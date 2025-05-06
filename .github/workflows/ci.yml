@@ -33,7 +33,7 @@ jobs:
             - name: Setup Gradle
               uses: gradle/actions/setup-gradle@v3
               with:
-                  gradle-home-cache-cleanup: true  # キャッシュクリーンアップの有効化
+                  gradle-home-cache-cleanup: false
 
             # ktlintによるスタイルチェックを実行
             - name: Run ktlint check
@@ -73,7 +73,7 @@ jobs:
             - name: Setup Gradle
               uses: gradle/actions/setup-gradle@v3
               with:
-                  gradle-home-cache-cleanup: true  # キャッシュクリーンアップの有効化
+                  gradle-home-cache-cleanup: false
 
             # Androidアプリのビルド
             - name: Build Android App
@@ -125,7 +125,7 @@ jobs:
             - name: Setup Gradle
               uses: gradle/actions/setup-gradle@v3
               with:
-                  gradle-home-cache-cleanup: true  # キャッシュクリーンアップの有効化
+                  gradle-home-cache-cleanup: false
 
             # Kotlin Nativeのキャッシュ設定
             - name: Cache Kotlin Native
