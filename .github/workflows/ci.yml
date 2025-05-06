@@ -1,0 +1,115 @@
+# ワークフロー名の定義 - GitHub Actionsのダッシュボードに表示される名前
+name: CI
+
+# ワークフローのトリガー設定 - どのような条件でこのワークフローが実行されるか
+on:
+  # masterブランチへのプッシュが行われたとき
+  push:
+    branches: [ master ]
+  # masterブランチへのプルリクエストが作成/更新されたとき
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  # Androidビルド用ジョブ
+  build-android:
+    name: Build Android App
+    # このジョブが実行される環境 (Ubuntu最新版)
+    runs-on: ubuntu-latest
+    steps:
+      # リポジトリのチェックアウト
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 完全な履歴を取得 (オプション)
+
+      # JDKのセットアップ
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      # Gradleのセットアップ
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-home-cache-cleanup: true  # キャッシュクリーンアップの有効化
+
+      # Androidアプリのビルド
+      - name: Build Android App
+        run: ./gradlew :androidApp:assembleDebug
+
+      # 共有モジュールのテスト実行
+      - name: Run Shared Module Tests
+        run: ./gradlew :shared:testDebugUnitTest
+
+      # テスト結果のアップロード
+      - name: Upload Test Results
+        if: always()  # テストが失敗しても常に実行
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-test-results
+          path: '**/build/test-results'
+          retention-days: 7  # アーティファクトの保持日数
+
+      # ビルドしたAPKのアップロード
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug
+          path: androidApp/build/outputs/apk/debug/*.apk
+          retention-days: 7  # アーティファクトの保持日数
+
+  # iOSビルド用ジョブ
+  build-ios:
+    name: Build iOS App
+    # このジョブが実行される環境 (macOS最新版)
+    runs-on: macos-latest
+    steps:
+      # リポジトリのチェックアウト
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 完全な履歴を取得 (オプション)
+
+      # JDKのセットアップ
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      # Gradleのセットアップ
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-home-cache-cleanup: true  # キャッシュクリーンアップの有効化
+
+      # Kotlin Nativeのキャッシュ設定
+      - name: Cache Kotlin Native
+        uses: actions/cache@v4
+        with:
+          path: ~/.konan  # Kotlin Nativeのキャッシュディレクトリ
+          key: ${{ runner.os }}-konan-${{ hashFiles('**/*.versions.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-konan-
+
+      # 共有モジュールのiOS向けビルドとテスト
+      - name: Build & Test iOS Shared Module
+        run: ./gradlew :shared:iosX64Test
+
+      # テスト結果のアップロード
+      - name: Upload Test Results
+        if: always()  # テストが失敗しても常に実行
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-test-results
+          path: '**/build/test-results'
+          retention-days: 7  # アーティファクトの保持日数
+
+      # iOSアプリのビルド(コード署名なし)
+      - name: Build iOS App
+        run: |
+          cd iosApp
+          xcodebuild -project iosApp.xcodeproj -scheme iosApp -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
