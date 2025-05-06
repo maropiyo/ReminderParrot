@@ -1,0 +1,67 @@
+# Gradle関連
+.gradle/
+build/
+/*/build/
+/androidApp/build/
+/iosApp/build/
+/shared/build/
+.gradletasknamecache
+
+# ローカル設定
+local.properties
+
+# IntelliJ IDEA / Android Studio
+.idea/
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/dictionaries
+.idea/vcs.xml
+.idea/jsLibraryMappings.xml
+*.iml
+*.iws
+*.ipr
+out/
+
+# Kotlin
+*.klib
+
+# Android
+.DS_Store
+/captures
+.externalNativeBuild
+.cxx
+*.apk
+*.aab
+gen/
+
+# iOS
+## Xcode
+xcuserdata/
+DerivedData/
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+*.xccheckout
+*.moved-aside
+*.xcscmblueprint
+
+## Obj-C/Swift specific
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# iOSのPreview Contentファイル
+**/Preview Content/Preview Assets.xcassets/
+
+# Gradle Wrapper（これらは含める）
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+
+# MacOS
+.DS_Store
