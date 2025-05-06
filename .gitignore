@@ -56,9 +56,6 @@ DerivedData/
 *.dSYM.zip
 *.dSYM
 
-# iOSのPreview Contentファイル
-**/Preview Content/Preview Assets.xcassets/
-
 # Gradle Wrapper（これらは含める）
 !gradle/wrapper/gradle-wrapper.jar
 !gradle/wrapper/gradle-wrapper.properties
