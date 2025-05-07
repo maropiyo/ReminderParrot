@@ -3,12 +3,12 @@ name: CI
 
 # ワークフローのトリガー設定
 on:
-    # masterブランチへのプッシュが行われたとき
+    # mainブランチへのプッシュが行われたとき
     push:
-        branches: [ master ]
-    # masterブランチへのプルリクエストが作成/更新されたとき
+        branches: [ main ]
+    # mainブランチへのプルリクエストが作成/更新されたとき
     pull_request:
-        branches: [ master ]
+        branches: [ main ]
 
 jobs:
     # ktlintによるコードスタイルチェックジョブ
