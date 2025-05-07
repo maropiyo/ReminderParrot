@@ -24,6 +24,8 @@ out/
 
 # Kotlin
 *.klib
+.kotlin/sessions/
+*.salive
 
 # Android
 .DS_Store
