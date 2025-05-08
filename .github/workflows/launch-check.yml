@@ -1,0 +1,41 @@
+name: Launch Check
+
+on: pull_request
+
+jobs:
+    check:
+        runs-on: macos-latest
+        steps:
+            - name: Check out
+              uses: actions/checkout@v4
+            - name: Set up JDK
+              uses: actions/setup-java@v3
+              with:
+                  distribution: 'zulu'
+                  java-version: 17
+            - name: Build with Gradle
+              run: ./gradlew assembleDebug
+            - name: Set up Maestro
+              run: export MAESTRO_VERSION=1.33.1; curl -Ls https://get.maestro.mobile.dev | bash
+            - name: Get apk path
+              id: apk-path
+              run: echo "path=$(find . -regex '^.*/build/outputs/apk/.*\.apk$' -type f | head -1)" >> $GITHUB_OUTPUT
+            - name: Create test code
+              run: |
+                  tool="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/apkanalyzer"
+                  application_id="$("$tool" manifest application-id '${{ steps.apk-path.outputs.path }}')"
+                  echo "appId: $application_id" >> ./flow.yaml
+                  echo '---' >> ./flow.yaml
+                  echo '- launchApp' >> ./flow.yaml
+        echo '- assertVisible: ホーム画面' >> ./flow.yaml # 起動後の画面に表示される文言を指定
+                                   - name: Run Maestro
+                                   uses: reactivecircus/android-emulator-runner@v2
+                                   with:
+                                       api-level: 28
+                                       target: 'google_apis'
+                                       arch: 'x86'
+                                       profile: 'pixel'
+                                       disable-animations: true
+                                       script: |
+                                           $ANDROID_HOME/platform-tools/adb install '${{ steps.apk-path.outputs.path }}'
+                                           ~/.maestro/bin/maestro test --no-ansi ./flow.yaml
