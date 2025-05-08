@@ -3,24 +3,17 @@ name: Android Screenshot Capture
 
 # ワークフローのトリガー設定
 on:
-    # mainブランチへのプッシュ時
-    push:
-        branches: [ main ]
-    # プルリクエスト時
     pull_request:
         branches: [ main ]
 
 jobs:
-    # Maestroを使ったAndroid向けスクリーンショット撮影ジョブ
     capture-android-screenshots:
         name: Capture Android Screenshots
         runs-on: macos-latest
         steps:
-            # リポジトリのチェックアウト
-            - name: Checkout code
+            - name: Check out
               uses: actions/checkout@v4
 
-            # JDKのセットアップ
             - name: Set up JDK
               uses: actions/setup-java@v4
               with:
@@ -33,11 +26,12 @@ jobs:
               with:
                   gradle-home-cache-cleanup: false
 
-            # Androidエミュレータのセットアップ
+            # Androidエミュレータのセットアップ (ARM64対応)
             - name: Setup Android Emulator
               uses: reactivecircus/android-emulator-runner@v2
               with:
                   api-level: 29
+                  arch: x86_64
                   profile: pixel_2
                   avd-name: test-device
                   emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
@@ -65,16 +59,18 @@ jobs:
                   mkdir -p .maestro/screenshots/android
 
             # Androidスクリーンショットを撮影
-            - name: Take Android Screenshots
+            - name: Run Maestro
               run: |
-                  # スクリーンショットを撮影し、あとで移動する
-                  maestro test .maestro/flows/
+                  # デバイス情報を確認（デバッグ用）
+                  adb devices -l
+
+                  # スクリーンショットを撮影
+                  maestro test .maestro/flows/take
 
                   # 生成されたスクリーンショットをandroidディレクトリに移動
-                  # (Maestroが.maestro/screenshotsに保存するものとする)
                   if [ -d ".maestro/screenshots" ]; then
                     # デフォルトの保存先から特定のディレクトリに移動
-                    mv .maestro/screenshots/* .maestro/screenshots/android/ || true
+                    find .maestro/screenshots -name "*.png" -type f -exec mv {} .maestro/screenshots/android/ \; || true
                   fi
 
             # スクリーンショットのアーティファクトをアップロード
