@@ -27,7 +27,7 @@ jobs:
                   echo "appId: $application_id" >> ./flow.yaml
                   echo '---' >> ./flow.yaml
                   echo '- launchApp' >> ./flow.yaml
-        echo '- assertVisible: ホーム画面' >> ./flow.yaml # 起動後の画面に表示される文言を指定
+                  echo '- assertVisible: ホーム画面' >> ./flow.yaml # 起動後の画面に表示される文言を指定
                                    - name: Run Maestro
                                    uses: reactivecircus/android-emulator-runner@v2
                                    with:
