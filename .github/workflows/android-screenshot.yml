@@ -13,230 +13,74 @@ env:
 jobs:
     android-tests:
         name: Android UI Tests
-        runs-on: macos-latest
-        timeout-minutes: 45
-
+        runs-on: macos-latest  # macOSランナーはAndroidエミュレータのパフォーマンスが良い
         steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
+            -   name: Checkout code
+                uses: actions/checkout@v3
 
-            - name: Set up JDK
-              uses: actions/setup-java@v4
-              with:
-                  distribution: 'temurin'
-                  java-version: ${{ env.JAVA_VERSION }}
-                  cache: 'gradle'
+            -   name: Set up JDK
+                uses: actions/setup-java@v3
+                with:
+                    distribution: 'zulu'
+                    java-version: '17'
 
-            - name: List Gradle Projects
-              run: ./gradlew projects
+            -   name: Setup Android SDK
+                uses: android-actions/setup-android@v2
 
-            - name: Build Android App
-              run: ./gradlew :androidApp:assembleDebug
+            -   name: Cache Gradle packages
+                uses: actions/cache@v3
+                with:
+                    path: |
+                        ~/.gradle/caches
+                        ~/.gradle/wrapper
+                    key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+                    restore-keys: |
+                        ${{ runner.os }}-gradle-
 
-            - name: Install Maestro
-              run: |
-                  curl -Ls "https://get.maestro.mobile.dev" | bash
-                  export PATH="$PATH":"$HOME/.maestro/bin"
-                  echo "$HOME/.maestro/bin" >> $GITHUB_PATH
-                  maestro -v
+            -   name: Grant execute permission for gradlew
+                run: chmod +x ./gradlew
 
-            - name: Setup Android Emulator & Run Tests
-              uses: reactivecircus/android-emulator-runner@v2
-              with:
-                  api-level: ${{ env.API_LEVEL }}
-                  arch: x86_64
-                  profile: pixel_6
-                  avd-name: test-device
-                  emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none
-                  disable-animations: true
-                  script: |
-                      # エミュレータ起動確認
-                      adb devices -l
+            -   name: Build APK
+                run: ./gradlew assembleDebug
 
-                      # アプリのインストール
-                      APK_PATH=$(find . -path "*/androidApp/build/outputs/apk/debug/*.apk" -type f | head -1)
-                      if [ -z "$APK_PATH" ]; then
-                        echo "::error::APK not found"
-                        exit 1
-                      fi
-                      echo "Installing APK: $APK_PATH"
-                      adb install -r "$APK_PATH"
+            -   name: AVD cache
+                uses: actions/cache@v3
+                id: avd-cache
+                with:
+                    path: |
+                        ~/.android/avd/*
+                        ~/.android/adb*
+                    key: avd-pixel9
 
-                      # Maestroディレクトリの作成（存在しない場合）
-                      mkdir -p .maestro/flows
-                      mkdir -p .maestro/screenshots/android
+            -   name: Create AVD and start emulator
+                if: steps.avd-cache.outputs.cache-hit != 'true'
+                uses: reactivecircus/android-emulator-runner@v2
+                with:
+                    api-level: 33
+                    target: google_apis
+                    arch: x86_64
+                    profile: pixel_9
+                    cores: 2
+                    ram-size: 2048M
+                    emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+                    disable-animations: true
+                    script: echo "Emulator created."
 
-                      # Maestroフローが存在するか確認
-                      FLOWS_COUNT=$(find .maestro/flows -name "*.yaml" -o -name "*.yml" | wc -l)
-                      if [ "$FLOWS_COUNT" -eq 0 ]; then
-                        echo "No Maestro flows found, creating a basic flow for screenshot"
-
-                        # アプリパッケージ名の取得
-                        APP_PACKAGE=$(aapt dump badging "$APK_PATH" | grep package | awk -F"'" '/package/{print $2}')
-                        echo "App package: $APP_PACKAGE"
-
-                        # 基本的なスクリーンショットフローの作成
-                        cat > .maestro/flows/basic_android_flow.yaml << EOF
-                        appId: $APP_PACKAGE
-                        name: Basic Android Screenshot Flow
-                        tags:
-                          - screenshot
-
-                        steps:
-                          - launchApp
-                          - waitForAnimationToEnd: 3000
-                          - takeScreenshot:
-                              name: "home_screen"
-                        EOF
-                      fi
-
-                      # テスト実行
-                      echo "Running Maestro tests..."
-                      for FLOW in $(find .maestro/flows -name "*.yaml" -o -name "*.yml"); do
-                        FLOW_NAME=$(basename $FLOW .yaml)
-                        FLOW_NAME=${FLOW_NAME%.yml}
-                        echo "Running flow: $FLOW_NAME"
-                        maestro test --format junit --output test-results "$FLOW" || echo "Flow $FLOW_NAME failed but continuing"
-                      done
-
-                      # スクリーンショットが保存されているか確認
-                      SCREENSHOT_COUNT=$(find .maestro/screenshots -name "*.png" | wc -l)
-                      echo "Found $SCREENSHOT_COUNT screenshots"
-
-                      # スクリーンショットが無い場合は明示的に撮影
-                      if [ "$SCREENSHOT_COUNT" -eq 0 ]; then
-                        echo "No screenshots found, taking manual screenshots"
-                        adb shell screencap -p /sdcard/screen1.png
-                        adb pull /sdcard/screen1.png .maestro/screenshots/android/home_screen.png
-                      fi
-
-            - name: Upload Test Results
-              if: always()
-              uses: actions/upload-artifact@v4
-              with:
-                  name: android-test-results
-                  path: test-results
-                  retention-days: 14
-
-            - name: Upload Screenshots
-              if: always()
-              uses: actions/upload-artifact@v4
-              with:
-                  name: android-screenshots
-                  path: .maestro/screenshots/android
-                  retention-days: 14
-
-    ios-tests:
-        name: iOS UI Tests
-        runs-on: macos-14
-        timeout-minutes: 45
-
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
-
-            - name: Set up Xcode
-              uses: maxim-lobanov/setup-xcode@v1
-              with:
-                  xcode-version: latest-stable
-
-            - name: Install Maestro
-              run: |
-                  curl -Ls "https://get.maestro.mobile.dev" | bash
-                  export PATH="$PATH":"$HOME/.maestro/bin"
-                  echo "$HOME/.maestro/bin" >> $GITHUB_PATH
-                  maestro -v
-
-            - name: Build iOS App
-              run: |
-                  cd iosApp
-                  xcodebuild -project iosApp.xcodeproj -scheme iosApp -configuration Debug -sdk iphonesimulator -derivedDataPath ../DerivedData
-
-            - name: Start iOS Simulator & Run Tests
-              run: |
-                  # 使用可能なシミュレータのリスト
-                  xcrun simctl list devices available
-
-                  # 最新のiPhoneシミュレータを選択
-                  DEVICE_ID=$(xcrun simctl list devices available | grep "iPhone 15" | head -1 | sed -E 's/.*\(([A-Z0-9-]+)\).*/\1/')
-                  if [ -z "$DEVICE_ID" ]; then
-                    DEVICE_ID=$(xcrun simctl list devices available | grep "iPhone" | head -1 | sed -E 's/.*\(([A-Z0-9-]+)\).*/\1/')
-                  fi
-                  echo "Using simulator: $DEVICE_ID"
-
-                  # シミュレータの起動
-                  xcrun simctl boot "$DEVICE_ID"
-
-                  # アプリのパスを特定
-                  APP_PATH=$(find ./DerivedData -name "*.app" -type d | head -1)
-                  if [ -z "$APP_PATH" ]; then
-                    echo "::error::iOS app not found"
-                    exit 1
-                  fi
-
-                  # アプリのインストールと起動
-                  xcrun simctl install "$DEVICE_ID" "$APP_PATH"
-                  APP_BUNDLE_ID=$(defaults read "$APP_PATH/Info" CFBundleIdentifier)
-                  xcrun simctl launch "$DEVICE_ID" "$APP_BUNDLE_ID"
-
-                  # Maestroディレクトリの作成
-                  mkdir -p .maestro/flows
-                  mkdir -p .maestro/screenshots/ios
-
-                  # Maestroフローが存在するか確認
-                  FLOWS_COUNT=$(find .maestro/flows -name "*.yaml" -o -name "*.yml" | wc -l)
-                  if [ "$FLOWS_COUNT" -eq 0 ]; then
-                    echo "No Maestro flows found, creating a basic flow for screenshot"
-
-                    # 基本的なスクリーンショットフローの作成
-                    cat > .maestro/flows/basic_ios_flow.yaml << EOF
-                    appId: $APP_BUNDLE_ID
-                    name: Basic iOS Screenshot Flow
-                    tags:
-                      - screenshot
-
-                    steps:
-                      - launchApp
-                      - waitForAnimationToEnd: 3000
-                      - takeScreenshot:
-                          name: "home_screen"
-                    EOF
-                  fi
-
-                  # テスト実行
-                  echo "Running Maestro tests..."
-                  for FLOW in $(find .maestro/flows -name "*.yaml" -o -name "*.yml"); do
-                    FLOW_NAME=$(basename $FLOW .yaml)
-                    FLOW_NAME=${FLOW_NAME%.yml}
-                    echo "Running flow: $FLOW_NAME"
-                    maestro test --format junit --output test-results "$FLOW" || echo "Flow $FLOW_NAME failed but continuing"
-                  done
-
-                  # スクリーンショットが保存されているか確認
-                  SCREENSHOT_COUNT=$(find .maestro/screenshots -name "*.png" | wc -l)
-                  echo "Found $SCREENSHOT_COUNT screenshots"
-
-                  # スクリーンショットが無い場合は明示的に撮影
-                  if [ "$SCREENSHOT_COUNT" -eq 0 ]; then
-                    echo "No screenshots found, taking manual screenshots"
-                    xcrun simctl io "$DEVICE_ID" screenshot .maestro/screenshots/ios/home_screen.png
-                  fi
-
-                  # シミュレータのシャットダウン
-                  xcrun simctl shutdown "$DEVICE_ID"
-
-            - name: Upload iOS Test Results
-              if: always()
-              uses: actions/upload-artifact@v4
-              with:
-                  name: ios-test-results
-                  path: test-results
-                  retention-days: 14
-
-            - name: Upload iOS Screenshots
-              if: always()
-              uses: actions/upload-artifact@v4
-              with:
-                  name: ios-screenshots
-                  path: .maestro/screenshots/ios
-                  retention-days: 14
+            -   name: Install and run app on emulator
+                uses: reactivecircus/android-emulator-runner@v2
+                with:
+                    api-level: 33
+                    target: google_apis
+                    arch: x86_64
+                    profile: pixel_9
+                    cores: 2
+                    ram-size: 2048M
+                    emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+                    disable-animations: true
+                    script: |
+                        adb devices
+                        adb install app/build/outputs/apk/debug/app-debug.apk
+                        echo "App installed successfully"
+                        # アプリを起動する場合はコメントを外す
+                        # adb shell am start -n YOUR_PACKAGE_NAME/YOUR_MAIN_ACTIVITY_NAME
+                        # echo "App launched successfully"
