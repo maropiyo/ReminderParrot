@@ -1,132 +1,222 @@
-# ワークフロー名
-name: Android Screenshot Capture
+name: Maestro Mobile Testing
 
-# ワークフローのトリガー設定
 on:
     pull_request:
-        branches: [ main ]
+        branches: [ main, develop ]
+    workflow_dispatch:  # 手動実行も可能に
+
+env:
+    MAESTRO_VERSION: 1.35.0  # 最新の安定バージョンを使用
+    API_LEVEL: 33  # Android 13
+    JAVA_VERSION: 17
 
 jobs:
-    capture-android-screenshots:
-        name: Capture Android Screenshots
-        runs-on: macos-latest
+    android-tests:
+        name: Android UI Tests
+        runs-on: macos-latest  # macOSはAndroid/iOSの両方のテストに必要
+        timeout-minutes: 45  # タイムアウトを設定して無限実行を防止
+
         steps:
-            - name: Check out
+            - name: Checkout code
               uses: actions/checkout@v4
 
             - name: Set up JDK
               uses: actions/setup-java@v4
               with:
-                  distribution: 'zulu'
-                  java-version: '17'
+                  distribution: 'temurin'  # OpenJDKディストリビューション
+                  java-version: ${{ env.JAVA_VERSION }}
+                  cache: 'gradle'  # Gradleのキャッシュを有効化
 
-            # Gradleのセットアップ
             - name: Setup Gradle
-              uses: gradle/actions/setup-gradle@v3
-              with:
-                  gradle-home-cache-cleanup: false
+              uses: gradle/gradle-build-action@v2
 
-            # Androidエミュレータのセットアップ (ARM64対応)
-            - name: Setup Android Emulator
-              uses: reactivecircus/android-emulator-runner@v2
-              with:
-                  api-level: 29
-                  arch: x86_64
-                  profile: pixel_2
-                  avd-name: test-device
-                  emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
-                  disable-animations: true
-                  script: echo "Emulator is running"
+            - name: Build Android App
+              run: ./gradlew :app:assembleDebug
 
-            # Maestroのインストール
             - name: Install Maestro
               run: |
-                  curl -fsSL "https://get.maestro.mobile.dev" | bash
+                  curl -Ls "https://get.maestro.mobile.dev" | bash
+                  export PATH="$PATH":"$HOME/.maestro/bin"
                   echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+                  maestro -v  # バージョン確認
 
-            # Androidアプリをビルド
-            - name: Build Android App
-              run: ./gradlew :androidApp:assembleDebug
+            - name: Setup Android Emulator & Run Tests
+              uses: reactivecircus/android-emulator-runner@v2
+              with:
+                  api-level: ${{ env.API_LEVEL }}
+                  arch: x86_64
+                  profile: pixel_6
+                  avd-name: test-device
+                  emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none
+                  disable-animations: true
+                  script: |
+                      # エミュレータ起動確認
+                      adb devices -l
 
-            # Androidアプリをインストール
-            - name: Install Android App
-              run: adb install androidApp/build/outputs/apk/debug/*.apk
+                      # アプリのインストール
+                      APK_PATH=$(find . -path "*/build/outputs/apk/debug/*.apk" -type f | head -1)
+                      if [ -z "$APK_PATH" ]; then
+                        echo "::error::APK not found"
+                        exit 1
+                      fi
+                      echo "Installing APK: $APK_PATH"
+                      adb install -r "$APK_PATH"
 
-            # スクリーンショットディレクトリを準備
-            - name: Prepare Screenshot Directory
-              run: |
-                  # スクリーンショット保存用のディレクトリ構造を作成
-                  mkdir -p .maestro/screenshots/android
+                      # maestro.ymlファイルが存在するか確認
+                      if [ ! -d ".maestro" ]; then
+                        echo "::error::Maestro directory not found"
+                        exit 1
+                      fi
 
-            # Androidスクリーンショットを撮影
-            - name: Run Maestro
-              run: |
-                  # デバイス情報を確認（デバッグ用）
-                  adb devices -l
+                      # スクリーンショットディレクトリの準備
+                      mkdir -p .maestro/screenshots
 
-                  # スクリーンショットを撮影
-                  maestro test .maestro/flows/take
+                      # テスト実行
+                      echo "Running Maestro tests..."
+                      maestro test --format junit --output test-results .maestro/flows
+                      TEST_STATUS=$?
 
-                  # 生成されたスクリーンショットをandroidディレクトリに移動
-                  if [ -d ".maestro/screenshots" ]; then
-                    # デフォルトの保存先から特定のディレクトリに移動
-                    find .maestro/screenshots -name "*.png" -type f -exec mv {} .maestro/screenshots/android/ \; || true
-                  fi
+                      # スクリーンショットを撮影（テスト結果に関わらず）
+                      echo "Capturing screenshots..."
+                      for FLOW in $(find .maestro/flows -name "*.yaml" -o -name "*.yml"); do
+                        FLOW_NAME=$(basename $FLOW .yaml)
+                        FLOW_NAME=${FLOW_NAME%.yml}
+                        echo "Running flow: $FLOW_NAME for screenshots"
+                        maestro test --include-tags screenshot $FLOW
+                      done
 
-            # スクリーンショットのアーティファクトをアップロード
-            - name: Upload Screenshots
+                      # 結果の確認
+                      SCREENSHOT_COUNT=$(find .maestro/screenshots -name "*.png" | wc -l)
+                      echo "Generated $SCREENSHOT_COUNT screenshots"
+
+                      # テストステータスを返す
+                      exit $TEST_STATUS
+
+            - name: Upload Test Results
+              if: always()  # テストが失敗しても結果をアップロード
               uses: actions/upload-artifact@v4
               with:
-                  name: screenshots
-                  path: .maestro/screenshots
-                  retention-days: 7
+                  name: maestro-test-results
+                  path: test-results
+                  retention-days: 14
 
-            # PR時にスクリーンショット情報を提供するコメントを追加
-            - name: Add Screenshots Info to PR
-              if: github.event_name == 'pull_request'
-              uses: actions/github-script@v7
+            - name: Upload Screenshots
+              if: always()
+              uses: actions/upload-artifact@v4
               with:
-                  github-token: ${{ secrets.GITHUB_TOKEN }}
-                  script: |
-                      const fs = require('fs');
-                      const path = require('path');
+                  name: android-screenshots
+                  path: .maestro/screenshots
+                  retention-days: 14
 
-                      // Androidスクリーンショットディレクトリ
-                      const screenshotDir = '.maestro/screenshots/android';
+            - name: Generate Visual Report
+              if: always()
+              run: |
+                  # スクリーンショットを使ったレポート生成（例としてHTMLレポート）
+                  mkdir -p report
+                  echo "<html><head><title>Test Screenshots</title></head><body>" > report/index.html
+                  echo "<h1>Test Screenshots</h1><div style='display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;'>" >> report/index.html
 
-                      // ディレクトリが存在するか確認
-                      if (!fs.existsSync(screenshotDir)) {
-                        console.log('スクリーンショットディレクトリが見つかりません。');
-                        return;
-                      }
+                  # スクリーンショットをレポートに追加
+                  for IMG in $(find .maestro/screenshots -name "*.png"); do
+                    FILENAME=$(basename $IMG)
+                    cp $IMG report/
+                    echo "<div><img src='$FILENAME' style='width: 100%'><p>$FILENAME</p></div>" >> report/index.html
+                  done
 
-                      // スクリーンショットファイル一覧を取得
-                      const screenshots = fs.readdirSync(screenshotDir)
-                        .filter(file => file.endsWith('.png'))
-                        .sort();
+                  echo "</div></body></html>" >> report/index.html
 
-                      if (screenshots.length === 0) {
-                        console.log('スクリーンショットが見つかりません。');
-                        return;
-                      }
+            - name: Upload Visual Report
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: visual-report
+                  path: report
+                  retention-days: 14
 
-                      // PR番号
-                      const prNumber = context.issue.number;
+    ios-tests:
+        name: iOS UI Tests
+        runs-on: macos-14  # Ventura以降はiOS simulatorに必要
+        timeout-minutes: 45
 
-                      // コメント内容を作成
-                      let commentBody = '## ReminderParrot スクリーンショット\n\n';
-                      commentBody += '📱 **Androidスクリーンショットが生成されました**\n\n';
-                      commentBody += '以下の画面のスクリーンショットがCIにより自動生成されました。詳細はワークフローの「Artifacts」セクションでダウンロードできます。\n\n';
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
 
-                      commentBody += '**生成されたスクリーンショット一覧**:\n';
-                      screenshots.forEach(screenshot => {
-                        commentBody += `- ${screenshot}\n`;
-                      });
+            - name: Set up Xcode
+              uses: maxim-lobanov/setup-xcode@v1
+              with:
+                  xcode-version: latest-stable
 
-                      // コメントをPRに追加
-                      github.rest.issues.createComment({
-                        owner: context.repo.owner,
-                        repo: context.repo.repo,
-                        issue_number: prNumber,
-                        body: commentBody
-                      });
+            - name: Install Maestro
+              run: |
+                  curl -Ls "https://get.maestro.mobile.dev" | bash
+                  export PATH="$PATH":"$HOME/.maestro/bin"
+                  echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+                  maestro -v
+
+            - name: Build iOS App
+              run: |
+                  xcodebuild -workspace MyApp.xcworkspace -scheme MyApp -configuration Debug -sdk iphonesimulator -derivedDataPath ./DerivedData
+
+            - name: Start iOS Simulator & Run Tests
+              run: |
+                  # 使用可能なシミュレータのリスト
+                  xcrun simctl list devices available
+
+                  # 最新のiPhoneシミュレータを選択
+                  DEVICE_ID=$(xcrun simctl list devices available | grep "iPhone 15" | head -1 | sed -E 's/.*\(([A-Z0-9-]+)\).*/\1/')
+                  if [ -z "$DEVICE_ID" ]; then
+                    DEVICE_ID=$(xcrun simctl list devices available | grep "iPhone" | head -1 | sed -E 's/.*\(([A-Z0-9-]+)\).*/\1/')
+                  fi
+                  echo "Using simulator: $DEVICE_ID"
+
+                  # シミュレータの起動
+                  xcrun simctl boot "$DEVICE_ID"
+
+                  # アプリのパスを特定
+                  APP_PATH=$(find ./DerivedData -name "*.app" -type d | head -1)
+                  if [ -z "$APP_PATH" ]; then
+                    echo "::error::iOS app not found"
+                    exit 1
+                  fi
+
+                  # アプリのインストールと起動
+                  xcrun simctl install "$DEVICE_ID" "$APP_PATH"
+                  APP_BUNDLE_ID=$(defaults read "$APP_PATH/Info" CFBundleIdentifier)
+                  xcrun simctl launch "$DEVICE_ID" "$APP_BUNDLE_ID"
+
+                  # スクリーンショットディレクトリ作成
+                  mkdir -p .maestro/screenshots/ios
+
+                  # Maestroテスト実行
+                  maestro test --format junit --output test-results .maestro/flows
+                  TEST_STATUS=$?
+
+                  # スクリーンショット撮影
+                  for FLOW in $(find .maestro/flows -name "*.yaml" -o -name "*.yml"); do
+                    FLOW_NAME=$(basename $FLOW .yaml)
+                    FLOW_NAME=${FLOW_NAME%.yml}
+                    echo "Running flow: $FLOW_NAME for screenshots"
+                    maestro test --include-tags screenshot $FLOW
+                  done
+
+                  # シミュレータのシャットダウン
+                  xcrun simctl shutdown "$DEVICE_ID"
+
+                  exit $TEST_STATUS
+
+            - name: Upload iOS Test Results
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: ios-test-results
+                  path: test-results
+                  retention-days: 14
+
+            - name: Upload iOS Screenshots
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: ios-screenshots
+                  path: .maestro/screenshots
+                  retention-days: 14
