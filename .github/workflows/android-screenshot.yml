@@ -54,7 +54,7 @@ jobs:
                     api-level: 33
                     target: google_apis
                     arch: x86_64
-                    profile: pixel_6    # pixel_9 から pixel_6 に変更
+                    profile: pixel_5    # pixel_9 から pixel_6 に変更
                     cores: 2
                     ram-size: 2048M
                     emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
