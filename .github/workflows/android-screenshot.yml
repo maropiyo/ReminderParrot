@@ -43,44 +43,26 @@ jobs:
             -   name: Build APK
                 run: ./gradlew assembleDebug
 
-            -   name: AVD cache
-                uses: actions/cache@v3
-                id: avd-cache
-                with:
-                    path: |
-                        ~/.android/avd/*
-                        ~/.android/adb*
-                    key: avd-pixel9
+            # 利用可能なデバイスリストを確認
+            -   name: List available devices
+                run: avdmanager list device
 
-            -   name: Create AVD and start emulator
-                if: steps.avd-cache.outputs.cache-hit != 'true'
+            # 修正: pixel_9 の代わりに pixel_6 または利用可能な最新のPixelモデルを使用
+            -   name: Create and run emulator
                 uses: reactivecircus/android-emulator-runner@v2
                 with:
                     api-level: 33
                     target: google_apis
                     arch: x86_64
-                    profile: pixel_9
+                    profile: pixel_6    # pixel_9 から pixel_6 に変更
                     cores: 2
                     ram-size: 2048M
                     emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
                     disable-animations: true
-                    script: echo "Emulator created."
-
-            -   name: Install and run app on emulator
-                uses: reactivecircus/android-emulator-runner@v2
-                with:
-                    api-level: 33
-                    target: google_apis
-                    arch: x86_64
-                    profile: pixel_9
-                    cores: 2
-                    ram-size: 2048M
-                    emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-                    disable-animations: true
+                    avd-name: test
+                    force-avd-creation: true
+                    emulator-boot-timeout: 600
                     script: |
                         adb devices
                         adb install app/build/outputs/apk/debug/app-debug.apk
                         echo "App installed successfully"
-                        # アプリを起動する場合はコメントを外す
-                        # adb shell am start -n YOUR_PACKAGE_NAME/YOUR_MAIN_ACTIVITY_NAME
-                        # echo "App launched successfully"
