@@ -1,4 +1,4 @@
-package com.maropiyo.reminderparrot.ui.theme
+package com.maropiyo.reminderparrot.android.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape

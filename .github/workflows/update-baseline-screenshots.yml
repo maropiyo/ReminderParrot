@@ -1,0 +1,61 @@
+name: Update Baseline Screenshots
+
+on:
+    push:
+        branches: [ main ]
+
+jobs:
+    update-baselines:
+        runs-on: macos-latest
+        steps:
+            - uses: actions/checkout@v3
+
+            - name: Set up JDK
+              uses: actions/setup-java@v3
+              with:
+                  distribution: 'zulu'
+                  java-version: '17'
+
+            - name: Setup Android SDK
+              uses: android-actions/setup-android@v2
+
+            - name: Set up Xcode
+              uses: maxim-lobanov/setup-xcode@v1
+              with:
+                  xcode-version: 'latest-stable'
+
+            - name: Install Maestro
+              run: |
+                  curl -Ls "https://get.maestro.mobile.dev" | bash
+                  echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+
+            - name: Build Android Debug APK
+              run: ./gradlew assembleDebug
+
+            - name: Install Cocoapods
+              run: |
+                  gem install cocoapods
+                  pod install --project-directory=iosApp
+
+            - name: Build iOS app
+              run: |
+                  xcodebuild -workspace iosApp/Reminco.xcworkspace -scheme "Reminco" -configuration Debug -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 14,OS=latest' build
+
+            - name: Run Maestro tests
+              run: |
+                  # Android
+                  maestro test .maestro/flows/ --config .maestro/config.yaml --platform android
+                  # iOS
+                  maestro test .maestro/flows/ --config .maestro/config.yaml --platform ios
+
+            - name: Save baseline screenshots
+              run: |
+                  mkdir -p baseline/android baseline/ios
+                  cp -r .maestro/screenshots/android/* baseline/android/ || true
+                  cp -r .maestro/screenshots/ios/* baseline/ios/ || true
+
+            - name: Upload baseline screenshots
+              uses: actions/upload-artifact@v3
+              with:
+                  name: baseline-screenshots
+                  path: baseline

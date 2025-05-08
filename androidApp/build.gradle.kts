@@ -5,10 +5,10 @@ plugins {
 }
 
 android {
-    namespace = "com.maropiyo.reminderparrot"
+    namespace = "com.maropiyo.reminderparrot.android"
     compileSdk = 35
     defaultConfig {
-        applicationId = "com.maropiyo.reminderparrot"
+        applicationId = "com.maropiyo.reminderparrot.android"
         minSdk = 28
         targetSdk = 35
         versionCode = 1

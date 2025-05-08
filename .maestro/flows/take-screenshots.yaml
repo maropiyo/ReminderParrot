@@ -1,0 +1,7 @@
+appId: "com.maropiyo.reminderparrot"
+name: "Take Screenshots"
+---
+- launchApp:
+      clearState: true
+- assertVisible: "ホーム画面"
+- takeScreenshot: "home_screen"

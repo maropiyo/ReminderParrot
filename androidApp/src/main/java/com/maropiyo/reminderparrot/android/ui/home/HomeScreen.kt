@@ -1,4 +1,4 @@
-package com.maropiyo.reminderparrot.ui.home
+package com.maropiyo.reminderparrot.android.ui.home
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
@@ -11,7 +11,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.maropiyo.reminderparrot.ui.theme.ReminderParrotTheme
+import com.maropiyo.reminderparrot.android.ui.theme.ReminderParrotTheme
 
 /**
  * ホーム画面

@@ -1,0 +1,12 @@
+# .maestro/config.yaml
+
+# テスト実行のグローバル設定
+maestro:
+    screenshotDir: "./screenshots"
+    reportFormat: "junit"
+    reportPath: "./test-results"
+
+# グローバル変数
+env:
+    APP_ID: "com.maropiyo.reminderparrot"
+    DEFAULT_TIMEOUT: 10000  # ミリ秒単位
