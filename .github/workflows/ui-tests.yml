@@ -34,7 +34,7 @@ jobs:
                   maestro test .maestro/flows/ --config .maestro/config.yaml
 
             - name: Upload test results
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                   name: android-test-results
                   path: |
@@ -70,7 +70,7 @@ jobs:
                   maestro test .maestro/flows/ --config .maestro/config.yaml --platform ios
 
             - name: Upload test results
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                   name: ios-test-results
                   path: |
