@@ -1,0 +1,68 @@
+name: Maestro Mobile Testing
+
+on:
+    pull_request:
+        branches: [ main, develop ]
+    workflow_dispatch:
+
+env:
+    MAESTRO_VERSION: 1.35.0
+    API_LEVEL: 33
+    JAVA_VERSION: 17
+
+jobs:
+    android-tests:
+        name: Android UI Tests
+        runs-on: ubuntu-latest
+        steps:
+            -   name: Checkout code
+                uses: actions/checkout@v3
+
+            -   name: Set up JDK
+                uses: actions/setup-java@v3
+                with:
+                    distribution: 'zulu'
+                    java-version: '17'
+
+            -   name: Setup Android SDK
+                uses: android-actions/setup-android@v2
+
+            -   name: Cache Gradle packages
+                uses: actions/cache@v3
+                with:
+                    path: |
+                        ~/.gradle/caches
+                        ~/.gradle/wrapper
+                    key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+                    restore-keys: |
+                        ${{ runner.os }}-gradle-
+
+            -   name: Grant execute permission for gradlew
+                run: chmod +x ./gradlew
+
+            -   name: Build APK
+                run: ./gradlew assembleDebug
+
+            # 利用可能なデバイスリストを確認
+            -   name: List available devices
+                run: avdmanager list device
+
+            # 修正: pixel_9 の代わりに pixel_6 または利用可能な最新のPixelモデルを使用
+            -   name: Create and run emulator
+                uses: reactivecircus/android-emulator-runner@v2
+                with:
+                    api-level: 33
+                    target: google_apis
+                    arch: x86_64
+                    profile: pixel_5    # pixel_9 から pixel_6 に変更
+                    cores: 2
+                    ram-size: 2048M
+                    emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+                    disable-animations: true
+                    avd-name: test
+                    force-avd-creation: true
+                    emulator-boot-timeout: 600
+                    script: |
+                        adb devices
+                        adb install app/build/outputs/apk/debug/app-debug.apk
+                        echo "App installed successfully"
