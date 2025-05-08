@@ -1,0 +1,10 @@
+appId: "com.maropiyo.reminderparrot"
+name: "Take screenshots flow"
+env:
+    TAKE_SCREENSHOTS_DIR: "./.maestro/screenshots"
+---
+- launchApp:
+      clearState: true
+- assertVisible: "ホーム画面"
+- takeScreenshot: "${TAKE_SCREENSHOTS_DIR}/HomeScreen"
+

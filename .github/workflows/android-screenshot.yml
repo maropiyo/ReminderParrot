@@ -1,0 +1,136 @@
+# ワークフロー名
+name: Android Screenshot Capture
+
+# ワークフローのトリガー設定
+on:
+    # mainブランチへのプッシュ時
+    push:
+        branches: [ main ]
+    # プルリクエスト時
+    pull_request:
+        branches: [ main ]
+
+jobs:
+    # Maestroを使ったAndroid向けスクリーンショット撮影ジョブ
+    capture-android-screenshots:
+        name: Capture Android Screenshots
+        runs-on: macos-latest
+        steps:
+            # リポジトリのチェックアウト
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            # JDKのセットアップ
+            - name: Set up JDK
+              uses: actions/setup-java@v4
+              with:
+                  distribution: 'zulu'
+                  java-version: '17'
+
+            # Gradleのセットアップ
+            - name: Setup Gradle
+              uses: gradle/actions/setup-gradle@v3
+              with:
+                  gradle-home-cache-cleanup: false
+
+            # Androidエミュレータのセットアップ
+            - name: Setup Android Emulator
+              uses: reactivecircus/android-emulator-runner@v2
+              with:
+                  api-level: 29
+                  profile: pixel_2
+                  avd-name: test-device
+                  emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+                  disable-animations: true
+                  script: echo "Emulator is running"
+
+            # Maestroのインストール
+            - name: Install Maestro
+              run: |
+                  curl -fsSL "https://get.maestro.mobile.dev" | bash
+                  echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+
+            # Androidアプリをビルド
+            - name: Build Android App
+              run: ./gradlew :androidApp:assembleDebug
+
+            # Androidアプリをインストール
+            - name: Install Android App
+              run: adb install androidApp/build/outputs/apk/debug/*.apk
+
+            # スクリーンショットディレクトリを準備
+            - name: Prepare Screenshot Directory
+              run: |
+                  # スクリーンショット保存用のディレクトリ構造を作成
+                  mkdir -p .maestro/screenshots/android
+
+            # Androidスクリーンショットを撮影
+            - name: Take Android Screenshots
+              run: |
+                  # スクリーンショットを撮影し、あとで移動する
+                  maestro test .maestro/flows/
+
+                  # 生成されたスクリーンショットをandroidディレクトリに移動
+                  # (Maestroが.maestro/screenshotsに保存するものとする)
+                  if [ -d ".maestro/screenshots" ]; then
+                    # デフォルトの保存先から特定のディレクトリに移動
+                    mv .maestro/screenshots/* .maestro/screenshots/android/ || true
+                  fi
+
+            # スクリーンショットのアーティファクトをアップロード
+            - name: Upload Screenshots
+              uses: actions/upload-artifact@v4
+              with:
+                  name: screenshots
+                  path: .maestro/screenshots
+                  retention-days: 7
+
+            # PR時にスクリーンショット情報を提供するコメントを追加
+            - name: Add Screenshots Info to PR
+              if: github.event_name == 'pull_request'
+              uses: actions/github-script@v7
+              with:
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+                  script: |
+                      const fs = require('fs');
+                      const path = require('path');
+
+                      // Androidスクリーンショットディレクトリ
+                      const screenshotDir = '.maestro/screenshots/android';
+
+                      // ディレクトリが存在するか確認
+                      if (!fs.existsSync(screenshotDir)) {
+                        console.log('スクリーンショットディレクトリが見つかりません。');
+                        return;
+                      }
+
+                      // スクリーンショットファイル一覧を取得
+                      const screenshots = fs.readdirSync(screenshotDir)
+                        .filter(file => file.endsWith('.png'))
+                        .sort();
+
+                      if (screenshots.length === 0) {
+                        console.log('スクリーンショットが見つかりません。');
+                        return;
+                      }
+
+                      // PR番号
+                      const prNumber = context.issue.number;
+
+                      // コメント内容を作成
+                      let commentBody = '## ReminderParrot スクリーンショット\n\n';
+                      commentBody += '📱 **Androidスクリーンショットが生成されました**\n\n';
+                      commentBody += '以下の画面のスクリーンショットがCIにより自動生成されました。詳細はワークフローの「Artifacts」セクションでダウンロードできます。\n\n';
+
+                      commentBody += '**生成されたスクリーンショット一覧**:\n';
+                      screenshots.forEach(screenshot => {
+                        commentBody += `- ${screenshot}\n`;
+                      });
+
+                      // コメントをPRに追加
+                      github.rest.issues.createComment({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        issue_number: prNumber,
+                        body: commentBody
+                      });
