@@ -55,7 +55,7 @@ jobs:
                   cp -r .maestro/screenshots/ios/* baseline/ios/ || true
 
             - name: Upload baseline screenshots
-              uses: actions/upload-artifact@v3.1.0
+              uses: actions/upload-artifact@v3
               with:
                   name: baseline-screenshots
                   path: baseline
