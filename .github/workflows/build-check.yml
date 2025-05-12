@@ -28,13 +28,13 @@ jobs:
           gradle-home-cache-cleanup: false
 
       - name: Androidビルド実行
-        run: ./gradlew :androidApp:assembleDebug --no-daemon
+        run: ./gradlew :composeApp:assembleDebug --no-daemon
 
       - name: APKのアップロード
         uses: actions/upload-artifact@v4
         with:
           name: reminderparrot-android-debug
-          path: androidApp/build/outputs/apk/debug/*.apk
+          path: composeApp/build/outputs/apk/debug/*.apk
           retention-days: 7
 
   # iOSビルド確認
@@ -65,7 +65,7 @@ jobs:
             ${{ runner.os }}-konan-
 
       - name: iOSフレームワークのビルド
-        run: ./gradlew :shared:compileKotlinIosX64 --no-daemon
+        run: ./gradlew :composeApp:compileKotlinIosX64 --no-daemon
 
       - name: iOSアプリのビルド
         run: |
