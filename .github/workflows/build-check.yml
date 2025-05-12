@@ -1,0 +1,66 @@
+# ワークフロー名
+name: ビルド確認
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  # Androidビルド確認
+  build-android:
+    name: Androidビルド確認
+    runs-on: ubuntu-latest
+    steps:
+      - name: コードのチェックアウト
+        uses: actions/checkout@v4
+
+      - name: JDKのセットアップ
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Gradleのセットアップ
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-home-cache-cleanup: false
+
+      - name: Androidビルド確認
+        run: ./gradlew :composeApp:assembleDebug --no-daemon
+
+  # iOSビルド確認
+  build-ios:
+    name: iOSビルド確認
+    runs-on: macos-latest
+    steps:
+      - name: コードのチェックアウト
+        uses: actions/checkout@v4
+
+      - name: JDKのセットアップ
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Gradleのセットアップ
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-home-cache-cleanup: false
+
+      - name: Kotlin Nativeのキャッシュ
+        uses: actions/cache@v4
+        with:
+          path: ~/.konan
+          key: ${{ runner.os }}-konan-${{ hashFiles('**/*.gradle.kts') }}
+          restore-keys: |
+            ${{ runner.os }}-konan-
+
+      - name: iOSフレームワークビルド確認
+        run: ./gradlew :composeApp:compileKotlinIosX64 --no-daemon
+
+      - name: iOSアプリビルド確認
+        run: |
+          cd iosApp
+          xcodebuild -project iosApp.xcodeproj -scheme iosApp -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' -configuration Debug CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
