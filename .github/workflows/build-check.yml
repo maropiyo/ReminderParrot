@@ -10,7 +10,7 @@ on:
 jobs:
   # Androidビルド確認
   build-android:
-    name: Androidビルド
+    name: Androidビルド確認
     runs-on: ubuntu-latest
     steps:
       - name: コードのチェックアウト
@@ -27,19 +27,12 @@ jobs:
         with:
           gradle-home-cache-cleanup: false
 
-      - name: Androidビルド実行
+      - name: Androidビルド確認
         run: ./gradlew :composeApp:assembleDebug --no-daemon
-
-      - name: APKのアップロード
-        uses: actions/upload-artifact@v4
-        with:
-          name: reminderparrot-android-debug
-          path: composeApp/build/outputs/apk/debug/*.apk
-          retention-days: 7
 
   # iOSビルド確認
   build-ios:
-    name: iOSビルド
+    name: iOSビルド確認
     runs-on: macos-latest
     steps:
       - name: コードのチェックアウト
@@ -64,24 +57,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-konan-
 
-      - name: iOSフレームワークのビルド
+      - name: iOSフレームワークビルド確認
         run: ./gradlew :composeApp:compileKotlinIosX64 --no-daemon
 
-      - name: iOSアプリのビルド
+      - name: iOSアプリビルド確認
         run: |
           cd iosApp
-          xcodebuild -project iosApp.xcodeproj -scheme iosApp -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' -configuration Debug -derivedDataPath build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
-
-      - name: iOSアプリのアーカイブ作成
-        run: |
-          cd iosApp/build/Build/Products/Debug-iphonesimulator
-          mkdir -p Payload
-          cp -r iosApp.app Payload/
-          zip -r reminderparrot-ios-simulator.zip Payload
-
-      - name: iOSアプリのアップロード
-        uses: actions/upload-artifact@v4
-        with:
-          name: reminderparrot-ios-simulator
-          path: iosApp/build/Build/Products/Debug-iphonesimulator/reminderparrot-ios-simulator.zip
-          retention-days: 7
+          xcodebuild -project iosApp.xcodeproj -scheme iosApp -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' -configuration Debug CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
