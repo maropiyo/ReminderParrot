@@ -5,7 +5,6 @@ import com.maropiyo.reminderparrot.data.repository.ReminderRepositoryImpl
 import com.maropiyo.reminderparrot.domain.repository.ReminderRepository
 import com.maropiyo.reminderparrot.domain.usecase.CreateReminderUseCase
 import com.maropiyo.reminderparrot.domain.usecase.GetRemindersUseCase
-import org.koin.core.module.Module
 import org.koin.dsl.module
 
 /**
@@ -23,10 +22,3 @@ val appModule =
         // Mapper
         single { ReminderMapper() }
     }
-
-/**
- * プラットフォームごとのモジュールを定義する
- *
- * @return プラットフォームごとのモジュール
- */
-expect fun getPlatformModule(): Module
