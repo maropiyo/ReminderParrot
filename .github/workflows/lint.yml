@@ -1,0 +1,64 @@
+name: Lint
+
+on:
+    push:
+        branches: [ main, develop ]
+    pull_request:
+        branches: [ main, develop ]
+
+jobs:
+    ktlint:
+        name: KtLint実行
+        runs-on: ubuntu-latest
+        steps:
+            - name: コードのチェックアウト
+              uses: actions/checkout@v4
+
+            - name: JDKのセットアップ
+              uses: actions/setup-java@v4
+              with:
+                  distribution: 'zulu'
+                  java-version: '17'
+
+            - name: Gradleのセットアップ
+              uses: gradle/actions/setup-gradle@v3
+              with:
+                  gradle-home-cache-cleanup: false
+
+            - name: ktlint実行
+              run: ./gradlew ktlintCheck --no-daemon
+
+            - name: KtLintレポートのアップロード
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: ktlint-reports
+                  path: "**/build/reports/ktlint/"
+
+    androidlint:
+        name: Android Lint実行
+        runs-on: ubuntu-latest
+        steps:
+            - name: コードのチェックアウト
+              uses: actions/checkout@v4
+
+            - name: JDKのセットアップ
+              uses: actions/setup-java@v4
+              with:
+                  distribution: 'zulu'
+                  java-version: '17'
+
+            - name: Gradleのセットアップ
+              uses: gradle/actions/setup-gradle@v3
+              with:
+                  gradle-home-cache-cleanup: false
+
+            - name: Android Lint実行
+              run: ./gradlew :composeApp:lintDebug --no-daemon
+
+            - name: Android Lintレポートのアップロード
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: android-lint-reports
+                  path: "**/build/reports/lint-results-*.html"
