@@ -8,5 +8,5 @@ package com.maropiyo.reminderparrot.domain.entity
  */
 data class Reminder(
     val id: String? = null,
-    val text: String,
+    val text: String
 )

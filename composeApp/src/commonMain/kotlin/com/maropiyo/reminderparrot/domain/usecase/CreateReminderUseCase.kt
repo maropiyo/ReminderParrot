@@ -18,14 +18,11 @@ class CreateReminderUseCase(
      * @param text リマインダーテキスト
      * @return 作成したリマインダー
      */
-    suspend operator fun invoke(
-        id: String,
-        text: String
-    ): Result<Reminder> {
+    suspend operator fun invoke(id: String, text: String): Result<Reminder> {
         val reminder =
             Reminder(
                 id = id,
-                text = text,
+                text = text
             )
 
         return reminderRepository.createReminder(reminder)
