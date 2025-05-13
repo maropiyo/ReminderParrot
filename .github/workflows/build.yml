@@ -1,5 +1,5 @@
 # ワークフロー名
-name: ビルド
+name: Build
 
 on:
     push:
