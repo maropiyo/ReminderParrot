@@ -14,5 +14,5 @@ data class ReminderDto(
     @SerialName("id")
     val id: String? = null,
     @SerialName("text")
-    val text: String,
+    val text: String
 )

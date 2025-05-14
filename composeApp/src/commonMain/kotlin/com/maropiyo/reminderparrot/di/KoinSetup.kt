@@ -16,11 +16,7 @@ import org.koin.dsl.module
  * @param additionalModules 追加のモジュール
  * @return KoinApplication
  */
-fun initKoin(
-    supabaseUrl: String,
-    supabaseKey: String,
-    additionalModules: List<Module> = emptyList()
-): KoinApplication =
+fun initKoin(supabaseUrl: String, supabaseKey: String, additionalModules: List<Module> = emptyList()): KoinApplication =
     startKoin {
         modules(
             listOf(
@@ -36,20 +32,16 @@ fun initKoin(
  * @param supabaseUrl SupabaseのURL
  * @param supabaseKey SupabaseのAPIキー
  */
-private fun createSupabaseModule(
-    supabaseUrl: String,
-    supabaseKey: String
-): Module =
-    module {
-        single {
-            createSupabaseClient(
-                supabaseUrl = supabaseUrl,
-                supabaseKey = supabaseKey
-            ) {
-                install(Postgrest)
-            }
+private fun createSupabaseModule(supabaseUrl: String, supabaseKey: String): Module = module {
+    single {
+        createSupabaseClient(
+            supabaseUrl = supabaseUrl,
+            supabaseKey = supabaseKey
+        ) {
+            install(Postgrest)
         }
-
-        // RemoteDataSource
-        single { ReminderRemoteDataSource(get(), get()) }
     }
+
+    // RemoteDataSource
+    single { ReminderRemoteDataSource(get(), get()) }
+}
