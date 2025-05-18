@@ -12,15 +12,17 @@ import androidx.compose.ui.Modifier
  * エラーメッセージを表示するコンポーネント
  */
 @Composable
-fun ErrorState(errorMessage: String, paddingValues: androidx.compose.foundation.layout.PaddingValues) {
+fun ErrorState(
+    errorMessage: String,
+    paddingValues: androidx.compose.foundation.layout.PaddingValues
+) {
     Box(
         modifier =
-        Modifier
-            .fillMaxSize()
-            .padding(paddingValues),
+            Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
         contentAlignment = Alignment.Center
     ) {
-        // TODO: エラーメッセージを表示
         Text(text = errorMessage)
     }
 }
