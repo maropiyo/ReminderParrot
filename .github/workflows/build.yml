@@ -60,6 +60,17 @@ jobs:
             - name: iOSフレームワークビルド
               run: ./gradlew :composeApp:compileKotlinIosX64 --no-daemon
 
+            - name: Create Config.xcconfig
+              run: |
+                  mkdir -p iosApp/Configuration
+                  cat > iosApp/Configuration/Config.xcconfig << EOF
+                  TEAM_ID=${{ secrets.TEAM_ID }}
+                  BUNDLE_ID=${{ secrets.BUNDLE_ID }}
+                  APP_NAME=${{ secrets.APP_NAME }}
+                  SUPABASE_URL="${{ secrets.SUPABASE_URL }}"
+                  SUPABASE_ANON_KEY="${{ secrets.SUPABASE_ANON_KEY }}"
+                  EOF
+
             - name: iOSアプリビルド
               run: |
                   cd iosApp
