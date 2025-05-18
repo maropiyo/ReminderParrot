@@ -1,6 +1,5 @@
 package com.maropiyo.reminderparrot.ui.screens
 
-import ReminderList
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -13,6 +12,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.maropiyo.reminderparrot.presentation.viewmodel.HomeViewModel
+import com.maropiyo.reminderparrot.ui.components.reminder.ReminderList
 import com.maropiyo.reminderparrot.ui.components.state.EmptyState
 import com.maropiyo.reminderparrot.ui.components.state.ErrorState
 import com.maropiyo.reminderparrot.ui.components.state.LoadingState
