@@ -4,9 +4,9 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 /**
- * IDジェネレーター
+ * UUIDジェネレーター
  */
-class IdGenerator {
+class UuidGenerator {
     /**
      * IDを生成する
      *

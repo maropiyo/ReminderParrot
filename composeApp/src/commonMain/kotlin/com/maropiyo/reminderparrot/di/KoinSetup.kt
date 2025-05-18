@@ -1,5 +1,6 @@
 package com.maropiyo.reminderparrot.di
 
+import com.maropiyo.reminderparrot.config.SupabaseConfig
 import com.maropiyo.reminderparrot.data.remote.ReminderRemoteDataSource
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
@@ -11,17 +12,19 @@ import org.koin.dsl.module
 /**
  * Koinの初期化を行う
  *
- * @param supabaseUrl SupabaseのURL
- * @param supabaseKey SupabaseのAPIキー
+ * @param supabaseConfig Supabaseの設定
  * @param additionalModules 追加のモジュール
  * @return KoinApplication
  */
-fun initKoin(supabaseUrl: String, supabaseKey: String, additionalModules: List<Module> = emptyList()): KoinApplication =
+fun initKoin(
+    supabaseConfig: SupabaseConfig,
+    additionalModules: List<Module> = emptyList()
+): KoinApplication =
     startKoin {
         modules(
             listOf(
                 appModule,
-                createSupabaseModule(supabaseUrl, supabaseKey)
+                createSupabaseModule(supabaseConfig)
             ) + additionalModules
         )
     }
@@ -29,19 +32,19 @@ fun initKoin(supabaseUrl: String, supabaseKey: String, additionalModules: List<M
 /**
  * Supabase関連のモジュールを作成する
  *
- * @param supabaseUrl SupabaseのURL
- * @param supabaseKey SupabaseのAPIキー
+ * @param supabaseConfig Supabaseの設定
  */
-private fun createSupabaseModule(supabaseUrl: String, supabaseKey: String): Module = module {
-    single {
-        createSupabaseClient(
-            supabaseUrl = supabaseUrl,
-            supabaseKey = supabaseKey
-        ) {
-            install(Postgrest)
+private fun createSupabaseModule(supabaseConfig: SupabaseConfig): Module =
+    module {
+        single {
+            createSupabaseClient(
+                supabaseUrl = supabaseConfig.url,
+                supabaseKey = supabaseConfig.key
+            ) {
+                install(Postgrest)
+            }
         }
-    }
 
-    // RemoteDataSource
-    single { ReminderRemoteDataSource(get(), get()) }
-}
+        // RemoteDataSource
+        single { ReminderRemoteDataSource(get(), get()) }
+    }

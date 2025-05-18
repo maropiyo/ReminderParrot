@@ -28,12 +28,16 @@ class ReminderRemoteDataSource(
      * @throws Exception リマインダーの作成に失敗した場合
      */
     suspend fun createReminder(reminder: Reminder): Result<Reminder> {
-        val reminderDto = reminderMapper.mapToDto(reminder)
-        val result = supabaseClient.from(TABLE_NAME).insert(reminderDto).decodeSingle<ReminderDto>()
-        return if (result != null) {
-            Result.success(reminderMapper.mapToEntity(result))
-        } else {
-            Result.failure(Exception("Failed to create reminder"))
+        try {
+            val reminderDto = reminderMapper.mapToDto(reminder)
+            val result = supabaseClient.from(TABLE_NAME).insert(reminderDto).decodeSingle<ReminderDto>()
+            return if (result != null) {
+                Result.success(reminderMapper.mapToEntity(result))
+            } else {
+                Result.failure(Exception("Failed to create reminder"))
+            }
+        } catch (e: Exception) {
+            return Result.failure(e)
         }
     }
 
@@ -44,11 +48,15 @@ class ReminderRemoteDataSource(
      * @throws Exception リマインダーの取得に失敗した場合
      */
     suspend fun getReminders(): Result<List<Reminder>> {
-        val result = supabaseClient.from(TABLE_NAME).select().decodeList<ReminderDto>()
-        return if (result != null) {
-            Result.success(result.map { reminderMapper.mapToEntity(it) })
-        } else {
-            Result.failure(Exception("Failed to get reminders"))
+        try {
+            val result = supabaseClient.from(TABLE_NAME).select().decodeList<ReminderDto>()
+            return if (result != null) {
+                Result.success(result.map { reminderMapper.mapToEntity(it) })
+            } else {
+                Result.failure(Exception("Failed to get reminders"))
+            }
+        } catch (e: Exception) {
+            return Result.failure(e)
         }
     }
 }
