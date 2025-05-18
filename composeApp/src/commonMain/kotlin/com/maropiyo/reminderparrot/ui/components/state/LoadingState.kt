@@ -16,15 +16,12 @@ import androidx.compose.ui.unit.dp
  * 読み込み中の状態を表示するコンポーネント
  */
 @Composable
-fun LoadingState(
-    paddingValues: PaddingValues = PaddingValues(0.dp),
-    modifier: Modifier = Modifier
-) {
+fun LoadingState(paddingValues: PaddingValues = PaddingValues(0.dp), modifier: Modifier = Modifier) {
     Box(
         modifier =
-            modifier
-                .fillMaxSize()
-                .padding(paddingValues),
+        modifier
+            .fillMaxSize()
+            .padding(paddingValues),
         contentAlignment = Alignment.Center
     ) {
         CircularProgressIndicator(

@@ -30,9 +30,9 @@ fun homeScreen(viewModel: HomeViewModel = koinViewModel()) {
                 title = {
                     Text(
                         text = "ホーム画面",
-                        style = MaterialTheme.typography.headlineLarge,
+                        style = MaterialTheme.typography.headlineLarge
                     )
-                },
+                }
             )
         },
         floatingActionButton = {
@@ -40,14 +40,14 @@ fun homeScreen(viewModel: HomeViewModel = koinViewModel()) {
                 onClick = {
                     viewModel.createReminder("リマインダー")
                 },
-                containerColor = MaterialTheme.colorScheme.primary,
+                containerColor = MaterialTheme.colorScheme.primary
             ) {
                 Text(
                     text = "おしえる",
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleMedium
                 )
             }
-        },
+        }
     ) { paddingValues ->
         when {
             state.isLoading -> {

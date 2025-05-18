@@ -7,8 +7,7 @@ import com.maropiyo.reminderparrot.BuildConfig
  *
  * @return SupabaseConfig
  */
-actual fun getSupabaseConfig(): SupabaseConfig =
-    SupabaseConfig(
-        url = BuildConfig.SUPABASE_URL,
-        key = BuildConfig.SUPABASE_KEY
-    )
+actual fun getSupabaseConfig(): SupabaseConfig = SupabaseConfig(
+    url = BuildConfig.SUPABASE_URL,
+    key = BuildConfig.SUPABASE_KEY
+)

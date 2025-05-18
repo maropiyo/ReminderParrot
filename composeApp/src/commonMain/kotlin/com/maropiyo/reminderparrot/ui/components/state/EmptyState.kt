@@ -16,15 +16,12 @@ import androidx.compose.ui.Modifier
  * @param paddingValues パディング値
  */
 @Composable
-fun EmptyState(
-    emptyMessage: String,
-    paddingValues: PaddingValues
-) {
+fun EmptyState(emptyMessage: String, paddingValues: PaddingValues) {
     Box(
         modifier =
-            Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
+        Modifier
+            .fillMaxSize()
+            .padding(paddingValues),
         contentAlignment = Alignment.Center
     ) {
         Text(

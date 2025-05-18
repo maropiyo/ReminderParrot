@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
  */
 class HomeViewModel(
     private val getRemindersUseCase: GetRemindersUseCase,
-    private val createReminderUseCase: CreateReminderUseCase,
+    private val createReminderUseCase: CreateReminderUseCase
 ) : ViewModel() {
     // リマインダーの状態を保持するStateFlow
     private val _state = MutableStateFlow(HomeState())
@@ -39,13 +39,14 @@ class HomeViewModel(
      */
     fun createReminder(text: String) {
         viewModelScope.launch {
-            val reminder = createReminderUseCase(text)
-            if (reminder != null) {
-                _state.update { it.copy(reminders = it.reminders) }
-                loadReminders()
-            } else {
-                _state.update { it.copy(error = "リマインダーの作成に失敗しました") }
-            }
+            createReminderUseCase(text)
+                .onSuccess {
+                    // リマインダーの作成に成功した場合、リマインダーを更新する
+                    loadReminders()
+                }.onFailure { exception ->
+                    // リマインダーの作成に失敗した場合、エラーメッセージを表示する
+                    _state.update { it.copy(error = exception.message) }
+                }
         }
     }
 
