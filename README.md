@@ -1,11 +1,11 @@
-# リマインコ
+# Reminder Parrot
 
-言葉を覚えさせてインコを育てるリマインダーアプリです
+言葉を教えてインコを育てるリマインダーアプリ
 
 ## Ktlint
 
-コードスタイルチェック
+Check
 `./gradlew ktlintCheck`
 
-コードの自動フォーマット
+Format
 `./gradlew ktlintFormat`
