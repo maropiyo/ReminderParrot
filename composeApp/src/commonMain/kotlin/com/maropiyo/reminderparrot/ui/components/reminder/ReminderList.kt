@@ -18,16 +18,13 @@ import com.maropiyo.reminderparrot.domain.entity.Reminder
 import com.maropiyo.reminderparrot.ui.theme.White
 
 @Composable
-fun ReminderList(
-    reminders: List<Reminder>,
-    modifier: Modifier = Modifier
-) {
+fun ReminderList(reminders: List<Reminder>, modifier: Modifier = Modifier) {
     LazyColumn(
         modifier =
-            modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+        modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
         items(reminders) { reminder ->
             ReminderCard(
@@ -39,16 +36,13 @@ fun ReminderList(
 }
 
 @Composable
-fun ReminderCard(
-    title: String,
-    modifier: Modifier = Modifier
-) {
+fun ReminderCard(title: String, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier.fillMaxWidth(),
         colors =
-            CardDefaults.cardColors(
-                containerColor = White
-            ),
+        CardDefaults.cardColors(
+            containerColor = White
+        ),
         shape = MaterialTheme.shapes.medium
     ) {
         // テキストにパディングを追加して、カード内で適切な間隔を確保
