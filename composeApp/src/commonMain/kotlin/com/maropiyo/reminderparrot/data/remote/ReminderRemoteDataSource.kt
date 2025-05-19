@@ -30,8 +30,8 @@ class ReminderRemoteDataSource(
     suspend fun createReminder(reminder: Reminder): Result<Reminder> {
         try {
             val reminderDto = reminderMapper.mapToDto(reminder)
-            val result = supabaseClient.from(TABLE_NAME).insert(reminderDto).decodeSingle<ReminderDto>()
-            return Result.success(reminderMapper.mapToEntity(result))
+            supabaseClient.from(TABLE_NAME).insert(reminderDto)
+            return Result.success(reminder)
         } catch (e: Exception) {
             return Result.failure(e)
         }
