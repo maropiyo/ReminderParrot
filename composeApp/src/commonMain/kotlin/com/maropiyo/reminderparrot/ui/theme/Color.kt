@@ -12,6 +12,8 @@ val Primary = Color(0xFFF4C148)
 val Secondary = Color(0xFFE59F43)
 val Tertiary = Color(0xFFFF8000)
 
+val DisableSecondary = Color(0x61E59F43)
+
 // テキスト色
 val White = Color(0xFFFFFFFF)
 val Black = Color(0xFF4B4B4B)

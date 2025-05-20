@@ -15,7 +15,7 @@ val Typography =
         TextStyle(
             fontFamily = FontFamily.Default,
             fontWeight = FontWeight.Bold,
-            fontSize = 28.sp
+            fontSize = 30.sp
         ),
         // サブタイトル用フォント
         titleLarge =
