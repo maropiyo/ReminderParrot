@@ -40,9 +40,15 @@ class HomeViewModel(
     fun createReminder(text: String) {
         viewModelScope.launch {
             createReminderUseCase(text)
-                .onSuccess {
+                .onSuccess { reminder ->
                     // リマインダーの作成に成功した場合、リマインダーを更新する
-                    loadReminders()
+                    _state.update {
+                        it.copy(
+                            reminders = it.reminders + reminder,
+                            isLoading = false,
+                            error = null
+                        )
+                    }
                 }.onFailure { exception ->
                     // リマインダーの作成に失敗した場合、エラーメッセージを表示する
                     _state.update { it.copy(error = exception.message) }

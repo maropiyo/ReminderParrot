@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.maropiyo.reminderparrot.domain.entity.Reminder
+import com.maropiyo.reminderparrot.ui.theme.Secondary
 import com.maropiyo.reminderparrot.ui.theme.White
 
 @Composable
@@ -49,7 +50,8 @@ fun ReminderCard(title: String, modifier: Modifier = Modifier) {
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Medium,
+            fontWeight = FontWeight.Bold,
+            color = Secondary,
             modifier = Modifier.padding(16.dp) // テキストにパディングを追加
         )
     }
