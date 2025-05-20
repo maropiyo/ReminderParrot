@@ -147,10 +147,7 @@ private fun HomeFloatingActionButton(onClick: () -> Unit) {
  * メインコンテンツ
  */
 @Composable
-private fun HomeContent(
-    state: HomeState,
-    paddingValues: androidx.compose.foundation.layout.PaddingValues
-) {
+private fun HomeContent(state: HomeState, paddingValues: androidx.compose.foundation.layout.PaddingValues) {
     when {
         state.isLoading -> {
             LoadingState(paddingValues)
@@ -190,20 +187,20 @@ private fun ReminderInputBottomSheet(
     ) {
         Box(
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .padding(bottom = 16.dp)
-                    .imePadding()
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 16.dp)
+                .imePadding()
         ) {
             ReminderInputCard(
                 reminderText = reminderText,
                 onReminderTextChange = onReminderTextChange,
                 onSaveReminder = onSaveReminder,
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(top = 104.dp)
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 104.dp)
             )
 
             // オーバーレイ画像
@@ -211,9 +208,9 @@ private fun ReminderInputBottomSheet(
                 painter = painterResource(Res.drawable.reminko_raising_hand),
                 contentDescription = "Parrot",
                 modifier =
-                    Modifier
-                        .size(128.dp)
-                        .align(Alignment.TopCenter),
+                Modifier
+                    .size(128.dp)
+                    .align(Alignment.TopCenter),
                 contentScale = ContentScale.Crop
             )
         }
@@ -233,17 +230,17 @@ private fun ReminderInputCard(
     Card(
         modifier = modifier,
         colors =
-            CardDefaults.cardColors(
-                containerColor = Background
-            ),
+        CardDefaults.cardColors(
+            containerColor = Background
+        ),
         shape = Shapes.extraLarge
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 24.dp)
+            Modifier
+                .fillMaxWidth()
+                .padding(vertical = 24.dp)
         ) {
             // タイトル
             Text(
@@ -259,9 +256,9 @@ private fun ReminderInputCard(
                 value = reminderText,
                 onValueChange = onReminderTextChange,
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
             )
 
             Spacer(Modifier.size(16.dp))
@@ -271,21 +268,17 @@ private fun ReminderInputCard(
                 onClick = onSaveReminder,
                 enabled = reminderText.isNotBlank(),
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                        .height(50.dp)
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .height(50.dp)
             )
         }
     }
 }
 
 @Composable
-private fun ReminderTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
+private fun ReminderTextField(value: String, onValueChange: (String) -> Unit, modifier: Modifier = Modifier) {
     TextField(
         value = value,
         onValueChange = onValueChange,
@@ -299,35 +292,31 @@ private fun ReminderTextField(
         },
         modifier = modifier,
         colors =
-            TextFieldDefaults.colors(
-                focusedTextColor = Secondary,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                focusedContainerColor = White,
-                unfocusedContainerColor = White
-            ),
+        TextFieldDefaults.colors(
+            focusedTextColor = Secondary,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            focusedContainerColor = White,
+            unfocusedContainerColor = White
+        ),
         shape = Shapes.large,
         singleLine = true
     )
 }
 
 @Composable
-private fun SaveReminderButton(
-    onClick: () -> Unit,
-    enabled: Boolean,
-    modifier: Modifier = Modifier
-) {
+private fun SaveReminderButton(onClick: () -> Unit, enabled: Boolean, modifier: Modifier = Modifier) {
     ElevatedButton(
         onClick = onClick,
         modifier = modifier,
         shape = Shapes.large,
         colors =
-            ButtonDefaults.elevatedButtonColors(
-                containerColor = Secondary,
-                contentColor = White,
-                disabledContainerColor = DisableSecondary,
-                disabledContentColor = White
-            ),
+        ButtonDefaults.elevatedButtonColors(
+            containerColor = Secondary,
+            contentColor = White,
+            disabledContainerColor = DisableSecondary,
+            disabledContentColor = White
+        ),
         enabled = enabled
     ) {
         Text(
