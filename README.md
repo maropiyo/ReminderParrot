@@ -1,7 +1,5 @@
 # Reminder Parrot
 
-言葉を教えてインコを育てるリマインダーアプリ
-
 ## Ktlint
 
 Check
