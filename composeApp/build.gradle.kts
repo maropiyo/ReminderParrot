@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.sqlDelight)
 }
 
 kotlin {
@@ -47,6 +48,7 @@ kotlin {
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
             implementation(libs.koin.compose.viewmodel)
+            implementation(libs.sql.coroutines.extensions)
         }
 
         androidMain.dependencies {
@@ -56,10 +58,12 @@ kotlin {
             implementation(libs.kotlinx.coroutines.android)
             implementation(libs.koin.android)
             implementation(libs.koin.androidx.compose)
+            implementation(libs.sql.android.driver)
         }
 
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
+            implementation(libs.sql.native.driver)
         }
     }
 }
@@ -110,4 +114,12 @@ android {
 dependencies {
     implementation(libs.androidx.material3.android)
     debugImplementation(compose.uiTooling)
+}
+
+sqldelight {
+    databases {
+        create("ReminderParrotDatabase") {
+            packageName.set("com.maropiyo.reminderparrot.db")
+        }
+    }
 }
