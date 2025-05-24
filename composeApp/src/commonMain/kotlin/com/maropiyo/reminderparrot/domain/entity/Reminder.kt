@@ -7,6 +7,6 @@ package com.maropiyo.reminderparrot.domain.entity
  * @param text リマインダーテキスト
  */
 data class Reminder(
-    val id: String? = null,
+    val id: String,
     val text: String
 )
