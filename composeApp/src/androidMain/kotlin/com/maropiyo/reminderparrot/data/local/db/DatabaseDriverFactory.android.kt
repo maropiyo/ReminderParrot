@@ -16,10 +16,9 @@ actual class DatabaseDriverFactory(
     /**
      * データベースドライバを作成する
      */
-    actual fun createDriver(): SqlDriver =
-        AndroidSqliteDriver(
-            schema = ReminderParrotDatabase.Schema,
-            context = context,
-            name = "ReminderParrot.db"
-        )
+    actual fun createDriver(): SqlDriver = AndroidSqliteDriver(
+        schema = ReminderParrotDatabase.Schema,
+        context = context,
+        name = "ReminderParrot.db"
+    )
 }

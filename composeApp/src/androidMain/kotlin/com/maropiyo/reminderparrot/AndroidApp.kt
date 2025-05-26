@@ -14,9 +14,9 @@ class AndroidApp : Application() {
         initKoin(
             supabaseConfig = getSupabaseConfig(),
             additionalModules =
-                listOf(
-                    databaseModule
-                )
+            listOf(
+                databaseModule
+            )
         ).apply {
             // AndroidContextの設定
             androidContext(this@AndroidApp)

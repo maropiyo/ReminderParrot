@@ -22,12 +22,11 @@ class ReminderRepositoryImpl(
      * @return 作成したリマインダー
      * @throws Exception リマインダーの取得に失敗した場合
      */
-    override suspend fun createReminder(reminder: Reminder): Result<Reminder> =
-        try {
-            Result.success(localDataSource.createReminder(reminder))
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+    override suspend fun createReminder(reminder: Reminder): Result<Reminder> = try {
+        Result.success(localDataSource.createReminder(reminder))
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
 
     /**
      * リマインダーを取得する
@@ -35,10 +34,9 @@ class ReminderRepositoryImpl(
      * @return リマインダーのリスト
      * @throws Exception リマインダーの取得に失敗した場合
      */
-    override suspend fun getReminders(): Result<List<Reminder>> =
-        try {
-            Result.success(localDataSource.getReminders())
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+    override suspend fun getReminders(): Result<List<Reminder>> = try {
+        Result.success(localDataSource.getReminders())
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
 }

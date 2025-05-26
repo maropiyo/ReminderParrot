@@ -15,9 +15,8 @@ actual class DatabaseDriverFactory {
      *
      * @return SQLDelightのドライバ
      */
-    actual fun createDriver(): SqlDriver =
-        NativeSqliteDriver(
-            schema = ReminderParrotDatabase.Schema,
-            name = "ReminderParrot.db"
-        )
+    actual fun createDriver(): SqlDriver = NativeSqliteDriver(
+        schema = ReminderParrotDatabase.Schema,
+        name = "ReminderParrot.db"
+    )
 }

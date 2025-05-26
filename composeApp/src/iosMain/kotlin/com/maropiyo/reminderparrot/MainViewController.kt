@@ -11,9 +11,9 @@ fun MainViewController(): UIViewController {
     initKoin(
         supabaseConfig = getSupabaseConfig(),
         additionalModules =
-            listOf(
-                databaseModule
-            )
+        listOf(
+            databaseModule
+        )
     )
 
     // ComposeUIの作成
