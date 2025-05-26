@@ -28,4 +28,16 @@ class ReminderMapper {
         id = entity.id,
         text = entity.text
     )
+
+    /**
+     * SQLDelightのクエリ結果をエンティティに変換する
+     *
+     * @param id リマインダーID
+     * @param text リマインダーテキスト
+     * @return リマインダー
+     */
+    fun mapFromDatabase(id: String, text: String): Reminder = Reminder(
+        id = id,
+        text = text
+    )
 }

@@ -1,5 +1,6 @@
 package com.maropiyo.reminderparrot.di
 
+import com.maropiyo.reminderparrot.data.local.ReminderLocalDataSource
 import com.maropiyo.reminderparrot.data.mapper.ReminderMapper
 import com.maropiyo.reminderparrot.data.repository.ReminderRepositoryImpl
 import com.maropiyo.reminderparrot.domain.common.UuidGenerator
@@ -22,10 +23,13 @@ val appModule =
         single<GetRemindersUseCase> { GetRemindersUseCase(get()) }
 
         // Repository
-        single<ReminderRepository> { ReminderRepositoryImpl(get()) }
+        single<ReminderRepository> { ReminderRepositoryImpl(get(), get()) }
 
         // Mapper
         single { ReminderMapper() }
+
+        // LocalDataSource
+        single<ReminderLocalDataSource> { ReminderLocalDataSource(get(), get()) }
 
         // Common
         single<UuidGenerator> { UuidGenerator() }

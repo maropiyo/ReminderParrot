@@ -1,0 +1,15 @@
+CREATE TABLE Reminder (
+    id TEXT PRIMARY KEY,
+    text TEXT NOT NULL
+);
+
+insertReminder:
+INSERT INTO Reminder(id, text)
+VALUES(?,?);
+
+selectAllReminders:
+SELECT Reminder.*
+FROM Reminder;
+
+removeAllReminders:
+DELETE FROM Reminder;

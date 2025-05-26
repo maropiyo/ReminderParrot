@@ -12,7 +12,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ReminderDto(
     @SerialName("id")
-    val id: String? = null,
+    val id: String,
     @SerialName("text")
     val text: String
 )

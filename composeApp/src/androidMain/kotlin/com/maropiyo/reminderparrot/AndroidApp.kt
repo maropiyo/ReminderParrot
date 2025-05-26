@@ -2,6 +2,7 @@ package com.maropiyo.reminderparrot
 
 import android.app.Application
 import com.maropiyo.reminderparrot.config.getSupabaseConfig
+import com.maropiyo.reminderparrot.di.databaseModule
 import com.maropiyo.reminderparrot.di.initKoin
 import org.koin.android.ext.koin.androidContext
 
@@ -11,7 +12,11 @@ class AndroidApp : Application() {
 
         // Koinの初期化
         initKoin(
-            supabaseConfig = getSupabaseConfig()
+            supabaseConfig = getSupabaseConfig(),
+            additionalModules =
+            listOf(
+                databaseModule
+            )
         ).apply {
             // AndroidContextの設定
             androidContext(this@AndroidApp)
