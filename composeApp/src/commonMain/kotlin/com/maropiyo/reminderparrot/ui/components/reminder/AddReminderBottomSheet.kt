@@ -67,20 +67,20 @@ fun AddReminderBottomSheet(
     ) {
         Box(
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .padding(bottom = 16.dp)
-                    .imePadding()
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 16.dp)
+                .imePadding()
         ) {
             ReminderInputCard(
                 reminderText = reminderText,
                 onReminderTextChange = onReminderTextChange,
                 onSaveReminder = onSaveReminder,
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(top = 104.dp)
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 104.dp)
             )
 
             // リマインコの画像
@@ -88,9 +88,9 @@ fun AddReminderBottomSheet(
                 painter = painterResource(Res.drawable.reminko_raising_hand),
                 contentDescription = "Parrot",
                 modifier =
-                    Modifier
-                        .size(128.dp)
-                        .align(Alignment.TopCenter),
+                Modifier
+                    .size(128.dp)
+                    .align(Alignment.TopCenter),
                 contentScale = ContentScale.Crop
             )
         }
@@ -110,17 +110,17 @@ private fun ReminderInputCard(
     Card(
         modifier = modifier,
         colors =
-            CardDefaults.cardColors(
-                containerColor = Background
-            ),
+        CardDefaults.cardColors(
+            containerColor = Background
+        ),
         shape = Shapes.extraLarge
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 24.dp)
+            Modifier
+                .fillMaxWidth()
+                .padding(vertical = 24.dp)
         ) {
             // タイトルテキスト
             Text(
@@ -136,9 +136,9 @@ private fun ReminderInputCard(
                 reminderText = reminderText,
                 onValueChange = onReminderTextChange,
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
             )
 
             Spacer(Modifier.size(16.dp))
@@ -148,10 +148,10 @@ private fun ReminderInputCard(
                 onClick = onSaveReminder,
                 enabled = reminderText.isNotBlank(),
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                        .height(50.dp)
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .height(50.dp)
             )
         }
     }
@@ -165,11 +165,7 @@ private fun ReminderInputCard(
  * @param modifier 修飾子
  */
 @Composable
-private fun ReminderTextField(
-    reminderText: String,
-    onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
+private fun ReminderTextField(reminderText: String, onValueChange: (String) -> Unit, modifier: Modifier = Modifier) {
     // 初期テキストとカーソル位置を保持するための状態
     var textFieldValue by remember {
         mutableStateOf(
@@ -188,26 +184,26 @@ private fun ReminderTextField(
         },
         modifier = modifier,
         colors =
-            TextFieldDefaults.colors(
-                focusedTextColor = Secondary,
-                focusedContainerColor = White,
-                unfocusedContainerColor = White,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-            ),
+        TextFieldDefaults.colors(
+            focusedTextColor = Secondary,
+            focusedContainerColor = White,
+            unfocusedContainerColor = White,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent
+        ),
         textStyle =
-            MaterialTheme.typography.bodyLarge.copy(
-                color = Secondary,
-                fontWeight = FontWeight.Bold
-            ),
+        MaterialTheme.typography.bodyLarge.copy(
+            color = Secondary,
+            fontWeight = FontWeight.Bold
+        ),
         placeholder =
-            {
-                Text(
-                    text = "おしえることばをかいてね",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = Secondary.copy(alpha = 0.5f),
-                )
-            },
+        {
+            Text(
+                text = "おしえることばをかいてね",
+                style = MaterialTheme.typography.bodyLarge,
+                color = Secondary.copy(alpha = 0.5f)
+            )
+        },
         singleLine = true,
         shape = Shapes.large
     )
@@ -221,22 +217,18 @@ private fun ReminderTextField(
  * @param modifier ボタンの修飾子
  */
 @Composable
-private fun SaveReminderButton(
-    onClick: () -> Unit,
-    enabled: Boolean,
-    modifier: Modifier = Modifier
-) {
+private fun SaveReminderButton(onClick: () -> Unit, enabled: Boolean, modifier: Modifier = Modifier) {
     ElevatedButton(
         onClick = onClick,
         modifier = modifier,
         shape = Shapes.large,
         colors =
-            ButtonDefaults.elevatedButtonColors(
-                containerColor = Secondary,
-                contentColor = White,
-                disabledContainerColor = DisableSecondary,
-                disabledContentColor = White
-            ),
+        ButtonDefaults.elevatedButtonColors(
+            containerColor = Secondary,
+            contentColor = White,
+            disabledContainerColor = DisableSecondary,
+            disabledContentColor = White
+        ),
         enabled = enabled
     ) {
         Text(
