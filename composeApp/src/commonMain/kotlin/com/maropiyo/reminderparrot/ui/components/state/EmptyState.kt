@@ -1,9 +1,7 @@
 package com.maropiyo.reminderparrot.ui.components.state
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -13,15 +11,12 @@ import androidx.compose.ui.Modifier
 /**
  * 空の状態を表示するコンポーネント
  * @param emptyMessage 空の状態のメッセージ
- * @param paddingValues パディング値
+ * @param modifier 修飾子
  */
 @Composable
-fun EmptyState(emptyMessage: String, paddingValues: PaddingValues) {
+fun EmptyState(emptyMessage: String, modifier: Modifier = Modifier) {
     Box(
-        modifier =
-        Modifier
-            .fillMaxSize()
-            .padding(paddingValues),
+        modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         Text(
