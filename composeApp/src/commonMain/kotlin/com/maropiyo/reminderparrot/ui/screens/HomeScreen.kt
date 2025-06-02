@@ -1,15 +1,12 @@
 package com.maropiyo.reminderparrot.ui.screens
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -18,6 +15,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -57,17 +55,19 @@ fun HomeScreen(viewModel: HomeViewModel = koinViewModel(), modifier: Modifier = 
     val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    Scaffold(
-        modifier = modifier,
-        topBar = { HomeTopBar() },
-        floatingActionButton = {
-            HomeFloatingActionButton(onClick = { isShowBottomSheet = true })
-        }
-    ) { paddingValues ->
+    Box(modifier = modifier) {
         // メインコンテンツの表示
         HomeContent(
             state = state,
-            paddingValues = paddingValues
+            modifier = Modifier.fillMaxSize()
+        )
+
+        // フローティングアクションボタン
+        HomeFloatingActionButton(
+            onClick = { isShowBottomSheet = true },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
         )
 
         // リマインダー追加用ボトムシート
@@ -95,29 +95,14 @@ fun HomeScreen(viewModel: HomeViewModel = koinViewModel(), modifier: Modifier = 
 }
 
 /**
- * トップアプリバー
- */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun HomeTopBar() {
-    TopAppBar(
-        title = {
-            Text(
-                text = "こんにちは",
-                style = MaterialTheme.typography.headlineLarge
-            )
-        }
-    )
-}
-
-/**
  * フローティングアクションボタン
  */
 @Composable
-private fun HomeFloatingActionButton(onClick: () -> Unit) {
+private fun HomeFloatingActionButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
     FloatingActionButton(
         onClick = onClick,
-        containerColor = ParrotYellow
+        containerColor = ParrotYellow,
+        modifier = modifier
     ) {
         Image(
             painter = painterResource(Res.drawable.reminko_face),
@@ -132,21 +117,21 @@ private fun HomeFloatingActionButton(onClick: () -> Unit) {
  * コンテンツ
  */
 @Composable
-private fun HomeContent(state: HomeState, paddingValues: PaddingValues) {
+private fun HomeContent(state: HomeState, modifier: Modifier = Modifier) {
     when {
         state.isLoading -> {
-            LoadingState(paddingValues)
+            LoadingState(modifier = modifier)
         }
         state.error != null -> {
-            ErrorState(state.error, paddingValues)
+            ErrorState(state.error, modifier = modifier)
         }
         state.reminders.isEmpty() -> {
-            EmptyState("リマインダーがありません", paddingValues)
+            EmptyState("リマインダーがありません", modifier = modifier)
         }
         else -> {
             ReminderList(
                 reminders = state.reminders.reversed(),
-                modifier = Modifier.padding(paddingValues)
+                modifier = modifier
             )
         }
     }
