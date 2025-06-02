@@ -130,10 +130,7 @@ private fun HomeFloatingActionButton(onClick: () -> Unit) {
  * コンテンツ
  */
 @Composable
-private fun HomeContent(
-    state: HomeState,
-    paddingValues: PaddingValues
-) {
+private fun HomeContent(state: HomeState, paddingValues: PaddingValues) {
     when {
         state.isLoading -> {
             LoadingState(paddingValues)
