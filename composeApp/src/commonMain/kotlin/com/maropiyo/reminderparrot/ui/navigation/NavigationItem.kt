@@ -1,11 +1,9 @@
 package com.maropiyo.reminderparrot.ui.navigation
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Share
-import androidx.compose.ui.graphics.vector.ImageVector
+import org.jetbrains.compose.resources.DrawableResource
+import reminderparrot.composeapp.generated.resources.Res
+import reminderparrot.composeapp.generated.resources.home
+import reminderparrot.composeapp.generated.resources.network
 
 /**
  * ボトムナビゲーションの項目を定義
@@ -18,8 +16,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 sealed class NavigationItem(
     val route: String,
     val label: String,
-    val selectedIcon: ImageVector,
-    val unselectedIcon: ImageVector
+    val selectedIcon: DrawableResource,
+    val unselectedIcon: DrawableResource
 ) {
     /**
      * ホーム画面
@@ -27,8 +25,8 @@ sealed class NavigationItem(
     data object Home : NavigationItem(
         route = "home",
         label = "ホーム",
-        selectedIcon = Icons.Filled.Home,
-        unselectedIcon = Icons.Outlined.Home
+        selectedIcon = Res.drawable.home,
+        unselectedIcon = Res.drawable.home
     )
 
     /**
@@ -37,8 +35,8 @@ sealed class NavigationItem(
     data object RemindNet : NavigationItem(
         route = "remind_net",
         label = "リマインネット",
-        selectedIcon = Icons.Filled.Share,
-        unselectedIcon = Icons.Outlined.Share
+        selectedIcon = Res.drawable.network,
+        unselectedIcon = Res.drawable.network
     )
 
     companion object {

@@ -1,14 +1,19 @@
 package com.maropiyo.reminderparrot.ui.navigation
 
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.maropiyo.reminderparrot.ui.theme.ParrotYellow
+import androidx.compose.ui.unit.dp
+import com.maropiyo.reminderparrot.ui.theme.Background
+import com.maropiyo.reminderparrot.ui.theme.LightGray
 import com.maropiyo.reminderparrot.ui.theme.Secondary
+import org.jetbrains.compose.resources.painterResource
 
 /**
  * ボトムナビゲーションバー
@@ -17,7 +22,10 @@ import com.maropiyo.reminderparrot.ui.theme.Secondary
  * @param onNavigate ナビゲーション項目が選択されたときのコールバック
  */
 @Composable
-fun BottomNavigation(selectedRoute: String, onNavigate: (NavigationItem) -> Unit) {
+fun BottomNavigation(
+    selectedRoute: String,
+    onNavigate: (NavigationItem) -> Unit
+) {
     NavigationBar(
         containerColor = Color.White
     ) {
@@ -27,26 +35,24 @@ fun BottomNavigation(selectedRoute: String, onNavigate: (NavigationItem) -> Unit
             NavigationBarItem(
                 selected = isSelected,
                 onClick = { onNavigate(item) },
-                label = {
-                    Text(
-                        text = item.label,
-                        color = if (isSelected) Secondary else Color.Gray
-                    )
-                },
                 icon = {
                     Icon(
-                        imageVector = if (isSelected) item.selectedIcon else item.unselectedIcon,
+                        painter =
+                            painterResource(
+                                if (isSelected) item.selectedIcon else item.unselectedIcon
+                            ),
                         contentDescription = item.label,
-                        tint = if (isSelected) Secondary else Color.Gray
+                        modifier = Modifier.size(40.dp).padding(2.dp)
                     )
                 },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = Secondary,
-                    selectedTextColor = Secondary,
-                    indicatorColor = ParrotYellow.copy(alpha = 0.1f),
-                    unselectedIconColor = Color.Gray,
-                    unselectedTextColor = Color.Gray
-                )
+                colors =
+                    NavigationBarItemDefaults.colors(
+                        selectedIconColor = Secondary,
+                        selectedTextColor = Secondary,
+                        indicatorColor = Background,
+                        unselectedIconColor = LightGray,
+                        unselectedTextColor = LightGray
+                    ),
             )
         }
     }
