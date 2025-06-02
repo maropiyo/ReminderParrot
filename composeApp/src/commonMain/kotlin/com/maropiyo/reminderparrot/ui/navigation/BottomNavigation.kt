@@ -22,10 +22,7 @@ import org.jetbrains.compose.resources.painterResource
  * @param onNavigate ナビゲーション項目が選択されたときのコールバック
  */
 @Composable
-fun BottomNavigation(
-    selectedRoute: String,
-    onNavigate: (NavigationItem) -> Unit
-) {
+fun BottomNavigation(selectedRoute: String, onNavigate: (NavigationItem) -> Unit) {
     NavigationBar(
         containerColor = Color.White
     ) {
@@ -38,21 +35,21 @@ fun BottomNavigation(
                 icon = {
                     Icon(
                         painter =
-                            painterResource(
-                                if (isSelected) item.selectedIcon else item.unselectedIcon
-                            ),
+                        painterResource(
+                            if (isSelected) item.selectedIcon else item.unselectedIcon
+                        ),
                         contentDescription = item.label,
                         modifier = Modifier.size(40.dp).padding(2.dp)
                     )
                 },
                 colors =
-                    NavigationBarItemDefaults.colors(
-                        selectedIconColor = Secondary,
-                        selectedTextColor = Secondary,
-                        indicatorColor = Background,
-                        unselectedIconColor = LightGray,
-                        unselectedTextColor = LightGray
-                    ),
+                NavigationBarItemDefaults.colors(
+                    selectedIconColor = Secondary,
+                    selectedTextColor = Secondary,
+                    indicatorColor = Background,
+                    unselectedIconColor = LightGray,
+                    unselectedTextColor = LightGray
+                )
             )
         }
     }
