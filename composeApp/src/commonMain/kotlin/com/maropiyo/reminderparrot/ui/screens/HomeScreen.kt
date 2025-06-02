@@ -64,7 +64,10 @@ fun HomeScreen(viewModel: HomeViewModel = koinViewModel(), modifier: Modifier = 
 
         // フローティングアクションボタン
         HomeFloatingActionButton(
-            onClick = { isShowBottomSheet = true },
+            onClick = {
+                reminderText = ""
+                isShowBottomSheet = true
+            },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp)
