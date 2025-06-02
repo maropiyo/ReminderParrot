@@ -39,10 +39,11 @@ import reminderparrot.composeapp.generated.resources.reminko_face
 /**
  * ホーム画面
  * @param viewModel ViewModel
+ * @param modifier 修飾子
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(viewModel: HomeViewModel = koinViewModel()) {
+fun HomeScreen(viewModel: HomeViewModel = koinViewModel(), modifier: Modifier = Modifier) {
     // ViewModelの状態を取得
     val state by viewModel.state.collectAsState()
 
@@ -57,6 +58,7 @@ fun HomeScreen(viewModel: HomeViewModel = koinViewModel()) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
     Scaffold(
+        modifier = modifier,
         topBar = { HomeTopBar() },
         floatingActionButton = {
             HomeFloatingActionButton(onClick = { isShowBottomSheet = true })
