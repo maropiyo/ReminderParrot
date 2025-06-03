@@ -7,6 +7,7 @@ import com.maropiyo.reminderparrot.domain.common.UuidGenerator
 import com.maropiyo.reminderparrot.domain.repository.ReminderRepository
 import com.maropiyo.reminderparrot.domain.usecase.CreateReminderUseCase
 import com.maropiyo.reminderparrot.domain.usecase.GetRemindersUseCase
+import com.maropiyo.reminderparrot.domain.usecase.UpdateReminderUseCase
 import com.maropiyo.reminderparrot.presentation.viewmodel.HomeViewModel
 import org.koin.dsl.module
 
@@ -16,11 +17,12 @@ import org.koin.dsl.module
 val appModule =
     module {
         // ViewModel
-        single<HomeViewModel> { HomeViewModel(get(), get()) }
+        single<HomeViewModel> { HomeViewModel(get(), get(), get()) }
 
         // UseCase
         single<CreateReminderUseCase> { CreateReminderUseCase(get(), get()) }
         single<GetRemindersUseCase> { GetRemindersUseCase(get()) }
+        single<UpdateReminderUseCase> { UpdateReminderUseCase(get()) }
 
         // Repository
         single<ReminderRepository> { ReminderRepositoryImpl(get(), get()) }

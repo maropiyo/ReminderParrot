@@ -59,6 +59,7 @@ fun HomeScreen(viewModel: HomeViewModel = koinViewModel(), modifier: Modifier = 
         // メインコンテンツの表示
         HomeContent(
             state = state,
+            onToggleCompletion = viewModel::toggleReminderCompletion,
             modifier = Modifier.fillMaxSize()
         )
 
@@ -120,7 +121,7 @@ private fun HomeFloatingActionButton(onClick: () -> Unit, modifier: Modifier = M
  * コンテンツ
  */
 @Composable
-private fun HomeContent(state: HomeState, modifier: Modifier = Modifier) {
+private fun HomeContent(state: HomeState, onToggleCompletion: (String) -> Unit, modifier: Modifier = Modifier) {
     when {
         state.isLoading -> {
             LoadingState(modifier = modifier)
@@ -133,7 +134,8 @@ private fun HomeContent(state: HomeState, modifier: Modifier = Modifier) {
         }
         else -> {
             ReminderList(
-                reminders = state.reminders.reversed(),
+                reminders = state.reminders,
+                onToggleCompletion = onToggleCompletion,
                 modifier = modifier
             )
         }

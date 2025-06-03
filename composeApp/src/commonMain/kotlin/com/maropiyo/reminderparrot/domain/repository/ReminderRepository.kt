@@ -20,4 +20,12 @@ interface ReminderRepository {
      * @return リマインダーのリスト
      */
     suspend fun getReminders(): Result<List<Reminder>>
+
+    /**
+     * リマインダーを更新する
+     *
+     * @param reminder 更新するリマインダー
+     * @return 更新結果
+     */
+    suspend fun updateReminder(reminder: Reminder): Result<Unit>
 }

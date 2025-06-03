@@ -1,15 +1,21 @@
 CREATE TABLE Reminder (
     id TEXT PRIMARY KEY,
-    text TEXT NOT NULL
+    text TEXT NOT NULL,
+    is_completed INTEGER NOT NULL DEFAULT 0
 );
 
 insertReminder:
-INSERT INTO Reminder(id, text)
-VALUES(?,?);
+INSERT INTO Reminder(id, text, is_completed)
+VALUES(?, ?, ?);
 
 selectAllReminders:
 SELECT Reminder.*
 FROM Reminder;
+
+updateReminder:
+UPDATE Reminder
+SET text = ?, is_completed = ?
+WHERE id = ?;
 
 removeAllReminders:
 DELETE FROM Reminder;

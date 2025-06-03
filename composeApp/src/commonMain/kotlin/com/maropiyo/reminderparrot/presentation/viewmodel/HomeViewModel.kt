@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.maropiyo.reminderparrot.domain.usecase.CreateReminderUseCase
 import com.maropiyo.reminderparrot.domain.usecase.GetRemindersUseCase
+import com.maropiyo.reminderparrot.domain.usecase.UpdateReminderUseCase
 import com.maropiyo.reminderparrot.presentation.state.HomeState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,10 +17,12 @@ import kotlinx.coroutines.launch
  *
  * @property getRemindersUseCase リマインダー取得ユースケース
  * @property createReminderUseCase リマインダー作成ユースケース
+ * @property updateReminderUseCase リマインダー更新ユースケース
  */
 class HomeViewModel(
     private val getRemindersUseCase: GetRemindersUseCase,
-    private val createReminderUseCase: CreateReminderUseCase
+    private val createReminderUseCase: CreateReminderUseCase,
+    private val updateReminderUseCase: UpdateReminderUseCase
 ) : ViewModel() {
     // リマインダーの状態を保持するStateFlow
     private val _state = MutableStateFlow(HomeState())
@@ -43,14 +46,44 @@ class HomeViewModel(
                 .onSuccess { reminder ->
                     // リマインダーの作成に成功した場合、リマインダーを更新する
                     _state.update {
+                        val updatedReminders = it.reminders + reminder
+                        // 未完了→完了の順にソート
+                        val sortedReminders = updatedReminders.sortedBy { r -> r.isCompleted }
                         it.copy(
-                            reminders = it.reminders + reminder,
+                            reminders = sortedReminders,
                             isLoading = false,
                             error = null
                         )
                     }
                 }.onFailure { exception ->
                     // リマインダーの作成に失敗した場合、エラーメッセージを表示する
+                    _state.update { it.copy(error = exception.message) }
+                }
+        }
+    }
+
+    /**
+     * リマインダーの完了状態を切り替える
+     *
+     * @param reminderId リマインダーのID
+     */
+    fun toggleReminderCompletion(reminderId: String) {
+        viewModelScope.launch {
+            val reminder = _state.value.reminders.find { it.id == reminderId } ?: return@launch
+            val updatedReminder = reminder.copy(isCompleted = !reminder.isCompleted)
+
+            updateReminderUseCase(updatedReminder)
+                .onSuccess {
+                    _state.update { currentState ->
+                        val updatedReminders = currentState.reminders.map {
+                            if (it.id == reminderId) updatedReminder else it
+                        }
+                        // 未完了→完了の順にソート
+                        val sortedReminders = updatedReminders.sortedBy { it.isCompleted }
+                        currentState.copy(reminders = sortedReminders)
+                    }
+                }
+                .onFailure { exception ->
                     _state.update { it.copy(error = exception.message) }
                 }
         }
@@ -67,7 +100,9 @@ class HomeViewModel(
 
             getRemindersUseCase()
                 .onSuccess { reminders ->
-                    _state.update { it.copy(reminders = reminders, isLoading = false) }
+                    // 未完了→完了の順にソート
+                    val sortedReminders = reminders.sortedBy { it.isCompleted }
+                    _state.update { it.copy(reminders = sortedReminders, isLoading = false) }
                 }.onFailure { exception ->
                     _state.update { it.copy(error = exception.message, isLoading = false) }
                 }

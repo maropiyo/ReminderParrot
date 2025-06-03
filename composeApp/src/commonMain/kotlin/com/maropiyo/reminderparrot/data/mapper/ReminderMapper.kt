@@ -15,7 +15,8 @@ class ReminderMapper {
      */
     fun mapToEntity(dto: ReminderDto): Reminder = Reminder(
         id = dto.id,
-        text = dto.text
+        text = dto.text,
+        isCompleted = dto.isCompleted
     )
 
     /**
@@ -26,7 +27,8 @@ class ReminderMapper {
      */
     fun mapToDto(entity: Reminder): ReminderDto = ReminderDto(
         id = entity.id,
-        text = entity.text
+        text = entity.text,
+        isCompleted = entity.isCompleted
     )
 
     /**
@@ -34,10 +36,12 @@ class ReminderMapper {
      *
      * @param id リマインダーID
      * @param text リマインダーテキスト
+     * @param isCompleted 完了フラグ
      * @return リマインダー
      */
-    fun mapFromDatabase(id: String, text: String): Reminder = Reminder(
+    fun mapFromDatabase(id: String, text: String, isCompleted: Long): Reminder = Reminder(
         id = id,
-        text = text
+        text = text,
+        isCompleted = isCompleted == 1L
     )
 }
