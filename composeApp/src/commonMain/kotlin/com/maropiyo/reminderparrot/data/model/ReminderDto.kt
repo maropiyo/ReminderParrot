@@ -8,11 +8,14 @@ import kotlinx.serialization.Serializable
  *
  * @property id リマインダーID
  * @property text リマインダーテキスト
+ * @property isCompleted 完了フラグ
  */
 @Serializable
 data class ReminderDto(
     @SerialName("id")
     val id: String,
     @SerialName("text")
-    val text: String
+    val text: String,
+    @SerialName("is_completed")
+    val isCompleted: Boolean = false
 )

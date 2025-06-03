@@ -23,7 +23,8 @@ class ReminderLocalDataSource(
     fun createReminder(reminder: Reminder): Reminder {
         database.reminderParrotDatabaseQueries.insertReminder(
             id = reminder.id,
-            text = reminder.text
+            text = reminder.text,
+            is_completed = if (reminder.isCompleted) 1L else 0L
         )
         return reminder
     }
@@ -33,4 +34,17 @@ class ReminderLocalDataSource(
      */
     fun getReminders(): List<Reminder> =
         database.reminderParrotDatabaseQueries.selectAllReminders(reminderMapper::mapFromDatabase).executeAsList()
+
+    /**
+     * リマインダーを更新する
+     *
+     * @param reminder リマインダー
+     */
+    fun updateReminder(reminder: Reminder) {
+        database.reminderParrotDatabaseQueries.updateReminder(
+            text = reminder.text,
+            is_completed = if (reminder.isCompleted) 1L else 0L,
+            id = reminder.id
+        )
+    }
 }

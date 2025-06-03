@@ -39,4 +39,18 @@ class ReminderRepositoryImpl(
     } catch (e: Exception) {
         Result.failure(e)
     }
+
+    /**
+     * リマインダーを更新する
+     *
+     * @param reminder 更新するリマインダー
+     * @return 更新結果
+     * @throws Exception リマインダーの更新に失敗した場合
+     */
+    override suspend fun updateReminder(reminder: Reminder): Result<Unit> = try {
+        localDataSource.updateReminder(reminder)
+        Result.success(Unit)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
 }
