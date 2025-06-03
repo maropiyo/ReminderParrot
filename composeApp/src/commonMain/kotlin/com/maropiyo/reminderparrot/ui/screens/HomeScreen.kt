@@ -20,8 +20,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
-import com.maropiyo.reminderparrot.presentation.state.HomeState
-import com.maropiyo.reminderparrot.presentation.viewmodel.HomeViewModel
+import com.maropiyo.reminderparrot.presentation.state.ReminderListState
+import com.maropiyo.reminderparrot.presentation.viewmodel.ReminderListViewModel
 import com.maropiyo.reminderparrot.ui.components.reminder.AddReminderBottomSheet
 import com.maropiyo.reminderparrot.ui.components.reminder.ReminderList
 import com.maropiyo.reminderparrot.ui.components.state.EmptyState
@@ -41,7 +41,7 @@ import reminderparrot.composeapp.generated.resources.reminko_face
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(viewModel: HomeViewModel = koinViewModel(), modifier: Modifier = Modifier) {
+fun HomeScreen(viewModel: ReminderListViewModel = koinViewModel(), modifier: Modifier = Modifier) {
     // ViewModelの状態を取得
     val state by viewModel.state.collectAsState()
 
@@ -121,7 +121,7 @@ private fun HomeFloatingActionButton(onClick: () -> Unit, modifier: Modifier = M
  * コンテンツ
  */
 @Composable
-private fun HomeContent(state: HomeState, onToggleCompletion: (String) -> Unit, modifier: Modifier = Modifier) {
+private fun HomeContent(state: ReminderListState, onToggleCompletion: (String) -> Unit, modifier: Modifier = Modifier) {
     when {
         state.isLoading -> {
             LoadingState(modifier = modifier)
