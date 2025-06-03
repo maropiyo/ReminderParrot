@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.maropiyo.reminderparrot.domain.usecase.CreateReminderUseCase
 import com.maropiyo.reminderparrot.domain.usecase.GetRemindersUseCase
 import com.maropiyo.reminderparrot.domain.usecase.UpdateReminderUseCase
-import com.maropiyo.reminderparrot.presentation.state.HomeState
+import com.maropiyo.reminderparrot.presentation.state.ReminderListState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,22 +13,22 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
- * ホーム画面のビューモデル
+ * リマインダー一覧画面のビューモデル
  *
  * @property getRemindersUseCase リマインダー取得ユースケース
  * @property createReminderUseCase リマインダー作成ユースケース
  * @property updateReminderUseCase リマインダー更新ユースケース
  */
-class HomeViewModel(
+class ReminderListViewModel(
     private val getRemindersUseCase: GetRemindersUseCase,
     private val createReminderUseCase: CreateReminderUseCase,
     private val updateReminderUseCase: UpdateReminderUseCase
 ) : ViewModel() {
     // リマインダーの状態を保持するStateFlow
-    private val _state = MutableStateFlow(HomeState())
+    private val _state = MutableStateFlow(ReminderListState())
 
     // 外部からはStateFlowとして公開する
-    val state: StateFlow<HomeState> = _state.asStateFlow()
+    val state: StateFlow<ReminderListState> = _state.asStateFlow()
 
     init {
         // 初期化時にリマインダーを取得
