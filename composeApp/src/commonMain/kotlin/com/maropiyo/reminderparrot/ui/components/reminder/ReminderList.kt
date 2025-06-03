@@ -1,7 +1,11 @@
 package com.maropiyo.reminderparrot.ui.components.reminder
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,16 +14,19 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -74,17 +81,48 @@ fun ReminderCard(reminder: Reminder, onToggleCompletion: () -> Unit, modifier: M
             )
 
             // 丸いチェックボックス
-            Checkbox(
+            CircularCheckbox(
                 checked = reminder.isCompleted,
                 onCheckedChange = { onToggleCompletion() },
+                modifier = Modifier.size(32.dp)
+            )
+        }
+    }
+}
+
+/**
+ * 円形のチェックボックス
+ */
+@Composable
+private fun CircularCheckbox(checked: Boolean, onCheckedChange: (Boolean) -> Unit, modifier: Modifier = Modifier) {
+    val scale by animateFloatAsState(
+        targetValue = if (checked) 0.9f else 0f,
+        label = "checkmark_scale"
+    )
+
+    Box(
+        modifier = modifier
+            .clip(CircleShape)
+            .border(
+                width = 2.dp,
+                color = Secondary,
+                shape = CircleShape
+            )
+            .background(
+                color = if (checked) Secondary else White,
+                shape = CircleShape
+            )
+            .clickable { onCheckedChange(!checked) },
+        contentAlignment = Alignment.Center
+    ) {
+        if (checked) {
+            Icon(
+                imageVector = Icons.Default.Check,
+                contentDescription = "Checked",
+                tint = White,
                 modifier = Modifier
-                    .size(24.dp)
-                    .clip(CircleShape),
-                colors = CheckboxDefaults.colors(
-                    checkedColor = Secondary,
-                    uncheckedColor = Secondary,
-                    checkmarkColor = White
-                )
+                    .size(20.dp)
+                    .scale(scale)
             )
         }
     }
