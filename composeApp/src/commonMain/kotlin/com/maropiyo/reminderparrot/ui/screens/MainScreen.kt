@@ -55,7 +55,7 @@ fun MainScreen() {
                 HomeScreen(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(bottom = paddingValues.calculateBottomPadding())
+                        .padding(paddingValues)
                 )
             }
             NavigationItem.RemindNet.route -> {
