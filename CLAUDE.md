@@ -70,33 +70,63 @@ Create `iosApp/Configuration/Config.xcconfig` from template with:
 
 ## 🧠 AI Assistant Guidelines
 
+### 🇯🇵 日本語コミュニケーション
+- **会話**: 常に日本語で対話する
+- **コメント**: コードコメントは日本語で記述
+- **コミットメッセージ**: 日本語でコミットメッセージを作成
+- **プルリクエスト**: タイトルと説明は日本語で記述
+- **ドキュメント**: README、CHANGELOG等も日本語で作成
+
+### 日本語化の指針
+- **技術用語**: 英語のまま使用（StateFlow、ViewModel、Conventional Commits等）
+- **無理な翻訳禁止**: 分かりにくくなる場合は英語のまま
+- **意味重視**: 理解しやすさを最優先
+- **自然な日本語**: 直訳ではなく自然な表現を使用
+- **例**: ❌「日本語コンベンショナルコミット」→ ⭕「コミットメッセージの書き方」
+
 ### Efficient Professional Workflow
-**Smart Explore-Plan-Code-Commit with quality automation**
+**Smart Explore-Plan-Code-Test-Commit with quality automation**
 
 #### 1. EXPLORE Phase
 - **Use tools to quickly scan and understand codebase structure**
 - **Auto-identify dependencies and impact areas**
 - **Present findings concisely with actionable insights**
+- **Leverage search tools in parallel for comprehensive exploration**
+- **Use Task tool for complex multi-file investigations**
 
 #### 2. PLAN Phase
 - **Generate multiple implementation approaches when applicable**
 - **Auto-create test scenarios from requirements**
 - **Predict potential issues using pattern analysis**
 - **Provide time estimates for each approach**
+- **Use `think` mode for complex architectural decisions**
+- **Create comprehensive todo lists for multi-step tasks**
 
-#### 3. CODE Phase
+#### 3. TEST Phase (TDD Workflow)
+- **Write tests BEFORE implementation**
+- **Generate test cases covering edge cases and happy paths**
+- **Use MockK for mocking dependencies**
+- **Ensure platform-specific test coverage**
+
+#### 4. CODE Phase
 - **Generate code following project conventions**
-- **Auto-complete repetitive patterns**
+- **Follow existing patterns for consistency**
 - **Real-time error detection and fixes**
 - **Follow Clean Architecture principles**
+- **Reference existing implementations for patterns**
+- **Implement iteratively to pass all tests**
 
-#### 4. COMMIT Phase
+#### 5. COMMIT Phase
 **Always run quality checks before completing tasks:**
 ```bash
 # Kotlin quality checks
 ./gradlew ktlintCheck
 ./gradlew ktlintFormat
 ./gradlew :composeApp:lintDebug
+
+# Run tests
+./gradlew test
+./gradlew :composeApp:testDebugUnitTest
 ```
 
 ## 🚫 Security and Quality Standards
@@ -133,12 +163,12 @@ Create `iosApp/Configuration/Config.xcconfig` from template with:
  * 
  * @param paramName Description of what this parameter represents
  * @return Description of what the function returns and why
- * @throws ExceptionType When this error occurs
+ * @throws IllegalArgumentException When invalid parameters are provided
  * @sample com.example.SampleClass.sampleUsage
  * @since 1.0.0
  */
-fun functionName(paramName: ParamType): ReturnType {
-    // Implementation
+fun functionName(paramName: String): String {
+    return paramName
 }
 ```
 
@@ -149,23 +179,245 @@ fun functionName(paramName: ParamType): ReturnType {
 - **Error Handling**: Use sealed classes for state management
 - **Testing**: Write unit tests using JUnit and MockK
 - **Architecture**: Follow Clean Architecture with clear layer separation
+- **Exploration**: Use multiple search tools in parallel for efficiency
+- **Iteration**: Improve solutions through multiple Claude interactions
+- **Specificity**: Provide exact requirements to reduce ambiguity
 
-## 🔧 Commit Standards
+## 🧪 Test-Driven Development (TDD)
 
-### Conventional Commits
-```bash
-# Format: <type>(<scope>): <subject>
-git commit -m "feat(reminder): add notification scheduling"
-git commit -m "fix(ui): handle null reminder state correctly"
-git commit -m "docs(readme): update build instructions"
-git commit -m "refactor(data): extract common repository logic"
+### TDD Workflow
+1. **Write failing test first** - Define expected behavior
+2. **Implement minimal code** - Make test pass
+3. **Refactor** - Improve code while keeping tests green
+4. **Repeat** - Continue for each feature
+
+### Test Templates
+
+#### Unit Test Template
+```kotlin
+class ReminderUseCaseTest {
+    private val mockRepository = mockk<ReminderRepository>()
+    private val useCase = CreateReminderUseCase(mockRepository)
+    
+    @Test
+    fun `should create reminder with valid data`() = runTest {
+        // Given
+        val reminder = Reminder(title = "Test", dueDate = Clock.System.now())
+        coEvery { mockRepository.createReminder(any()) } returns Result.success(reminder)
+        
+        // When
+        val result = useCase.execute(reminder)
+        
+        // Then
+        assertTrue(result.isSuccess)
+        coVerify { mockRepository.createReminder(reminder) }
+    }
+}
 ```
 
-### Common Scopes for This Project
-- `reminder`: Reminder-related functionality
-- `parrot`: Parrot/pet system features
-- `ui`: UI components and screens
-- `data`: Data layer and repositories
-- `domain`: Business logic and use cases
-- `di`: Dependency injection setup
-- `config`: Configuration and setup
+#### UI Test Template (Compose Multiplatform)
+```kotlin
+class ReminderScreenTest {
+    @get:Rule
+    val composeTestRule = createComposeRule()
+    
+    @Test
+    fun `should display reminder list`() {
+        // Given
+        val reminders = listOf(
+            Reminder(id = "1", title = "Test 1"),
+            Reminder(id = "2", title = "Test 2")
+        )
+        
+        // When
+        composeTestRule.setContent {
+            ReminderListScreen(reminders = reminders)
+        }
+        
+        // Then
+        composeTestRule.onNodeWithText("Test 1").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Test 2").assertIsDisplayed()
+    }
+}
+```
+
+### Platform-Specific Testing
+- **Android**: Use `androidTest` for instrumented tests
+- **iOS**: Create XCTest cases in Xcode
+- **Common**: Use `commonTest` for shared logic tests
+
+## 🛠️ Code Patterns and Examples
+
+Instead of templates, follow existing patterns in the codebase:
+
+### Following Existing Patterns
+- **Use Cases**: Look at `GetRemindersUseCase` or `CreateReminderUseCase` for patterns
+- **ViewModels**: Follow `ReminderListViewModel` for state management patterns  
+- **Repositories**: Check `ReminderRepositoryImpl` for data layer patterns
+- **UI Components**: Examine existing screens in `presentation/` for Compose patterns
+
+### Pattern Discovery Commands
+```bash
+# Find all use cases
+find . -name "*UseCase.kt" -type f
+
+# Find all ViewModels  
+find . -name "*ViewModel.kt" -type f
+
+# Find all repository implementations
+find . -name "*RepositoryImpl.kt" -type f
+
+# Find UI state classes
+find . -name "*UiState.kt" -type f
+```
+
+### Architecture Guidelines
+1. **Domain Layer**: Pure business logic, no platform dependencies
+2. **Data Layer**: Repository pattern with local/remote data sources
+3. **Presentation Layer**: StateFlow for state management, Compose for UI
+4. **Dependency Injection**: Use Koin modules following existing patterns
+
+## 🎨 UI/UX Development Guidelines
+
+### Compose UI Workflow
+1. **Design Review** - Analyze mockups/screenshots
+2. **Component Planning** - Identify reusable components
+3. **State Management** - Define UI states
+4. **Implementation** - Build with Compose Multiplatform
+5. **Platform Testing** - Verify on Android & iOS
+
+### UI Component Patterns
+- **Existing Screens**: Follow patterns in `presentation/screens/`
+- **Components**: Check `presentation/components/` for reusable elements
+- **State Management**: Use existing `*UiState` and `*ViewModel` patterns
+- **Navigation**: Follow `presentation/navigation/` patterns
+
+### UI Development Commands
+```bash
+# Find existing UI components
+find . -path "*/presentation/components/*.kt" -type f
+
+# Find existing screens
+find . -path "*/presentation/screens/*.kt" -type f
+
+# Find UI state classes
+find . -name "*UiState.kt" -type f
+
+# Find ViewModels
+find . -name "*ViewModel.kt" -type f
+```
+
+## 🚀 Performance Optimization
+
+### Key Strategies
+1. **Lazy Loading** - Use LazyColumn/LazyRow for lists
+2. **State Hoisting** - Minimize recompositions
+3. **Remember** - Cache expensive computations
+4. **Coroutine Scopes** - Proper lifecycle management
+5. **Image Loading** - Use Coil for async image loading
+
+## 🔧 コミット標準
+
+### コミットメッセージの書き方
+```bash
+# フォーマット: <type>(<scope>): <subject>
+git commit -m "feat(reminder): 通知スケジュール機能を追加"
+git commit -m "fix(ui): リマインダーのnull状態を適切に処理"
+git commit -m "docs(readme): ビルド手順を更新"
+git commit -m "refactor(data): 共通リポジトリロジックを抽出"
+```
+
+### プロジェクト固有のスコープ
+- `reminder`: リマインダー関連機能
+- `parrot`: パロット/ペットシステム機能
+- `ui`: UIコンポーネントと画面
+- `data`: データレイヤーとリポジトリ
+- `domain`: ビジネスロジックとユースケース
+- `di`: 依存性注入セットアップ
+- `config`: 設定と構成
+
+### コミットメッセージガイドライン
+- **件名**: 日本語で簡潔に（50文字以内推奨）
+- **本文**: 必要に応じて詳細を日本語で説明
+- **理由**: 「何を」ではなく「なぜ」を重視
+- **技術用語**: 英語のまま使用可能（StateFlow、ViewModel等）
+
+## 🔍 KMM-Specific Exploration Techniques
+
+### Efficient Codebase Exploration
+```bash
+# Find platform-specific implementations
+- Search pattern: "actual" for platform implementations
+- Search pattern: "expect" for shared interfaces
+- Use Glob: "**/*.android.kt" or "**/*.ios.kt"
+
+# Locate shared/platform code
+- commonMain: Shared business logic
+- androidMain: Android-specific code
+- iosMain: iOS-specific code
+```
+
+### Complex Problem Solving with Think Mode
+Use `think` mode for:
+1. **Architecture Decisions** - Choosing between patterns
+2. **Platform Differences** - Handling iOS/Android specifics
+3. **Performance Issues** - Analyzing bottlenecks
+4. **State Management** - Complex UI state flows
+5. **Migration Planning** - Upgrading dependencies
+
+### Parallel Tool Usage
+```
+# Example: Comprehensive feature exploration
+1. Glob("**/*Reminder*.kt") - Find all reminder files
+2. Grep("ReminderRepository") - Find repository usage
+3. Read specific files identified
+4. Use Task for complex multi-file analysis
+```
+
+## 📦 Dependency Management
+
+### Adding New Dependencies
+1. Check compatibility with KMM
+2. Add to appropriate source sets
+3. Verify platform-specific requirements
+4. Update both `build.gradle.kts` files
+
+### Common KMM Dependencies
+```kotlin
+// commonMain dependencies
+implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:version")
+implementation("io.insert-koin:koin-core:version")
+
+// androidMain dependencies
+implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:version")
+
+// iosMain dependencies
+// Platform-specific implementations
+```
+
+## 🆘 Troubleshooting Guide
+
+### Common KMM Issues
+1. **Class not found on iOS**
+   - Check if class is in commonMain
+   - Verify iOS framework generation
+   
+2. **Coroutine crashes on iOS**
+   - Ensure proper dispatcher usage
+   - Check for frozen object issues
+   
+3. **SQLDelight schema issues**
+   - Run `./gradlew generateSqlDelightInterface`
+   - Check schema version migrations
+
+### Debug Commands
+```bash
+# Clean build
+./gradlew clean
+
+# Check dependencies
+./gradlew dependencies
+
+# iOS framework issues
+./gradlew linkDebugFrameworkIosX64
+```
