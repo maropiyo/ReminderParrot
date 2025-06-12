@@ -312,7 +312,7 @@ find . -name "*ViewModel.kt" -type f
 
 ## 🔧 コミット標準
 
-### 日本語コンベンショナルコミット
+### コミットメッセージの書き方
 ```bash
 # フォーマット: <type>(<scope>): <subject>
 git commit -m "feat(reminder): 通知スケジュール機能を追加"
