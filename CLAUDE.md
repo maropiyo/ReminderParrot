@@ -70,6 +70,14 @@ Create `iosApp/Configuration/Config.xcconfig` from template with:
 
 ## 🧠 AI Assistant Guidelines
 
+### 🇯🇵 日本語コミュニケーション
+- **会話**: 常に日本語で対話する
+- **コメント**: コードコメントは日本語で記述
+- **コミットメッセージ**: 日本語でコミットメッセージを作成
+- **プルリクエスト**: タイトルと説明は日本語で記述
+- **ドキュメント**: README、CHANGELOG等も日本語で作成
+- **例外**: 技術的なキーワードや固有名詞は英語のまま使用可能
+
 ### Efficient Professional Workflow
 **Smart Explore-Plan-Code-Test-Commit with quality automation**
 
@@ -302,25 +310,31 @@ find . -name "*ViewModel.kt" -type f
 4. **Coroutine Scopes** - Proper lifecycle management
 5. **Image Loading** - Use Coil for async image loading
 
-## 🔧 Commit Standards
+## 🔧 コミット標準
 
-### Conventional Commits
+### 日本語コンベンショナルコミット
 ```bash
-# Format: <type>(<scope>): <subject>
-git commit -m "feat(reminder): add notification scheduling"
-git commit -m "fix(ui): handle null reminder state correctly"
-git commit -m "docs(readme): update build instructions"
-git commit -m "refactor(data): extract common repository logic"
+# フォーマット: <type>(<scope>): <subject>
+git commit -m "feat(reminder): 通知スケジュール機能を追加"
+git commit -m "fix(ui): リマインダーのnull状態を適切に処理"
+git commit -m "docs(readme): ビルド手順を更新"
+git commit -m "refactor(data): 共通リポジトリロジックを抽出"
 ```
 
-### Common Scopes for This Project
-- `reminder`: Reminder-related functionality
-- `parrot`: Parrot/pet system features
-- `ui`: UI components and screens
-- `data`: Data layer and repositories
-- `domain`: Business logic and use cases
-- `di`: Dependency injection setup
-- `config`: Configuration and setup
+### プロジェクト固有のスコープ
+- `reminder`: リマインダー関連機能
+- `parrot`: パロット/ペットシステム機能
+- `ui`: UIコンポーネントと画面
+- `data`: データレイヤーとリポジトリ
+- `domain`: ビジネスロジックとユースケース
+- `di`: 依存性注入セットアップ
+- `config`: 設定と構成
+
+### コミットメッセージガイドライン
+- **件名**: 日本語で簡潔に（50文字以内推奨）
+- **本文**: 必要に応じて詳細を日本語で説明
+- **理由**: 「何を」ではなく「なぜ」を重視
+- **技術用語**: 英語のまま使用可能（StateFlow、ViewModel等）
 
 ## 🔍 KMM-Specific Exploration Techniques
 
