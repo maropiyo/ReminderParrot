@@ -94,9 +94,6 @@
     ]
   },
   "environment": {
-    "ANDROID_HOME": "/Users/manato/Library/Android/sdk",
-    "JAVA_HOME": "/Applications/Android Studio.app/Contents/jbr/Contents/Home",
-    "GRADLE_USER_HOME": "/Users/manato/.gradle",
     "KOTLIN_MULTIPLATFORM": "true"
   },
   "aliases": {
