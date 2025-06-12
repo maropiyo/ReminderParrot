@@ -76,7 +76,13 @@ Create `iosApp/Configuration/Config.xcconfig` from template with:
 - **コミットメッセージ**: 日本語でコミットメッセージを作成
 - **プルリクエスト**: タイトルと説明は日本語で記述
 - **ドキュメント**: README、CHANGELOG等も日本語で作成
-- **例外**: 技術的なキーワードや固有名詞は英語のまま使用可能
+
+### 日本語化の指針
+- **技術用語**: 英語のまま使用（StateFlow、ViewModel、Conventional Commits等）
+- **無理な翻訳禁止**: 分かりにくくなる場合は英語のまま
+- **意味重視**: 理解しやすさを最優先
+- **自然な日本語**: 直訳ではなく自然な表現を使用
+- **例**: ❌「日本語コンベンショナルコミット」→ ⭕「コミットメッセージの書き方」
 
 ### Efficient Professional Workflow
 **Smart Explore-Plan-Code-Test-Commit with quality automation**
