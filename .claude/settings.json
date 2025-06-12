@@ -1,23 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git push:*)",
+      "Bash(git:*)",
       "Bash(./gradlew:*)",
-      "Bash(git add:*)",
       "Bash(find:*)",
-      "Bash(git commit:*)",
-      "Bash(git checkout:*)",
-      "Bash(git branch:*)",
-      "Bash(git merge:*)",
-      "Bash(git status:*)",
-      "Bash(git diff:*)",
-      "Bash(git log:*)",
-      "Bash(git stash:*)",
-      "Bash(git fetch:*)",
-      "Bash(git pull:*)",
-      "Bash(git rebase:*)",
-      "Bash(git reset:*)",
-      "Bash(git tag:*)",
       "Bash(gh:*)",
       "Bash(adb:*)",
       "Bash(xcrun:*)",
@@ -67,7 +53,8 @@
       "Bash(scp:*)",
       "Bash(rsync:*)",
       "Bash(docker:*)",
-      "Bash(docker-compose:*)"
+      "Bash(docker-compose:*)",
+      "Fetch(domain:*)"
     ],
     "deny": [
       "Bash(rm -rf /:*)",
@@ -144,5 +131,100 @@
     "database": "sqldelight",
     "backend": "supabase",
     "async": "coroutines_flow"
+  },
+  "mcpServers": {
+    "android-emulator": {
+      "command": "node",
+      "args": ["/path/to/mcp-server-android"],
+      "env": {
+        "ANDROID_HOME": "${ANDROID_HOME}",
+        "EMULATOR_NAME": "Pixel_7_API_34"
+      }
+    },
+    "ios-simulator": {
+      "command": "node",
+      "args": ["/path/to/mcp-server-ios"],
+      "env": {
+        "SIMULATOR_NAME": "iPhone 15 Pro"
+      }
+    },
+    "gradle": {
+      "command": "node",
+      "args": ["/path/to/mcp-server-gradle"],
+      "env": {
+        "GRADLE_HOME": "${GRADLE_HOME}"
+      }
+    }
+  },
+  "customCommands": {
+    "/test-reminder": {
+      "description": "Run all reminder-related tests",
+      "command": "./gradlew test --tests '*Reminder*'"
+    },
+    "/build-all": {
+      "description": "Build both Android and iOS apps",
+      "command": "./gradlew :composeApp:assembleDebug && cd iosApp && xcodebuild -scheme iosApp -configuration Debug"
+    },
+    "/clean-build": {
+      "description": "Clean and rebuild the entire project",
+      "command": "./gradlew clean && ./gradlew build"
+    },
+    "/format": {
+      "description": "Format all Kotlin code",
+      "command": "./gradlew ktlintFormat"
+    },
+    "/check": {
+      "description": "Run all quality checks",
+      "command": "./gradlew ktlintCheck && ./gradlew :composeApp:lintDebug && ./gradlew test"
+    },
+    "/find-patterns": {
+      "description": "Find existing code patterns in the project",
+      "prompt": "Search for existing patterns (UseCase, ViewModel, Repository) and show examples to follow for new implementations."
+    },
+    "/setup-feature": {
+      "description": "Setup a complete feature with Clean Architecture",
+      "prompt": "Create a complete feature following Clean Architecture: domain (entity, use case, repository interface), data (repository impl, data sources), and presentation (viewmodel, UI state, composable)."
+    },
+    "/explore-feature": {
+      "description": "Explore all files related to a feature",
+      "prompt": "Use parallel search tools to find all files related to the specified feature across domain, data, and presentation layers."
+    },
+    "/tdd-start": {
+      "description": "Start TDD workflow for a new feature",
+      "prompt": "Begin with writing failing tests for the specified feature, then guide through implementation to make tests pass."
+    }
+  },
+  "tddSettings": {
+    "enabled": true,
+    "testFirst": true,
+    "autoGenerateTestCases": true,
+    "coverageThreshold": 80,
+    "testTemplatesPath": "CLAUDE.md#test-templates"
+  },
+  "patternFollowing": {
+    "patternDiscoveryPath": "CLAUDE.md#code-patterns-and-examples",
+    "autoImportDependencies": true,
+    "followProjectConventions": true,
+    "preferExistingPatterns": true
+  },
+  "qualityGates": {
+    "preCommit": [
+      "./gradlew ktlintCheck",
+      "./gradlew test"
+    ],
+    "preMerge": [
+      "./gradlew ktlintCheck",
+      "./gradlew :composeApp:lintDebug",
+      "./gradlew test",
+      "./gradlew :composeApp:assembleDebug"
+    ]
+  },
+  "workflowOptimization": {
+    "parallelSearches": true,
+    "autoGenerateTests": true,
+    "smartCodeCompletion": true,
+    "iterativeImprovement": true,
+    "thinkModeForComplexTasks": true,
+    "exploreBeforeCoding": true
   }
 }
