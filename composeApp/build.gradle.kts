@@ -51,6 +51,17 @@ kotlin {
             implementation(libs.sql.coroutines.extensions)
         }
 
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.koin.test)
+        }
+
+        androidUnitTest.dependencies {
+            implementation(libs.mockk)
+            implementation(libs.kotlin.test.junit)
+        }
+
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.core.splashscreen)

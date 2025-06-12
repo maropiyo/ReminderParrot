@@ -146,7 +146,77 @@ supabase.key=your_anon_key
 
 ## 🧪 テスト
 
-*テストは現在実装中です*
+### テスト戦略
+Kotlin Multiplatform環境に最適化されたテスト戦略を採用しています：
+
+#### 実装済みテスト
+- **commonTest**: プラットフォーム非依存テスト ✅
+  - `kotlin.test` - KMP公式テストライブラリ
+  - `kotlinx.coroutines.test` - 非同期処理テスト
+  - `koin.test` - 依存性注入テスト
+  - **手動テストダブル** - MockKの代替（KMP互換）
+
+#### テストカバレッジ（現在）
+- ✅ **Domain層**: UseCase（Create/Get/Update）
+- ✅ **Data層**: Repository実装
+- ✅ **Presentation層**: ViewModel
+- 📝 **Android固有テスト**: 未実装
+- 📝 **UI層**: Compose UIテスト未実装
+
+#### テスト実行
+
+```bash
+# 全プラットフォームテスト実行
+./gradlew allTests
+
+# commonTestのみ実行
+./gradlew :composeApp:cleanAllTests :composeApp:allTests
+```
+
+#### 手動テストダブルの採用理由
+MockKはKotlin/Native（iOS）をサポートしていないため、KMP公式推奨の手動テストダブルを採用：
+- 全プラットフォームで安定したテスト実行
+- プラットフォーム非依存の原則に準拠
+- 将来的なプラットフォーム拡張への対応
+
+#### 今後の実装予定
+- Android固有テスト（`androidUnitTest`）
+- Compose UIテスト（`androidInstrumentedTest`）
+- iOS固有テスト（`iosTest`）
+
+## 🚨 CI/CD
+
+### GitHub Actions ワークフロー
+
+このプロジェクトでは、品質保証のために3つのワークフローを使用：
+
+#### 🔍 Lint（コード品質チェック）
+```yaml
+# .github/workflows/lint.yml
+```
+- **KtLint**: Kotlinコードスタイルチェック
+- **Android Lint**: Android固有の問題検出
+- **実行タイミング**: push/PR時に自動実行
+
+#### 🧪 Tests（テスト実行）
+```yaml
+# .github/workflows/test.yml  
+```
+- **共通テスト**: Ubuntu環境でcommonTest実行
+- **iOSテスト**: macOS環境でKotlin/Nativeテスト実行
+- **全プラットフォーム**: Android + iOS同時テスト実行
+
+#### 🏗️ Build（ビルド確認）
+```yaml
+# .github/workflows/build.yml
+```
+- **Androidビルド**: APK生成確認
+- **iOSビルド**: フレームワーク + Xcodeビルド確認
+
+### ワークフロー実行順序
+1. **Lint** → コード品質チェック
+2. **Tests** → 機能テスト実行  
+3. **Build** → 最終ビルド確認
 
 ## 📄 ライセンス
 
