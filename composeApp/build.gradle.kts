@@ -55,7 +55,11 @@ kotlin {
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)
             implementation(libs.koin.test)
+        }
+
+        androidUnitTest.dependencies {
             implementation(libs.mockk)
+            implementation(libs.kotlin.test.junit)
         }
 
         androidMain.dependencies {

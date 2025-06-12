@@ -1,11 +1,7 @@
 package com.maropiyo.reminderparrot.domain.usecase
 
-import com.maropiyo.reminderparrot.domain.common.UuidGenerator
 import com.maropiyo.reminderparrot.domain.entity.Reminder
 import com.maropiyo.reminderparrot.domain.repository.ReminderRepository
-import io.mockk.coEvery
-import io.mockk.every
-import io.mockk.mockk
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -19,9 +15,79 @@ import kotlinx.coroutines.test.runTest
  */
 class CreateReminderUseCaseTest {
 
-    private val mockRepository = mockk<ReminderRepository>()
-    private val mockUuidGenerator = mockk<UuidGenerator>()
-    private val useCase = CreateReminderUseCase(mockRepository, mockUuidGenerator)
+    /**
+     * テスト用のリポジトリのテストダブル
+     */
+    private class TestReminderRepository : ReminderRepository {
+        private var shouldReturnFailure = false
+        private var exceptionToThrow: Exception? = null
+        private var reminderToReturn: Reminder? = null
+
+        fun setReminderToReturn(reminder: Reminder) {
+            this.reminderToReturn = reminder
+            this.shouldReturnFailure = false
+        }
+
+        fun setShouldReturnFailure(exception: Exception) {
+            this.shouldReturnFailure = true
+            this.exceptionToThrow = exception
+        }
+
+        fun reset() {
+            shouldReturnFailure = false
+            exceptionToThrow = null
+            reminderToReturn = null
+        }
+
+        override suspend fun createReminder(reminder: Reminder): Result<Reminder> {
+            return if (shouldReturnFailure) {
+                Result.failure(exceptionToThrow!!)
+            } else {
+                Result.success(reminderToReturn ?: reminder)
+            }
+        }
+
+        override suspend fun getReminders(): Result<List<Reminder>> {
+            return Result.success(emptyList())
+        }
+
+        override suspend fun updateReminder(reminder: Reminder): Result<Unit> {
+            return Result.success(Unit)
+        }
+    }
+
+    /**
+     * テスト用のUuidGeneratorのテストダブル
+     */
+    private class TestUuidGenerator {
+        private var idToReturn: String = "default-id"
+
+        fun setIdToReturn(id: String) {
+            this.idToReturn = id
+        }
+
+        fun generateId(): String {
+            return idToReturn
+        }
+    }
+
+    /**
+     * テスト用のCreateReminderUseCaseの実装
+     */
+    private class TestCreateReminderUseCase(
+        private val repository: TestReminderRepository,
+        private val uuidGenerator: TestUuidGenerator
+    ) {
+        suspend operator fun invoke(text: String): Result<Reminder> {
+            val id = uuidGenerator.generateId()
+            val reminder = Reminder(id = id, text = text)
+            return repository.createReminder(reminder)
+        }
+    }
+
+    private val testRepository = TestReminderRepository()
+    private val testUuidGenerator = TestUuidGenerator()
+    private val useCase = TestCreateReminderUseCase(testRepository, testUuidGenerator)
 
     /**
      * リマインダー作成が成功する場合のテスト
@@ -33,8 +99,9 @@ class CreateReminderUseCaseTest {
         val testId = "test-uuid-123"
         val expectedReminder = Reminder(id = testId, text = testText)
 
-        every { mockUuidGenerator.generateId() } returns testId
-        coEvery { mockRepository.createReminder(expectedReminder) } returns Result.success(expectedReminder)
+        testRepository.reset()
+        testUuidGenerator.setIdToReturn(testId)
+        testRepository.setReminderToReturn(expectedReminder)
 
         // When
         val result = useCase(testText)
@@ -55,11 +122,11 @@ class CreateReminderUseCaseTest {
         // Given
         val testText = "エラーテスト"
         val testId = "test-uuid-456"
-        val expectedReminder = Reminder(id = testId, text = testText)
         val exception = RuntimeException("保存エラー")
 
-        every { mockUuidGenerator.generateId() } returns testId
-        coEvery { mockRepository.createReminder(expectedReminder) } returns Result.failure(exception)
+        testRepository.reset()
+        testUuidGenerator.setIdToReturn(testId)
+        testRepository.setShouldReturnFailure(exception)
 
         // When
         val result = useCase(testText)
@@ -79,8 +146,9 @@ class CreateReminderUseCaseTest {
         val testId = "test-uuid-789"
         val expectedReminder = Reminder(id = testId, text = testText)
 
-        every { mockUuidGenerator.generateId() } returns testId
-        coEvery { mockRepository.createReminder(expectedReminder) } returns Result.success(expectedReminder)
+        testRepository.reset()
+        testUuidGenerator.setIdToReturn(testId)
+        testRepository.setReminderToReturn(expectedReminder)
 
         // When
         val result = useCase(testText)

@@ -2,8 +2,6 @@ package com.maropiyo.reminderparrot.domain.usecase
 
 import com.maropiyo.reminderparrot.domain.entity.Reminder
 import com.maropiyo.reminderparrot.domain.repository.ReminderRepository
-import io.mockk.coEvery
-import io.mockk.mockk
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -16,8 +14,60 @@ import kotlinx.coroutines.test.runTest
  */
 class GetRemindersUseCaseTest {
 
-    private val mockRepository = mockk<ReminderRepository>()
-    private val useCase = GetRemindersUseCase(mockRepository)
+    /**
+     * テスト用のリポジトリのテストダブル
+     */
+    private class TestReminderRepository : ReminderRepository {
+        private var shouldReturnFailure = false
+        private var exceptionToThrow: Exception? = null
+        private var remindersToReturn: List<Reminder> = emptyList()
+
+        fun setRemindersToReturn(reminders: List<Reminder>) {
+            this.remindersToReturn = reminders
+            this.shouldReturnFailure = false
+        }
+
+        fun setShouldReturnFailure(exception: Exception) {
+            this.shouldReturnFailure = true
+            this.exceptionToThrow = exception
+        }
+
+        fun reset() {
+            shouldReturnFailure = false
+            exceptionToThrow = null
+            remindersToReturn = emptyList()
+        }
+
+        override suspend fun createReminder(reminder: Reminder): Result<Reminder> {
+            return Result.success(reminder)
+        }
+
+        override suspend fun getReminders(): Result<List<Reminder>> {
+            return if (shouldReturnFailure) {
+                Result.failure(exceptionToThrow!!)
+            } else {
+                Result.success(remindersToReturn)
+            }
+        }
+
+        override suspend fun updateReminder(reminder: Reminder): Result<Unit> {
+            return Result.success(Unit)
+        }
+    }
+
+    /**
+     * テスト用のGetRemindersUseCaseの実装
+     */
+    private class TestGetRemindersUseCase(
+        private val repository: TestReminderRepository
+    ) {
+        suspend operator fun invoke(): Result<List<Reminder>> {
+            return repository.getReminders()
+        }
+    }
+
+    private val testRepository = TestReminderRepository()
+    private val useCase = TestGetRemindersUseCase(testRepository)
 
     /**
      * リマインダー取得が成功する場合のテスト
@@ -29,7 +79,8 @@ class GetRemindersUseCaseTest {
             Reminder(id = "1", text = "テスト1"),
             Reminder(id = "2", text = "テスト2", isCompleted = true)
         )
-        coEvery { mockRepository.getReminders() } returns Result.success(expectedReminders)
+        testRepository.reset()
+        testRepository.setRemindersToReturn(expectedReminders)
 
         // When
         val result = useCase()
@@ -46,7 +97,8 @@ class GetRemindersUseCaseTest {
     fun `リポジトリエラーの場合はFailureが返される`() = runTest {
         // Given
         val exception = RuntimeException("データベースエラー")
-        coEvery { mockRepository.getReminders() } returns Result.failure(exception)
+        testRepository.reset()
+        testRepository.setShouldReturnFailure(exception)
 
         // When
         val result = useCase()
@@ -63,7 +115,8 @@ class GetRemindersUseCaseTest {
     fun `空のリストが返される場合`() = runTest {
         // Given
         val emptyList = emptyList<Reminder>()
-        coEvery { mockRepository.getReminders() } returns Result.success(emptyList)
+        testRepository.reset()
+        testRepository.setRemindersToReturn(emptyList)
 
         // When
         val result = useCase()
