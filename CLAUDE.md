@@ -67,3 +67,105 @@ Create `iosApp/Configuration/Config.xcconfig` from template with:
 - APP_NAME
 - SUPABASE_URL
 - SUPABASE_KEY
+
+## 🧠 AI Assistant Guidelines
+
+### Efficient Professional Workflow
+**Smart Explore-Plan-Code-Commit with quality automation**
+
+#### 1. EXPLORE Phase
+- **Use tools to quickly scan and understand codebase structure**
+- **Auto-identify dependencies and impact areas**
+- **Present findings concisely with actionable insights**
+
+#### 2. PLAN Phase
+- **Generate multiple implementation approaches when applicable**
+- **Auto-create test scenarios from requirements**
+- **Predict potential issues using pattern analysis**
+- **Provide time estimates for each approach**
+
+#### 3. CODE Phase
+- **Generate code following project conventions**
+- **Auto-complete repetitive patterns**
+- **Real-time error detection and fixes**
+- **Follow Clean Architecture principles**
+
+#### 4. COMMIT Phase
+**Always run quality checks before completing tasks:**
+```bash
+# Kotlin quality checks
+./gradlew ktlintCheck
+./gradlew ktlintFormat
+./gradlew :composeApp:lintDebug
+```
+
+## 🚫 Security and Quality Standards
+
+### NEVER Rules (Non-negotiable)
+- **NEVER: Delete production data without explicit confirmation**
+- **NEVER: Hardcode API keys, passwords, or secrets**
+- **NEVER: Commit code with failing tests or linting errors**
+- **NEVER: Push directly to main/master branch**
+- **NEVER: Skip security reviews for authentication/authorization code**
+
+### YOU MUST Rules (Required Standards)
+- **YOU MUST: Write tests for new features and bug fixes**
+- **YOU MUST: Run quality checks before marking tasks complete**
+- **YOU MUST: Follow semantic versioning for releases**
+- **YOU MUST: Document breaking changes**
+- **YOU MUST: Use feature branches for all development**
+- **YOU MUST: Add comprehensive KDoc comments to public APIs**
+
+## 📚 Development Standards
+
+### Code Quality Requirements
+- **Generate comprehensive KDoc documentation for every public function**
+- **Add clear comments explaining business logic**
+- **Follow Kotlin conventions and Clean Architecture patterns**
+- **Auto-fix all linting/formatting issues before completion**
+
+### KDoc Template (Kotlin)
+```kotlin
+/**
+ * Brief description of what the function does
+ *
+ * Detailed explanation of the business logic and purpose
+ * 
+ * @param paramName Description of what this parameter represents
+ * @return Description of what the function returns and why
+ * @throws ExceptionType When this error occurs
+ * @sample com.example.SampleClass.sampleUsage
+ * @since 1.0.0
+ */
+fun functionName(paramName: ParamType): ReturnType {
+    // Implementation
+}
+```
+
+### Best Practices
+- **Coroutines**: Use structured concurrency with proper scopes
+- **Flow**: Prefer Flow over LiveData for reactive streams  
+- **Dependency Injection**: Use Koin following project patterns
+- **Error Handling**: Use sealed classes for state management
+- **Testing**: Write unit tests using JUnit and MockK
+- **Architecture**: Follow Clean Architecture with clear layer separation
+
+## 🔧 Commit Standards
+
+### Conventional Commits
+```bash
+# Format: <type>(<scope>): <subject>
+git commit -m "feat(reminder): add notification scheduling"
+git commit -m "fix(ui): handle null reminder state correctly"
+git commit -m "docs(readme): update build instructions"
+git commit -m "refactor(data): extract common repository logic"
+```
+
+### Common Scopes for This Project
+- `reminder`: Reminder-related functionality
+- `parrot`: Parrot/pet system features
+- `ui`: UI components and screens
+- `data`: Data layer and repositories
+- `domain`: Business logic and use cases
+- `di`: Dependency injection setup
+- `config`: Configuration and setup
