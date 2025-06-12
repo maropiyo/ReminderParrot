@@ -2,6 +2,7 @@ package com.maropiyo.reminderparrot.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.maropiyo.reminderparrot.domain.entity.Reminder
 import com.maropiyo.reminderparrot.domain.usecase.CreateReminderUseCase
 import com.maropiyo.reminderparrot.domain.usecase.GetRemindersUseCase
 import com.maropiyo.reminderparrot.domain.usecase.UpdateReminderUseCase
@@ -30,6 +31,16 @@ class ReminderListViewModel(
     // 外部からはStateFlowとして公開する
     val state: StateFlow<ReminderListState> = _state.asStateFlow()
 
+    /**
+     * リマインダーリストをソートする（未完了→完了の順）
+     *
+     * @param reminders ソート対象のリマインダーリスト
+     * @return ソート済みリマインダーリスト
+     */
+    private fun sortReminders(reminders: List<Reminder>): List<Reminder> {
+        return reminders.sortedBy { it.isCompleted }
+    }
+
     init {
         // 初期化時にリマインダーを取得
         loadReminders()
@@ -47,10 +58,8 @@ class ReminderListViewModel(
                     // リマインダーの作成に成功した場合、リマインダーを更新する
                     _state.update {
                         val updatedReminders = it.reminders + reminder
-                        // 未完了→完了の順にソート
-                        val sortedReminders = updatedReminders.sortedBy { r -> r.isCompleted }
                         it.copy(
-                            reminders = sortedReminders,
+                            reminders = sortReminders(updatedReminders),
                             isLoading = false,
                             error = null
                         )
@@ -78,9 +87,7 @@ class ReminderListViewModel(
                         val updatedReminders = currentState.reminders.map {
                             if (it.id == reminderId) updatedReminder else it
                         }
-                        // 未完了→完了の順にソート
-                        val sortedReminders = updatedReminders.sortedBy { it.isCompleted }
-                        currentState.copy(reminders = sortedReminders)
+                        currentState.copy(reminders = sortReminders(updatedReminders))
                     }
                 }
                 .onFailure { exception ->
@@ -100,9 +107,7 @@ class ReminderListViewModel(
 
             getRemindersUseCase()
                 .onSuccess { reminders ->
-                    // 未完了→完了の順にソート
-                    val sortedReminders = reminders.sortedBy { it.isCompleted }
-                    _state.update { it.copy(reminders = sortedReminders, isLoading = false) }
+                    _state.update { it.copy(reminders = sortReminders(reminders), isLoading = false) }
                 }.onFailure { exception ->
                     _state.update { it.copy(error = exception.message, isLoading = false) }
                 }
