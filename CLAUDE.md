@@ -18,6 +18,11 @@ ReminderParrot is a Kotlin Multiplatform Mobile (KMM) application for managing r
 - **iOS framework**: `./gradlew :composeApp:compileKotlinIosX64`
 - **iOS app**: Open `iosApp/iosApp.xcodeproj` in Xcode and build
 
+### Testing
+- **All tests**: `./gradlew allTests`
+- **Common tests only**: `./gradlew :composeApp:cleanAllTests :composeApp:allTests`
+- **Android unit tests**: `./gradlew :composeApp:testDebugUnitTest`
+
 ## Architecture
 
 The project follows Clean Architecture with three distinct layers:
@@ -121,7 +126,7 @@ gh pr create --title "feat: description" --body "details"
 #### 3. TEST Phase (TDD Workflow)
 - **Write tests BEFORE implementation**
 - **Generate test cases covering edge cases and happy paths**
-- **Use MockK for mocking dependencies**
+- **Use manual test doubles (fake implementations) for KMP compatibility**
 - **Ensure platform-specific test coverage**
 
 #### 4. CODE Phase
@@ -141,7 +146,7 @@ gh pr create --title "feat: description" --body "details"
 ./gradlew :composeApp:lintDebug
 
 # Run tests
-./gradlew test
+./gradlew allTests
 ./gradlew :composeApp:testDebugUnitTest
 ```
 
@@ -193,7 +198,7 @@ fun functionName(paramName: String): String {
 - **Flow**: Prefer Flow over LiveData for reactive streams  
 - **Dependency Injection**: Use Koin following project patterns
 - **Error Handling**: Use sealed classes for state management
-- **Testing**: Write unit tests using JUnit and MockK
+- **Testing**: Write unit tests using kotlin.test with manual test doubles (not MockK for KMP compatibility)
 - **Architecture**: Follow Clean Architecture with clear layer separation
 - **Exploration**: Use multiple search tools in parallel for efficiency
 - **Iteration**: Improve solutions through multiple Claude interactions
@@ -212,21 +217,32 @@ fun functionName(paramName: String): String {
 #### Unit Test Template
 ```kotlin
 class ReminderUseCaseTest {
-    private val mockRepository = mockk<ReminderRepository>()
-    private val useCase = CreateReminderUseCase(mockRepository)
+    private val fakeRepository = FakeReminderRepository()
+    private val useCase = CreateReminderUseCase(fakeRepository)
     
     @Test
     fun `should create reminder with valid data`() = runTest {
         // Given
         val reminder = Reminder(title = "Test", dueDate = Clock.System.now())
-        coEvery { mockRepository.createReminder(any()) } returns Result.success(reminder)
+        fakeRepository.createReminderResult = Result.success(reminder)
         
         // When
         val result = useCase.execute(reminder)
         
         // Then
         assertTrue(result.isSuccess)
-        coVerify { mockRepository.createReminder(reminder) }
+        assertEquals(reminder, fakeRepository.lastCreatedReminder)
+    }
+    
+    private class FakeReminderRepository : ReminderRepository {
+        var createReminderResult: Result<Reminder> = Result.failure(Exception())
+        var lastCreatedReminder: Reminder? = null
+        
+        override suspend fun createReminder(reminder: Reminder): Result<Reminder> {
+            lastCreatedReminder = reminder
+            return createReminderResult
+        }
+        // Other methods...
     }
 }
 ```
