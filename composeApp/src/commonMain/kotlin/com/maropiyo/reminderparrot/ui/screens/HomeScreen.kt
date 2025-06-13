@@ -11,21 +11,28 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.maropiyo.reminderparrot.presentation.viewmodel.ParrotViewModel
 import com.maropiyo.reminderparrot.presentation.viewmodel.ReminderListViewModel
-import com.maropiyo.reminderparrot.ui.components.home.ParrotSection
-import com.maropiyo.reminderparrot.ui.components.home.ReminderSection
+import com.maropiyo.reminderparrot.ui.components.home.ParrotContent
+import com.maropiyo.reminderparrot.ui.components.home.ReminderContent
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
  * ホーム画面
- * Parrotセクションとリマインダーセクションを含む統合画面
+ * Parrotコンテンツとリマインダーコンテンツを含む統合画面
  *
+ * @param parrotViewModel インコのViewModel
  * @param reminderListViewModel リマインダーリストのViewModel
  * @param modifier 修飾子
  */
 @Composable
-fun HomeScreen(reminderListViewModel: ReminderListViewModel = koinViewModel(), modifier: Modifier = Modifier) {
+fun HomeScreen(
+    parrotViewModel: ParrotViewModel = koinViewModel(),
+    reminderListViewModel: ReminderListViewModel = koinViewModel(),
+    modifier: Modifier = Modifier
+) {
     // ViewModelの状態を取得
+    val parrotState by parrotViewModel.state.collectAsState()
     val state by reminderListViewModel.state.collectAsState()
 
     Column(
@@ -35,13 +42,14 @@ fun HomeScreen(reminderListViewModel: ReminderListViewModel = koinViewModel(), m
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Parrotセクション（reminko.pngを表示）
-        ParrotSection(
+        // Parrotコンテンツ
+        ParrotContent(
+            state = parrotState,
             modifier = Modifier.fillMaxWidth()
         )
 
-        // リマインダーセクション
-        ReminderSection(
+        // リマインダーコンテンツ
+        ReminderContent(
             state = state,
             onToggleCompletion = reminderListViewModel::toggleReminderCompletion,
             onCreateReminder = { text ->
