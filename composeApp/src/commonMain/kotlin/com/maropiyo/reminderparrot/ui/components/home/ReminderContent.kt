@@ -48,6 +48,7 @@ import com.maropiyo.reminderparrot.ui.components.state.ErrorState
 import com.maropiyo.reminderparrot.ui.components.state.LoadingState
 import com.maropiyo.reminderparrot.ui.theme.ParrotYellow
 import com.maropiyo.reminderparrot.ui.theme.Secondary
+import com.maropiyo.reminderparrot.ui.theme.Shapes
 import com.maropiyo.reminderparrot.ui.theme.White
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
@@ -207,7 +208,10 @@ private fun ReminderCard(reminder: Reminder, onToggleCompletion: () -> Unit, mod
         colors = CardDefaults.cardColors(
             containerColor = White
         ),
-        shape = MaterialTheme.shapes.medium
+        shape = Shapes.extraLarge,
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 4.dp
+        )
     ) {
         Row(
             modifier = Modifier
