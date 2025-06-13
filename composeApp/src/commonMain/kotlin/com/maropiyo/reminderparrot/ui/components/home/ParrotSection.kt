@@ -23,9 +23,9 @@ import reminderparrot.composeapp.generated.resources.reminko
 fun ParrotSection(modifier: Modifier = Modifier) {
     Column(
         modifier =
-            modifier
-                .fillMaxWidth()
-                .padding(24.dp),
+        modifier
+            .fillMaxWidth()
+            .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Reminkoの画像
