@@ -14,5 +14,7 @@ val Shapes =
         // コンテナの角丸
         medium = RoundedCornerShape(12.dp),
         // モーダルシートなどの大きい要素の角丸
-        large = RoundedCornerShape(16.dp)
+        large = RoundedCornerShape(16.dp),
+        // 特大サイズの角丸（ボトムシートなど）
+        extraLarge = RoundedCornerShape(28.dp)
     )

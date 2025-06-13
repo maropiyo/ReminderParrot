@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -31,6 +30,7 @@ import com.maropiyo.reminderparrot.presentation.state.ParrotState
 import com.maropiyo.reminderparrot.ui.theme.Background
 import com.maropiyo.reminderparrot.ui.theme.Gray
 import com.maropiyo.reminderparrot.ui.theme.Secondary
+import com.maropiyo.reminderparrot.ui.theme.Shapes
 import com.maropiyo.reminderparrot.ui.theme.White
 import org.jetbrains.compose.resources.painterResource
 import reminderparrot.composeapp.generated.resources.Res
@@ -43,26 +43,26 @@ import reminderparrot.composeapp.generated.resources.reminko
  * @param modifier 修飾子
  */
 @Composable
-fun ParrotContent(
-    state: ParrotState,
-    modifier: Modifier = Modifier
-) {
+fun ParrotContent(state: ParrotState, modifier: Modifier = Modifier) {
     Card(
         modifier =
-            modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 8.dp),
-        shape = RoundedCornerShape(20.dp),
+        modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 8.dp),
+        shape = Shapes.extraLarge,
         colors =
-            CardDefaults.cardColors(
-                containerColor = White
-            )
+        CardDefaults.cardColors(
+            containerColor = White
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 4.dp
+        )
     ) {
         Row(
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
+            Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(20.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -74,10 +74,10 @@ fun ParrotContent(
                 Text(
                     text = "レベル${state.parrot.level}",
                     style =
-                        MaterialTheme.typography.labelMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp
-                        ),
+                    MaterialTheme.typography.labelMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    ),
                     color = Secondary
                 )
                 // インコと丸型経験値インジケータ
@@ -116,10 +116,10 @@ fun ParrotContent(
                                 sweepAngle = 360f * progress,
                                 useCenter = false,
                                 topLeft =
-                                    Offset(
-                                        center.x - radius,
-                                        center.y - radius
-                                    ),
+                                Offset(
+                                    center.x - radius,
+                                    center.y - radius
+                                ),
                                 size = Size(radius * 2, radius * 2),
                                 style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
                             )
@@ -145,11 +145,11 @@ fun ParrotContent(
                 Text(
                     text = "できること",
                     style =
-                        MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp
-                        ),
-                    color = Secondary,
+                    MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    ),
+                    color = Secondary
                 )
 
                 // ステータス表示（縦並び）
@@ -159,11 +159,11 @@ fun ParrotContent(
                     // おぼえられることば
                     Row(
                         modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(14.dp))
-                                .background(MaterialTheme.colorScheme.background)
-                                .padding(horizontal = 12.dp, vertical = 10.dp),
+                        Modifier
+                            .fillMaxWidth()
+                            .clip(Shapes.large)
+                            .background(MaterialTheme.colorScheme.background)
+                            .padding(horizontal = 12.dp, vertical = 10.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -176,9 +176,9 @@ fun ParrotContent(
                         Text(
                             text = "${state.parrot.memorizedWords}こ",
                             style =
-                                MaterialTheme.typography.titleMedium.copy(
-                                    fontWeight = FontWeight.Bold
-                                ),
+                            MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.Bold
+                            ),
                             color = Secondary,
                             fontSize = 16.sp
                         )
@@ -187,11 +187,11 @@ fun ParrotContent(
                     // きおくできるじかん
                     Row(
                         modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(14.dp))
-                                .background(MaterialTheme.colorScheme.background)
-                                .padding(horizontal = 12.dp, vertical = 10.dp),
+                        Modifier
+                            .fillMaxWidth()
+                            .clip(Shapes.large)
+                            .background(MaterialTheme.colorScheme.background)
+                            .padding(horizontal = 12.dp, vertical = 10.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -204,9 +204,9 @@ fun ParrotContent(
                         Text(
                             text = "${state.parrot.memoryTimeHours}じかん",
                             style =
-                                MaterialTheme.typography.titleMedium.copy(
-                                    fontWeight = FontWeight.Bold
-                                ),
+                            MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.Bold
+                            ),
                             color = Secondary,
                             fontSize = 16.sp
                         )
