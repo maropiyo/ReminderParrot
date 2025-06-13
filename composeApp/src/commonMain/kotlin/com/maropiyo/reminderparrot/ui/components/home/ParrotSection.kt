@@ -16,16 +16,16 @@ import reminderparrot.composeapp.generated.resources.reminko
 
 /**
  * Parrotセクション
- * ホーム画面上部にReminkoのキャラクターを表示
  *
  * @param modifier 修飾子
  */
 @Composable
 fun ParrotSection(modifier: Modifier = Modifier) {
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(24.dp),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Reminkoの画像

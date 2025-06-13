@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
- * リマインダー一覧画面のビューモデル
+ * リマインダー一覧のビューモデル
  *
  * @property getRemindersUseCase リマインダー取得ユースケース
  * @property createReminderUseCase リマインダー作成ユースケース
@@ -25,10 +25,7 @@ class ReminderListViewModel(
     private val createReminderUseCase: CreateReminderUseCase,
     private val updateReminderUseCase: UpdateReminderUseCase
 ) : ViewModel() {
-    // リマインダーの状態を保持するStateFlow
     private val _state = MutableStateFlow(ReminderListState())
-
-    // 外部からはStateFlowとして公開する
     val state: StateFlow<ReminderListState> = _state.asStateFlow()
 
     /**
@@ -37,9 +34,7 @@ class ReminderListViewModel(
      * @param reminders ソート対象のリマインダーリスト
      * @return ソート済みリマインダーリスト
      */
-    private fun sortReminders(reminders: List<Reminder>): List<Reminder> {
-        return reminders.sortedBy { it.isCompleted }
-    }
+    private fun sortReminders(reminders: List<Reminder>): List<Reminder> = reminders.sortedBy { it.isCompleted }
 
     init {
         // 初期化時にリマインダーを取得
@@ -84,13 +79,13 @@ class ReminderListViewModel(
             updateReminderUseCase(updatedReminder)
                 .onSuccess {
                     _state.update { currentState ->
-                        val updatedReminders = currentState.reminders.map {
-                            if (it.id == reminderId) updatedReminder else it
-                        }
+                        val updatedReminders =
+                            currentState.reminders.map {
+                                if (it.id == reminderId) updatedReminder else it
+                            }
                         currentState.copy(reminders = sortReminders(updatedReminders))
                     }
-                }
-                .onFailure { exception ->
+                }.onFailure { exception ->
                     _state.update { it.copy(error = exception.message) }
                 }
         }
