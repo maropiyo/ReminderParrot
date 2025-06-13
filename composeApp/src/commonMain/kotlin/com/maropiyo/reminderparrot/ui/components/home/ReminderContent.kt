@@ -175,7 +175,7 @@ private fun ReminderItems(
             ErrorState(state.error, modifier = modifier)
         }
         state.reminders.isEmpty() -> {
-            EmptyState("リマインダーがありません", modifier = modifier)
+            EmptyState("まだおぼえることはないみたいね", modifier = modifier)
         }
         else -> {
             LazyColumn(
