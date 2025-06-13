@@ -10,6 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import com.maropiyo.reminderparrot.presentation.state.ParrotState
 import org.jetbrains.compose.resources.painterResource
 import reminderparrot.composeapp.generated.resources.Res
 import reminderparrot.composeapp.generated.resources.reminko
@@ -21,7 +22,10 @@ import reminderparrot.composeapp.generated.resources.reminko
  * @param modifier 修飾子
  */
 @Composable
-fun ParrotContent(modifier: Modifier = Modifier) {
+fun ParrotContent(
+    state: ParrotState,
+    modifier: Modifier = Modifier
+) {
     Column(
         modifier =
             modifier
