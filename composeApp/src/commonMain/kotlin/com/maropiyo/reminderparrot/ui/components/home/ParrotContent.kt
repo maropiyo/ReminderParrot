@@ -24,12 +24,11 @@ import reminderparrot.composeapp.generated.resources.reminko
 fun ParrotContent(modifier: Modifier = Modifier) {
     Column(
         modifier =
-        modifier
-            .fillMaxWidth()
-            .padding(24.dp),
+            modifier
+                .fillMaxWidth()
+                .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Reminkoの画像
         Image(
             painter = painterResource(Res.drawable.reminko),
             contentDescription = "Reminko Parrot",
