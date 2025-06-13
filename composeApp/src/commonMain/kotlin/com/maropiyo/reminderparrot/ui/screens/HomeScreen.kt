@@ -13,12 +13,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.maropiyo.reminderparrot.presentation.viewmodel.ReminderListViewModel
 import com.maropiyo.reminderparrot.ui.components.home.ParrotSection
-import com.maropiyo.reminderparrot.ui.components.home.ReminderSection
+import com.maropiyo.reminderparrot.ui.components.home.ReminderContent
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
  * ホーム画面
- * Parrotセクションとリマインダーセクションを含む統合画面
+ * Parrotセクションとリマインダーコンテンツを含む統合画面
  *
  * @param reminderListViewModel リマインダーリストのViewModel
  * @param modifier 修飾子
@@ -40,8 +40,8 @@ fun HomeScreen(reminderListViewModel: ReminderListViewModel = koinViewModel(), m
             modifier = Modifier.fillMaxWidth()
         )
 
-        // リマインダーセクション
-        ReminderSection(
+        // リマインダーコンテンツ
+        ReminderContent(
             state = state,
             onToggleCompletion = reminderListViewModel::toggleReminderCompletion,
             onCreateReminder = { text ->
