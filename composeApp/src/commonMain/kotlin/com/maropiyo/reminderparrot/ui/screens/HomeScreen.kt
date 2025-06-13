@@ -37,9 +37,9 @@ fun HomeScreen(
 
     Column(
         modifier =
-            modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState()),
+        modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // Parrotコンテンツ
@@ -56,9 +56,9 @@ fun HomeScreen(
                 reminderListViewModel.createReminder(text)
             },
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
+            Modifier
+                .fillMaxWidth()
+                .weight(1f)
         )
     }
 }
