@@ -24,18 +24,15 @@ import org.koin.compose.viewmodel.koinViewModel
  * @param modifier 修飾子
  */
 @Composable
-fun HomeScreen(
-    reminderListViewModel: ReminderListViewModel = koinViewModel(),
-    modifier: Modifier = Modifier
-) {
+fun HomeScreen(reminderListViewModel: ReminderListViewModel = koinViewModel(), modifier: Modifier = Modifier) {
     // ViewModelの状態を取得
     val state by reminderListViewModel.state.collectAsState()
 
     Column(
         modifier =
-            modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState()),
+        modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // Parrotセクション（reminko.pngを表示）
@@ -51,9 +48,9 @@ fun HomeScreen(
                 reminderListViewModel.createReminder(text)
             },
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
+            Modifier
+                .fillMaxWidth()
+                .weight(1f)
         )
     }
 }
