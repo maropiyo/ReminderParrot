@@ -20,9 +20,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import com.maropiyo.reminderparrot.presentation.state.ReminderListState
-import com.maropiyo.reminderparrot.ui.components.common.EmptyState
-import com.maropiyo.reminderparrot.ui.components.common.ErrorState
-import com.maropiyo.reminderparrot.ui.components.common.LoadingState
+import com.maropiyo.reminderparrot.ui.components.state.EmptyState
+import com.maropiyo.reminderparrot.ui.components.state.ErrorState
+import com.maropiyo.reminderparrot.ui.components.state.LoadingState
 import com.maropiyo.reminderparrot.ui.theme.ParrotYellow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
@@ -70,9 +70,10 @@ fun ReminderSection(
                 reminderText = ""
                 isShowBottomSheet = true
             },
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp)
+            modifier =
+                Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp)
         )
 
         // リマインダー追加用ボトムシート
@@ -103,7 +104,10 @@ fun ReminderSection(
  * リマインダー用フローティングアクションボタン
  */
 @Composable
-private fun ReminderFloatingActionButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+private fun ReminderFloatingActionButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     FloatingActionButton(
         onClick = onClick,
         containerColor = ParrotYellow,

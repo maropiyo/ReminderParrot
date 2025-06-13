@@ -11,7 +11,10 @@ import androidx.compose.ui.Modifier
  * エラーメッセージを表示するコンポーネント
  */
 @Composable
-fun ErrorState(errorMessage: String, modifier: Modifier = Modifier) {
+fun ErrorState(
+    errorMessage: String,
+    modifier: Modifier = Modifier
+) {
     Box(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
