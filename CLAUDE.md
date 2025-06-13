@@ -70,6 +70,22 @@ Create `iosApp/Configuration/Config.xcconfig` from template with:
 
 ## 🧠 AI Assistant Guidelines
 
+### 🔄 Git Workflow Requirements
+- **NEVER commit directly to main branch**
+- **ALWAYS create feature branches** for any changes
+- **Create pull requests** for all changes
+- **User reviews and merges** all pull requests
+- **Feature branch naming**: `feature/description-of-change`
+
+Example workflow:
+```bash
+git checkout -b feature/new-feature
+# Make changes and commits
+git push origin feature/new-feature
+gh pr create --title "feat: description" --body "details"
+# User reviews and merges the PR
+```
+
 ### 🇯🇵 日本語コミュニケーション
 - **会話**: 常に日本語で対話する
 - **コメント**: コードコメントは日本語で記述
