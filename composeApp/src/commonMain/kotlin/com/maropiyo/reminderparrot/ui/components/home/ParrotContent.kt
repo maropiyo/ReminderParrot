@@ -15,12 +15,13 @@ import reminderparrot.composeapp.generated.resources.Res
 import reminderparrot.composeapp.generated.resources.reminko
 
 /**
- * Parrotセクション
+ * インココンテンツ
+ * ホーム画面内のインコ関連コンテンツを管理するコンポーネント
  *
  * @param modifier 修飾子
  */
 @Composable
-fun ParrotSection(modifier: Modifier = Modifier) {
+fun ParrotContent(modifier: Modifier = Modifier) {
     Column(
         modifier =
         modifier

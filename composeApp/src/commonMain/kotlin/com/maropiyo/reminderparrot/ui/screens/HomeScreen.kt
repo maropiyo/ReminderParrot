@@ -12,13 +12,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.maropiyo.reminderparrot.presentation.viewmodel.ReminderListViewModel
-import com.maropiyo.reminderparrot.ui.components.home.ParrotSection
+import com.maropiyo.reminderparrot.ui.components.home.ParrotContent
 import com.maropiyo.reminderparrot.ui.components.home.ReminderContent
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
  * ホーム画面
- * Parrotセクションとリマインダーコンテンツを含む統合画面
+ * Parrotコンテンツとリマインダーコンテンツを含む統合画面
  *
  * @param reminderListViewModel リマインダーリストのViewModel
  * @param modifier 修飾子
@@ -35,8 +35,8 @@ fun HomeScreen(reminderListViewModel: ReminderListViewModel = koinViewModel(), m
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Parrotセクション（reminko.pngを表示）
-        ParrotSection(
+        // Parrotコンテンツ（reminko.pngを表示）
+        ParrotContent(
             modifier = Modifier.fillMaxWidth()
         )
 
