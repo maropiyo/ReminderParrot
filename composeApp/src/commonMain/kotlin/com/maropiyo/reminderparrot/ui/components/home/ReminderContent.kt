@@ -110,9 +110,9 @@ fun ReminderContent(
                 isShowBottomSheet = true
             },
             modifier =
-            Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp)
+                Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp)
         )
 
         // リマインダー追加用ボトムシート
@@ -143,7 +143,10 @@ fun ReminderContent(
  * リマインダー用フローティングアクションボタン
  */
 @Composable
-private fun ReminderFloatingActionButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+private fun ReminderFloatingActionButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     FloatingActionButton(
         onClick = onClick,
         containerColor = ParrotYellow,
@@ -176,14 +179,15 @@ private fun ReminderItems(
             ErrorState(state.error, modifier = modifier)
         }
         state.reminders.isEmpty() -> {
-            EmptyState("まだおぼえることはないみたいね", modifier = modifier)
+            EmptyState("なにもおぼえていないよ", modifier = modifier)
         }
         else -> {
             LazyColumn(
-                modifier = modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                modifier =
+                    modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background)
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
                 items(state.reminders) { reminder ->
                     ReminderCard(
@@ -202,21 +206,28 @@ private fun ReminderItems(
  * 個々のリマインダーを表示するカードコンポーネント
  */
 @Composable
-private fun ReminderCard(reminder: Reminder, onToggleCompletion: () -> Unit, modifier: Modifier = Modifier) {
+private fun ReminderCard(
+    reminder: Reminder,
+    onToggleCompletion: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = White
-        ),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = White
+            ),
         shape = Shapes.extraLarge,
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 4.dp
-        )
+        elevation =
+            CardDefaults.cardElevation(
+                defaultElevation = 4.dp
+            )
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -244,25 +255,28 @@ private fun ReminderCard(reminder: Reminder, onToggleCompletion: () -> Unit, mod
  * 円形のチェックボックス
  */
 @Composable
-private fun CircularCheckbox(checked: Boolean, onCheckedChange: (Boolean) -> Unit, modifier: Modifier = Modifier) {
+private fun CircularCheckbox(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
     val scale by animateFloatAsState(
         targetValue = if (checked) 0.9f else 0f,
         label = "checkmark_scale"
     )
 
     Box(
-        modifier = modifier
-            .clip(CircleShape)
-            .border(
-                width = 2.dp,
-                color = Secondary,
-                shape = CircleShape
-            )
-            .background(
-                color = if (checked) Secondary else White,
-                shape = CircleShape
-            )
-            .clickable { onCheckedChange(!checked) },
+        modifier =
+            modifier
+                .clip(CircleShape)
+                .border(
+                    width = 2.dp,
+                    color = Secondary,
+                    shape = CircleShape
+                ).background(
+                    color = if (checked) Secondary else White,
+                    shape = CircleShape
+                ).clickable { onCheckedChange(!checked) },
         contentAlignment = Alignment.Center
     ) {
         if (checked) {
@@ -270,9 +284,10 @@ private fun CircularCheckbox(checked: Boolean, onCheckedChange: (Boolean) -> Uni
                 imageVector = Icons.Default.Check,
                 contentDescription = "Checked",
                 tint = White,
-                modifier = Modifier
-                    .size(20.dp)
-                    .scale(scale)
+                modifier =
+                    Modifier
+                        .size(20.dp)
+                        .scale(scale)
             )
         }
     }
