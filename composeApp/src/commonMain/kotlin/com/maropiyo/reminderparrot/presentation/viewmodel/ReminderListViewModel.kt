@@ -3,6 +3,7 @@ package com.maropiyo.reminderparrot.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.maropiyo.reminderparrot.domain.entity.Reminder
+import com.maropiyo.reminderparrot.domain.usecase.AddParrotExperienceUseCase
 import com.maropiyo.reminderparrot.domain.usecase.CreateReminderUseCase
 import com.maropiyo.reminderparrot.domain.usecase.GetRemindersUseCase
 import com.maropiyo.reminderparrot.domain.usecase.UpdateReminderUseCase
@@ -19,11 +20,13 @@ import kotlinx.coroutines.launch
  * @property getRemindersUseCase リマインダー取得ユースケース
  * @property createReminderUseCase リマインダー作成ユースケース
  * @property updateReminderUseCase リマインダー更新ユースケース
+ * @property addParrotExperienceUseCase インコの経験値追加ユースケース
  */
 class ReminderListViewModel(
     private val getRemindersUseCase: GetRemindersUseCase,
     private val createReminderUseCase: CreateReminderUseCase,
-    private val updateReminderUseCase: UpdateReminderUseCase
+    private val updateReminderUseCase: UpdateReminderUseCase,
+    private val addParrotExperienceUseCase: AddParrotExperienceUseCase
 ) : ViewModel() {
     private val _state = MutableStateFlow(ReminderListState())
     val state: StateFlow<ReminderListState> = _state.asStateFlow()
@@ -59,6 +62,8 @@ class ReminderListViewModel(
                             error = null
                         )
                     }
+                    // インコの経験値を追加（+1）
+                    addParrotExperienceUseCase()
                 }.onFailure { exception ->
                     // リマインダーの作成に失敗した場合、エラーメッセージを表示する
                     _state.update { it.copy(error = exception.message) }

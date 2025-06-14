@@ -28,7 +28,7 @@ class ParrotViewModel(
     /**
      * インコの状態を読み込む
      */
-    private fun loadParrot() {
+    fun loadParrot() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
 
