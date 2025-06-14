@@ -242,7 +242,7 @@ fun ParrotContent(
                         )
                     }
 
-                    // きおくできるじかん
+                    // きおくじかん
                     Row(
                         modifier =
                             Modifier
@@ -254,7 +254,7 @@ fun ParrotContent(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "きおくできるじかん",
+                            text = "きおくじかん",
                             style = MaterialTheme.typography.bodyMedium,
                             color = Gray,
                             fontSize = 13.sp
