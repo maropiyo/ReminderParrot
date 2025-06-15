@@ -90,6 +90,11 @@ class ReminderListViewModel(
                             }
                         currentState.copy(reminders = sortReminders(updatedReminders))
                     }
+
+                    // リマインダーが完了状態になった場合のみ経験値を追加
+                    if (updatedReminder.isCompleted) {
+                        addParrotExperienceUseCase()
+                    }
                 }.onFailure { exception ->
                     _state.update { it.copy(error = exception.message) }
                 }

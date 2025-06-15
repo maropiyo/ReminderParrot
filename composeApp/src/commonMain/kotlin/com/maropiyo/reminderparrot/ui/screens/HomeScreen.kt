@@ -74,7 +74,11 @@ fun HomeScreen(
             // リマインダーコンテンツ
             ReminderContent(
                 state = state,
-                onToggleCompletion = reminderListViewModel::toggleReminderCompletion,
+                onToggleCompletion = { reminderId ->
+                    reminderListViewModel.toggleReminderCompletion(reminderId)
+                    // リマインダー完了後にインコの状態を再読み込み
+                    parrotViewModel.loadParrot()
+                },
                 onCreateReminder = { text ->
                     reminderListViewModel.createReminder(text)
                     // リマインダー作成後にインコの状態を再読み込み
