@@ -42,6 +42,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.maropiyo.reminderparrot.domain.entity.Reminder
+import com.maropiyo.reminderparrot.presentation.state.ParrotState
 import com.maropiyo.reminderparrot.presentation.state.ReminderListState
 import com.maropiyo.reminderparrot.ui.components.state.EmptyState
 import com.maropiyo.reminderparrot.ui.components.state.ErrorState
@@ -60,6 +61,7 @@ import reminderparrot.composeapp.generated.resources.reminko_face
  * ホーム画面内のリマインダー関連機能を管理するコンポーネント
  *
  * @param state リマインダーリストの状態
+ * @param parrotState インコの状態
  * @param onToggleCompletion リマインダー完了切り替えコールバック
  * @param onCreateReminder 新しいリマインダー作成コールバック
  * @param modifier 修飾子
@@ -68,6 +70,7 @@ import reminderparrot.composeapp.generated.resources.reminko_face
 @Composable
 fun ReminderContent(
     state: ReminderListState,
+    parrotState: ParrotState,
     onToggleCompletion: (String) -> Unit,
     onCreateReminder: suspend (String) -> Unit,
     modifier: Modifier = Modifier
@@ -133,7 +136,9 @@ fun ReminderContent(
                         sheetState.hide()
                     }
                 },
-                sheetState = sheetState
+                sheetState = sheetState,
+                memorizedWords = parrotState.parrot.memorizedWords,
+                currentReminderCount = state.reminders.size
             )
         }
     }

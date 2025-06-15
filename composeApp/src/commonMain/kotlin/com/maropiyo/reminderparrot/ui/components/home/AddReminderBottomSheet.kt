@@ -49,6 +49,8 @@ import reminderparrot.composeapp.generated.resources.reminko_raising_hand
  * @param onDismiss ボトムシートが閉じられたときのコールバック
  * @param onSaveReminder リマインダーが保存されたときのコールバック
  * @param sheetState ボトムシートの状態
+ * @param memorizedWords インコが覚えられることばの数
+ * @param currentReminderCount 現在のリマインダー数
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,7 +59,9 @@ fun AddReminderBottomSheet(
     onReminderTextChange: (String) -> Unit,
     onDismiss: () -> Unit,
     onSaveReminder: () -> Unit,
-    sheetState: androidx.compose.material3.SheetState
+    sheetState: androidx.compose.material3.SheetState,
+    memorizedWords: Int,
+    currentReminderCount: Int
 ) {
     ModalBottomSheet(
         dragHandle = null,
@@ -80,7 +84,9 @@ fun AddReminderBottomSheet(
                 modifier =
                 Modifier
                     .fillMaxWidth()
-                    .padding(top = 104.dp)
+                    .padding(top = 104.dp),
+                memorizedWords = memorizedWords,
+                currentReminderCount = currentReminderCount
             )
 
             // リマインコの画像
@@ -105,8 +111,12 @@ private fun ReminderInputCard(
     reminderText: String,
     onReminderTextChange: (String) -> Unit,
     onSaveReminder: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    memorizedWords: Int,
+    currentReminderCount: Int
 ) {
+    // リマインダー数が上限に達しているかチェック
+    val isReachedLimit = currentReminderCount >= memorizedWords
     Card(
         modifier = modifier,
         colors =
@@ -124,7 +134,7 @@ private fun ReminderInputCard(
         ) {
             // タイトルテキスト
             Text(
-                text = "よんだ？",
+                text = if (isReachedLimit) "もうおぼえられないよ〜" else "よんだ？",
                 color = Secondary,
                 style = MaterialTheme.typography.titleLarge
             )
@@ -135,6 +145,7 @@ private fun ReminderInputCard(
             ReminderTextField(
                 reminderText = reminderText,
                 onValueChange = onReminderTextChange,
+                enabled = !isReachedLimit,
                 modifier =
                 Modifier
                     .fillMaxWidth()
@@ -146,7 +157,7 @@ private fun ReminderInputCard(
             // 送信ボタン
             SaveReminderButton(
                 onClick = onSaveReminder,
-                enabled = reminderText.isNotBlank(),
+                enabled = reminderText.isNotBlank() && !isReachedLimit,
                 modifier =
                 Modifier
                     .fillMaxWidth()
@@ -162,10 +173,16 @@ private fun ReminderInputCard(
  *
  * @param reminderText リマインダーテキスト
  * @param onValueChange テキストが変更されたときのコールバック
+ * @param enabled 入力フィールドが有効かどうか
  * @param modifier 修飾子
  */
 @Composable
-private fun ReminderTextField(reminderText: String, onValueChange: (String) -> Unit, modifier: Modifier = Modifier) {
+private fun ReminderTextField(
+    reminderText: String,
+    onValueChange: (String) -> Unit,
+    enabled: Boolean = true,
+    modifier: Modifier = Modifier
+) {
     // 初期テキストとカーソル位置を保持するための状態
     var textFieldValue by remember {
         mutableStateOf(
@@ -179,27 +196,33 @@ private fun ReminderTextField(reminderText: String, onValueChange: (String) -> U
     TextField(
         value = textFieldValue,
         onValueChange = { changedValue ->
-            textFieldValue = changedValue
-            onValueChange(changedValue.text)
+            if (enabled) {
+                textFieldValue = changedValue
+                onValueChange(changedValue.text)
+            }
         },
         modifier = modifier,
+        enabled = enabled,
         colors =
         TextFieldDefaults.colors(
             focusedTextColor = Secondary,
             focusedContainerColor = White,
             unfocusedContainerColor = White,
+            disabledTextColor = Secondary.copy(alpha = 0.3f),
+            disabledContainerColor = White,
             focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent
+            unfocusedIndicatorColor = Color.Transparent,
+            disabledIndicatorColor = Color.Transparent
         ),
         textStyle =
         MaterialTheme.typography.bodyLarge.copy(
-            color = Secondary,
+            color = if (enabled) Secondary else Secondary.copy(alpha = 0.3f),
             fontWeight = FontWeight.Bold
         ),
         placeholder =
         {
             Text(
-                text = "おしえることばをかいてね",
+                text = if (enabled) "おしえることばをかいてね" else "レベルをあげてもっとかしこくなろう！",
                 style = MaterialTheme.typography.bodyLarge,
                 color = Secondary.copy(alpha = 0.5f)
             )
