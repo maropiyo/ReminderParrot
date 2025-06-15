@@ -13,9 +13,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BasicAlertDialog
-import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -31,6 +32,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import com.maropiyo.reminderparrot.domain.entity.Parrot
+import com.maropiyo.reminderparrot.ui.theme.Secondary
+import com.maropiyo.reminderparrot.ui.theme.Shapes
+import com.maropiyo.reminderparrot.ui.theme.White
 import org.jetbrains.compose.resources.painterResource
 import reminderparrot.composeapp.generated.resources.Res
 import reminderparrot.composeapp.generated.resources.reminko_jump
@@ -127,7 +131,7 @@ fun LevelUpDialog(isVisible: Boolean, parrot: Parrot, onDismiss: () -> Unit) {
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
-                            text = "能力がアップしたよ！",
+                            text = "かしこくなったよ！",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Medium,
                             color = Color(0xFF795548)
@@ -147,15 +151,20 @@ fun LevelUpDialog(isVisible: Boolean, parrot: Parrot, onDismiss: () -> Unit) {
                     }
 
                     // やったー！ボタン
-                    Button(
+                    ElevatedButton(
                         onClick = onDismiss,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 8.dp)
+                            .padding(top = 8.dp),
+                        shape = Shapes.large,
+                        colors = ButtonDefaults.elevatedButtonColors(
+                            containerColor = Secondary,
+                            contentColor = White
+                        )
                     ) {
                         Text(
                             text = "やったー！",
-                            fontSize = 18.sp,
+                            style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )
                     }
