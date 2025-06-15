@@ -122,6 +122,7 @@ fun ParrotContent(state: ParrotState, modifier: Modifier = Modifier) {
                             skipAnimation = false
                             displayProgress = 1f
                             delay(1000) // アニメーション完了まで待機
+
                             previousLevel = state.parrot.level
                             // 新レベルの初期値に即座にリセット（アニメーションなし）
                             skipAnimation = true
