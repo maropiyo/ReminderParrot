@@ -1,5 +1,7 @@
 package com.maropiyo.reminderparrot.ui.components.home
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -15,6 +17,11 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,6 +39,7 @@ import com.maropiyo.reminderparrot.ui.theme.Gray
 import com.maropiyo.reminderparrot.ui.theme.Secondary
 import com.maropiyo.reminderparrot.ui.theme.Shapes
 import com.maropiyo.reminderparrot.ui.theme.White
+import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
 import reminderparrot.composeapp.generated.resources.Res
 import reminderparrot.composeapp.generated.resources.reminko
@@ -54,7 +62,8 @@ fun ParrotContent(state: ParrotState, modifier: Modifier = Modifier) {
         CardDefaults.cardColors(
             containerColor = White
         ),
-        elevation = CardDefaults.cardElevation(
+        elevation =
+        CardDefaults.cardElevation(
             defaultElevation = 4.dp
         )
     ) {
@@ -85,6 +94,60 @@ fun ParrotContent(state: ParrotState, modifier: Modifier = Modifier) {
                     modifier = Modifier.size(100.dp),
                     contentAlignment = Alignment.Center
                 ) {
+                    // 前回のレベルを記憶
+                    var previousLevel by remember { mutableStateOf(state.parrot.level) }
+                    var displayProgress by remember {
+                        mutableStateOf(
+                            if (state.parrot.maxExperience > 0) {
+                                state.parrot.currentExperience.toFloat() / state.parrot.maxExperience.toFloat()
+                            } else {
+                                0f
+                            }
+                        )
+                    }
+                    var skipAnimation by remember { mutableStateOf(false) }
+
+                    // 現在の実際の進捗を計算
+                    val actualProgress =
+                        if (state.parrot.maxExperience > 0) {
+                            state.parrot.currentExperience.toFloat() / state.parrot.maxExperience.toFloat()
+                        } else {
+                            0f
+                        }
+
+                    // レベルアップを検出
+                    LaunchedEffect(state.parrot.level, state.parrot.currentExperience) {
+                        if (state.parrot.level > previousLevel) {
+                            // レベルアップした場合、まず100%まで上昇させる
+                            skipAnimation = false
+                            displayProgress = 1f
+                            delay(1000) // アニメーション完了まで待機
+
+                            previousLevel = state.parrot.level
+                            // 新レベルの初期値に即座にリセット（アニメーションなし）
+                            skipAnimation = true
+                            displayProgress = actualProgress
+                            // 次回のアニメーションを有効にする
+                            delay(50) // 状態更新を確実にするための短い遅延
+                            skipAnimation = false
+                        } else {
+                            // 通常の経験値増加
+                            displayProgress = actualProgress
+                        }
+                    }
+
+                    // アニメーション付き進捗
+                    val animatedProgress by animateFloatAsState(
+                        targetValue = displayProgress,
+                        animationSpec =
+                        if (skipAnimation) {
+                            tween(durationMillis = 0) // 即座に変更
+                        } else {
+                            tween(durationMillis = 1000) // 通常のアニメーション
+                        },
+                        label = "experience_progress"
+                    )
+
                     // 丸型経験値インジケータ
                     Canvas(
                         modifier = Modifier.size(100.dp)
@@ -102,18 +165,11 @@ fun ParrotContent(state: ParrotState, modifier: Modifier = Modifier) {
                         )
 
                         // 経験値円弧
-                        val progress =
-                            if (state.parrot.maxExperience > 0) {
-                                state.parrot.currentExperience.toFloat() / state.parrot.maxExperience.toFloat()
-                            } else {
-                                0f
-                            }
-
-                        if (progress > 0) {
+                        if (animatedProgress > 0) {
                             drawArc(
                                 color = Secondary,
                                 startAngle = -90f,
-                                sweepAngle = 360f * progress,
+                                sweepAngle = 360f * animatedProgress,
                                 useCenter = false,
                                 topLeft =
                                 Offset(
@@ -184,7 +240,7 @@ fun ParrotContent(state: ParrotState, modifier: Modifier = Modifier) {
                         )
                     }
 
-                    // きおくできるじかん
+                    // きおくじかん
                     Row(
                         modifier =
                         Modifier
@@ -196,7 +252,7 @@ fun ParrotContent(state: ParrotState, modifier: Modifier = Modifier) {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "きおくできるじかん",
+                            text = "きおくじかん",
                             style = MaterialTheme.typography.bodyMedium,
                             color = Gray,
                             fontSize = 13.sp

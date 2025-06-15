@@ -176,11 +176,12 @@ private fun ReminderItems(
             ErrorState(state.error, modifier = modifier)
         }
         state.reminders.isEmpty() -> {
-            EmptyState("まだおぼえることはないみたいね", modifier = modifier)
+            EmptyState("なにもおぼえていないよ", modifier = modifier)
         }
         else -> {
             LazyColumn(
-                modifier = modifier
+                modifier =
+                modifier
                     .fillMaxSize()
                     .background(MaterialTheme.colorScheme.background)
                     .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -205,16 +206,19 @@ private fun ReminderItems(
 private fun ReminderCard(reminder: Reminder, onToggleCompletion: () -> Unit, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
+        colors =
+        CardDefaults.cardColors(
             containerColor = White
         ),
         shape = Shapes.extraLarge,
-        elevation = CardDefaults.cardElevation(
+        elevation =
+        CardDefaults.cardElevation(
             defaultElevation = 4.dp
         )
     ) {
         Row(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -251,18 +255,17 @@ private fun CircularCheckbox(checked: Boolean, onCheckedChange: (Boolean) -> Uni
     )
 
     Box(
-        modifier = modifier
+        modifier =
+        modifier
             .clip(CircleShape)
             .border(
                 width = 2.dp,
                 color = Secondary,
                 shape = CircleShape
-            )
-            .background(
+            ).background(
                 color = if (checked) Secondary else White,
                 shape = CircleShape
-            )
-            .clickable { onCheckedChange(!checked) },
+            ).clickable { onCheckedChange(!checked) },
         contentAlignment = Alignment.Center
     ) {
         if (checked) {
@@ -270,7 +273,8 @@ private fun CircularCheckbox(checked: Boolean, onCheckedChange: (Boolean) -> Uni
                 imageVector = Icons.Default.Check,
                 contentDescription = "Checked",
                 tint = White,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .size(20.dp)
                     .scale(scale)
             )
