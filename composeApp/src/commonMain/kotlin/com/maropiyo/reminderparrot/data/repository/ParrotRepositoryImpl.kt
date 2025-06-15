@@ -1,14 +1,17 @@
 package com.maropiyo.reminderparrot.data.repository
 
+import com.maropiyo.reminderparrot.data.local.ParrotLocalDataSource
 import com.maropiyo.reminderparrot.domain.entity.Parrot
 import com.maropiyo.reminderparrot.domain.repository.ParrotRepository
 
 /**
  * インコリポジトリの実装
+ *
+ * @property localDataSource ローカルデータソース
  */
-class ParrotRepositoryImpl : ParrotRepository {
-    // 暫定的にメモリ上で状態を保持
-    private var currentParrot = Parrot()
+class ParrotRepositoryImpl(
+    private val localDataSource: ParrotLocalDataSource
+) : ParrotRepository {
 
     /**
      * インコの状態を取得する
@@ -16,7 +19,11 @@ class ParrotRepositoryImpl : ParrotRepository {
      * @return インコの状態
      */
     override suspend fun getParrot(): Result<Parrot> = try {
-        Result.success(currentParrot)
+        val parrot = localDataSource.getParrot() ?: Parrot().also {
+            // 初回起動時はデフォルトのインコを保存
+            localDataSource.saveParrot(it)
+        }
+        Result.success(parrot)
     } catch (e: Exception) {
         Result.failure(e)
     }
@@ -28,7 +35,7 @@ class ParrotRepositoryImpl : ParrotRepository {
      * @return 更新結果
      */
     override suspend fun updateParrot(parrot: Parrot): Result<Unit> = try {
-        currentParrot = parrot
+        localDataSource.updateParrot(parrot)
         Result.success(Unit)
     } catch (e: Exception) {
         Result.failure(e)
@@ -41,6 +48,7 @@ class ParrotRepositoryImpl : ParrotRepository {
      * @return 更新されたインコの状態
      */
     override suspend fun addExperience(experience: Int): Result<Parrot> = try {
+        val currentParrot = localDataSource.getParrot() ?: Parrot()
         val newExperience = currentParrot.currentExperience + experience
         val updatedParrot = if (newExperience >= currentParrot.maxExperience) {
             // レベルアップロジック
@@ -56,7 +64,7 @@ class ParrotRepositoryImpl : ParrotRepository {
         } else {
             currentParrot.copy(currentExperience = newExperience)
         }
-        currentParrot = updatedParrot
+        localDataSource.updateParrot(updatedParrot)
         Result.success(updatedParrot)
     } catch (e: Exception) {
         Result.failure(e)
