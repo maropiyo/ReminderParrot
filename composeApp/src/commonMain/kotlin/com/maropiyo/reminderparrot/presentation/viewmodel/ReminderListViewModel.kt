@@ -2,13 +2,13 @@ package com.maropiyo.reminderparrot.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.maropiyo.reminderparrot.domain.entity.Reminder
 import com.maropiyo.reminderparrot.domain.usecase.AddParrotExperienceUseCase
 import com.maropiyo.reminderparrot.domain.usecase.CreateReminderUseCase
 import com.maropiyo.reminderparrot.domain.usecase.DeleteReminderUseCase
 import com.maropiyo.reminderparrot.domain.usecase.GetRemindersUseCase
 import com.maropiyo.reminderparrot.domain.usecase.UpdateReminderUseCase
 import com.maropiyo.reminderparrot.presentation.state.ReminderListState
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -34,14 +34,6 @@ class ReminderListViewModel(
     private val _state = MutableStateFlow(ReminderListState())
     val state: StateFlow<ReminderListState> = _state.asStateFlow()
 
-    /**
-     * リマインダーリストをソートする（未完了→完了の順）
-     *
-     * @param reminders ソート対象のリマインダーリスト
-     * @return ソート済みリマインダーリスト
-     */
-    private fun sortReminders(reminders: List<Reminder>): List<Reminder> = reminders.sortedBy { it.isCompleted }
-
     init {
         // 初期化時にリマインダーを取得
         loadReminders()
@@ -60,7 +52,7 @@ class ReminderListViewModel(
                     _state.update {
                         val updatedReminders = it.reminders + reminder
                         it.copy(
-                            reminders = sortReminders(updatedReminders),
+                            reminders = updatedReminders,
                             isLoading = false,
                             error = null
                         )
@@ -76,31 +68,52 @@ class ReminderListViewModel(
 
     /**
      * リマインダーの完了状態を切り替える
+     * 完了にした場合は、アニメーション後に自動削除される
      *
      * @param reminderId リマインダーのID
      */
     fun toggleReminderCompletion(reminderId: String) {
         viewModelScope.launch {
             val reminder = _state.value.reminders.find { it.id == reminderId } ?: return@launch
-            val updatedReminder = reminder.copy(isCompleted = !reminder.isCompleted)
 
-            updateReminderUseCase(updatedReminder)
-                .onSuccess {
-                    _state.update { currentState ->
-                        val updatedReminders =
-                            currentState.reminders.map {
+            if (!reminder.isCompleted) {
+                // 未完了→完了の場合は経験値追加後に削除
+                // まず完了状態に更新
+                val updatedReminder = reminder.copy(isCompleted = true)
+                _state.update { currentState ->
+                    val updatedReminders = currentState.reminders.map {
+                        if (it.id == reminderId) updatedReminder else it
+                    }
+                    currentState.copy(reminders = updatedReminders)
+                }
+
+                // 経験値を追加
+                addParrotExperienceUseCase()
+
+                // アニメーションの完了を待ってから削除
+                delay(400) // アニメーション時間（100ms + 300ms）
+                deleteReminderUseCase(reminderId)
+                    .onSuccess {
+                        _state.update { currentState ->
+                            val filteredReminders = currentState.reminders.filter { it.id != reminderId }
+                            currentState.copy(reminders = filteredReminders)
+                        }
+                    }
+            } else {
+                // 完了→未完了の場合は通常の更新
+                val updatedReminder = reminder.copy(isCompleted = false)
+                updateReminderUseCase(updatedReminder)
+                    .onSuccess {
+                        _state.update { currentState ->
+                            val updatedReminders = currentState.reminders.map {
                                 if (it.id == reminderId) updatedReminder else it
                             }
-                        currentState.copy(reminders = sortReminders(updatedReminders))
+                            currentState.copy(reminders = updatedReminders)
+                        }
+                    }.onFailure { exception ->
+                        _state.update { it.copy(error = exception.message) }
                     }
-
-                    // リマインダーが完了状態になった場合のみ経験値を追加
-                    if (updatedReminder.isCompleted) {
-                        addParrotExperienceUseCase()
-                    }
-                }.onFailure { exception ->
-                    _state.update { it.copy(error = exception.message) }
-                }
+            }
         }
     }
 
@@ -122,7 +135,7 @@ class ReminderListViewModel(
                             currentState.reminders.map {
                                 if (it.id == reminderId) updatedReminder else it
                             }
-                        currentState.copy(reminders = sortReminders(updatedReminders))
+                        currentState.copy(reminders = updatedReminders)
                     }
                 }.onFailure { exception ->
                     _state.update { it.copy(error = exception.message) }
@@ -141,7 +154,7 @@ class ReminderListViewModel(
                 .onSuccess {
                     _state.update { currentState ->
                         val updatedReminders = currentState.reminders.filter { it.id != reminderId }
-                        currentState.copy(reminders = sortReminders(updatedReminders))
+                        currentState.copy(reminders = updatedReminders)
                     }
                 }.onFailure { exception ->
                     _state.update { it.copy(error = exception.message) }
@@ -160,7 +173,7 @@ class ReminderListViewModel(
 
             getRemindersUseCase()
                 .onSuccess { reminders ->
-                    _state.update { it.copy(reminders = sortReminders(reminders), isLoading = false) }
+                    _state.update { it.copy(reminders = reminders, isLoading = false) }
                 }.onFailure { exception ->
                     _state.update { it.copy(error = exception.message, isLoading = false) }
                 }
