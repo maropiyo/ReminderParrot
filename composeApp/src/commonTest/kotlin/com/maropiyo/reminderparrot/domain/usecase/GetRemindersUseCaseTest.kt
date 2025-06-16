@@ -53,6 +53,10 @@ class GetRemindersUseCaseTest {
         override suspend fun updateReminder(reminder: Reminder): Result<Unit> {
             return Result.success(Unit)
         }
+
+        override suspend fun deleteReminder(reminderId: String): Result<Unit> {
+            return Result.success(Unit)
+        }
     }
 
     /**

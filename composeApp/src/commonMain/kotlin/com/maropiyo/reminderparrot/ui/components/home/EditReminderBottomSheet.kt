@@ -74,11 +74,11 @@ fun EditReminderBottomSheet(
     ) {
         Box(
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .padding(bottom = 16.dp)
-                    .imePadding()
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 16.dp)
+                .imePadding()
         ) {
             EditReminderInputCard(
                 reminderText = reminderText,
@@ -90,9 +90,9 @@ fun EditReminderBottomSheet(
                 },
                 onDeleteReminder = onDeleteReminder,
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(top = 104.dp),
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 104.dp),
                 isUpdateEnabled = reminderText.isNotBlank() && reminderText != reminder.text
             )
 
@@ -101,9 +101,9 @@ fun EditReminderBottomSheet(
                 painter = painterResource(Res.drawable.reminko_raising_hand),
                 contentDescription = "Parrot",
                 modifier =
-                    Modifier
-                        .size(128.dp)
-                        .align(Alignment.TopCenter),
+                Modifier
+                    .size(128.dp)
+                    .align(Alignment.TopCenter),
                 contentScale = ContentScale.Crop
             )
         }
@@ -125,17 +125,17 @@ private fun EditReminderInputCard(
     Card(
         modifier = modifier,
         colors =
-            CardDefaults.cardColors(
-                containerColor = Background
-            ),
+        CardDefaults.cardColors(
+            containerColor = Background
+        ),
         shape = Shapes.extraLarge
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 24.dp)
+            Modifier
+                .fillMaxWidth()
+                .padding(vertical = 24.dp)
         ) {
             // タイトルテキスト
             Text(
@@ -151,9 +151,9 @@ private fun EditReminderInputCard(
                 reminderText = reminderText,
                 onValueChange = onReminderTextChange,
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
             )
 
             Spacer(Modifier.size(16.dp))
@@ -161,17 +161,17 @@ private fun EditReminderInputCard(
             // ボタンエリア
             Row(
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
             ) {
                 // わすれるボタン
                 DeleteReminderButton(
                     onClick = onDeleteReminder,
                     modifier =
-                        Modifier
-                            .weight(1f)
-                            .height(50.dp)
+                    Modifier
+                        .weight(1f)
+                        .height(50.dp)
                 )
 
                 Spacer(Modifier.width(8.dp))
@@ -181,9 +181,9 @@ private fun EditReminderInputCard(
                     onClick = onUpdateReminder,
                     enabled = isUpdateEnabled,
                     modifier =
-                        Modifier
-                            .weight(1f)
-                            .height(50.dp)
+                    Modifier
+                        .weight(1f)
+                        .height(50.dp)
                 )
             }
         }
@@ -232,26 +232,26 @@ private fun EditReminderTextField(
         },
         modifier = modifier,
         colors =
-            TextFieldDefaults.colors(
-                focusedTextColor = Secondary,
-                focusedContainerColor = White,
-                unfocusedContainerColor = White,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent
-            ),
+        TextFieldDefaults.colors(
+            focusedTextColor = Secondary,
+            focusedContainerColor = White,
+            unfocusedContainerColor = White,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent
+        ),
         textStyle =
-            MaterialTheme.typography.bodyLarge.copy(
-                color = Secondary,
-                fontWeight = FontWeight.Bold
-            ),
+        MaterialTheme.typography.bodyLarge.copy(
+            color = Secondary,
+            fontWeight = FontWeight.Bold
+        ),
         placeholder =
-            {
-                Text(
-                    text = "あたらしいことばをかいてね",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = Secondary.copy(alpha = 0.5f)
-                )
-            },
+        {
+            Text(
+                text = "あたらしいことばをかいてね",
+                style = MaterialTheme.typography.bodyLarge,
+                color = Secondary.copy(alpha = 0.5f)
+            )
+        },
         singleLine = true,
         shape = Shapes.large
     )
@@ -265,22 +265,18 @@ private fun EditReminderTextField(
  * @param modifier ボタンの修飾子
  */
 @Composable
-private fun UpdateReminderButton(
-    onClick: () -> Unit,
-    enabled: Boolean,
-    modifier: Modifier = Modifier
-) {
+private fun UpdateReminderButton(onClick: () -> Unit, enabled: Boolean, modifier: Modifier = Modifier) {
     ElevatedButton(
         onClick = onClick,
         modifier = modifier,
         shape = Shapes.large,
         colors =
-            ButtonDefaults.elevatedButtonColors(
-                containerColor = Secondary,
-                contentColor = White,
-                disabledContainerColor = DisableSecondary,
-                disabledContentColor = White
-            ),
+        ButtonDefaults.elevatedButtonColors(
+            containerColor = Secondary,
+            contentColor = White,
+            disabledContainerColor = DisableSecondary,
+            disabledContentColor = White
+        ),
         enabled = enabled
     ) {
         Text(
@@ -298,19 +294,16 @@ private fun UpdateReminderButton(
  * @param modifier ボタンの修飾子
  */
 @Composable
-private fun DeleteReminderButton(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
+private fun DeleteReminderButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
     ElevatedButton(
         onClick = onClick,
         modifier = modifier,
         shape = Shapes.large,
         colors =
-            ButtonDefaults.elevatedButtonColors(
-                containerColor = Error,
-                contentColor = White
-            )
+        ButtonDefaults.elevatedButtonColors(
+            containerColor = Error,
+            contentColor = White
+        )
     ) {
         Text(
             text = "わすれる",
