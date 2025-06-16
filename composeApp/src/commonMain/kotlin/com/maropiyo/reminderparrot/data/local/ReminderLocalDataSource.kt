@@ -47,4 +47,13 @@ class ReminderLocalDataSource(
             id = reminder.id
         )
     }
+
+    /**
+     * リマインダーを削除する
+     *
+     * @param reminderId 削除するリマインダーのID
+     */
+    fun deleteReminder(reminderId: String) {
+        database.reminderParrotDatabaseQueries.deleteReminder(reminderId)
+    }
 }

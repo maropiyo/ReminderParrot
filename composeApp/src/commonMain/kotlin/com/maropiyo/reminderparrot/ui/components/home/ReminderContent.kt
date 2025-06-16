@@ -64,6 +64,8 @@ import reminderparrot.composeapp.generated.resources.reminko_face
  * @param parrotState インコの状態
  * @param onToggleCompletion リマインダー完了切り替えコールバック
  * @param onCreateReminder 新しいリマインダー作成コールバック
+ * @param onUpdateReminder リマインダー更新コールバック
+ * @param onDeleteReminder リマインダー削除コールバック
  * @param modifier 修飾子
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -73,14 +75,22 @@ fun ReminderContent(
     parrotState: ParrotState,
     onToggleCompletion: (String) -> Unit,
     onCreateReminder: suspend (String) -> Unit,
+    onUpdateReminder: (String, String) -> Unit,
+    onDeleteReminder: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     // ボトムシートの表示状態
     var isShowBottomSheet by remember { mutableStateOf(false) }
+    // 編集ボトムシートの表示状態
+    var isShowEditBottomSheet by remember { mutableStateOf(false) }
+    // 編集中のリマインダー
+    var editingReminder by remember { mutableStateOf<Reminder?>(null) }
     // リマインダーテキスト
     var reminderText by remember { mutableStateOf("") }
     // ボトムシートの状態
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    // 編集ボトムシートの状態
+    val editSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     // コルーチンスコープとキーボードコントローラーの取得
     val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -102,6 +112,10 @@ fun ReminderContent(
             ReminderItems(
                 state = state,
                 onToggleCompletion = onToggleCompletion,
+                onReminderClick = { reminder ->
+                    editingReminder = reminder
+                    isShowEditBottomSheet = true
+                },
                 modifier = Modifier.weight(1f).fillMaxWidth()
             )
         }
@@ -141,6 +155,35 @@ fun ReminderContent(
                 currentReminderCount = state.reminders.size
             )
         }
+
+        // リマインダー編集用ボトムシート
+        if (isShowEditBottomSheet && editingReminder != null) {
+            EditReminderBottomSheet(
+                reminder = editingReminder!!,
+                onDismiss = {
+                    keyboardController?.hide()
+                    isShowEditBottomSheet = false
+                    editingReminder = null
+                },
+                onUpdateReminder = { newText ->
+                    scope.launch {
+                        onUpdateReminder(editingReminder!!.id, newText)
+                        isShowEditBottomSheet = false
+                        editingReminder = null
+                        editSheetState.hide()
+                    }
+                },
+                onDeleteReminder = {
+                    scope.launch {
+                        onDeleteReminder(editingReminder!!.id)
+                        isShowEditBottomSheet = false
+                        editingReminder = null
+                        editSheetState.hide()
+                    }
+                },
+                sheetState = editSheetState
+            )
+        }
     }
 }
 
@@ -171,6 +214,7 @@ private fun ReminderFloatingActionButton(onClick: () -> Unit, modifier: Modifier
 private fun ReminderItems(
     state: ReminderListState,
     onToggleCompletion: (String) -> Unit,
+    onReminderClick: (Reminder) -> Unit,
     modifier: Modifier = Modifier
 ) {
     when {
@@ -195,6 +239,7 @@ private fun ReminderItems(
                     ReminderCard(
                         reminder = reminder,
                         onToggleCompletion = { onToggleCompletion(reminder.id) },
+                        onCardClick = { onReminderClick(reminder) },
                         modifier = Modifier.padding(vertical = 8.dp)
                     )
                 }
@@ -208,9 +253,16 @@ private fun ReminderItems(
  * 個々のリマインダーを表示するカードコンポーネント
  */
 @Composable
-private fun ReminderCard(reminder: Reminder, onToggleCompletion: () -> Unit, modifier: Modifier = Modifier) {
+private fun ReminderCard(
+    reminder: Reminder,
+    onToggleCompletion: () -> Unit,
+    onCardClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Card(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable { onCardClick() },
         colors =
         CardDefaults.cardColors(
             containerColor = White

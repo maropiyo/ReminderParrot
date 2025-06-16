@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.maropiyo.reminderparrot.domain.entity.Reminder
 import com.maropiyo.reminderparrot.domain.usecase.AddParrotExperienceUseCase
 import com.maropiyo.reminderparrot.domain.usecase.CreateReminderUseCase
+import com.maropiyo.reminderparrot.domain.usecase.DeleteReminderUseCase
 import com.maropiyo.reminderparrot.domain.usecase.GetRemindersUseCase
 import com.maropiyo.reminderparrot.domain.usecase.UpdateReminderUseCase
 import com.maropiyo.reminderparrot.presentation.state.ReminderListState
@@ -20,12 +21,14 @@ import kotlinx.coroutines.launch
  * @property getRemindersUseCase リマインダー取得ユースケース
  * @property createReminderUseCase リマインダー作成ユースケース
  * @property updateReminderUseCase リマインダー更新ユースケース
+ * @property deleteReminderUseCase リマインダー削除ユースケース
  * @property addParrotExperienceUseCase インコの経験値追加ユースケース
  */
 class ReminderListViewModel(
     private val getRemindersUseCase: GetRemindersUseCase,
     private val createReminderUseCase: CreateReminderUseCase,
     private val updateReminderUseCase: UpdateReminderUseCase,
+    private val deleteReminderUseCase: DeleteReminderUseCase,
     private val addParrotExperienceUseCase: AddParrotExperienceUseCase
 ) : ViewModel() {
     private val _state = MutableStateFlow(ReminderListState())
@@ -94,6 +97,51 @@ class ReminderListViewModel(
                     // リマインダーが完了状態になった場合のみ経験値を追加
                     if (updatedReminder.isCompleted) {
                         addParrotExperienceUseCase()
+                    }
+                }.onFailure { exception ->
+                    _state.update { it.copy(error = exception.message) }
+                }
+        }
+    }
+
+    /**
+     * リマインダーのテキストを更新する
+     *
+     * @param reminderId リマインダーのID
+     * @param newText 新しいテキスト
+     */
+    fun updateReminderText(reminderId: String, newText: String) {
+        viewModelScope.launch {
+            val reminder = _state.value.reminders.find { it.id == reminderId } ?: return@launch
+            val updatedReminder = reminder.copy(text = newText)
+
+            updateReminderUseCase(updatedReminder)
+                .onSuccess {
+                    _state.update { currentState ->
+                        val updatedReminders =
+                            currentState.reminders.map {
+                                if (it.id == reminderId) updatedReminder else it
+                            }
+                        currentState.copy(reminders = sortReminders(updatedReminders))
+                    }
+                }.onFailure { exception ->
+                    _state.update { it.copy(error = exception.message) }
+                }
+        }
+    }
+
+    /**
+     * リマインダーを削除する
+     *
+     * @param reminderId リマインダーのID
+     */
+    fun deleteReminder(reminderId: String) {
+        viewModelScope.launch {
+            deleteReminderUseCase(reminderId)
+                .onSuccess {
+                    _state.update { currentState ->
+                        val updatedReminders = currentState.reminders.filter { it.id != reminderId }
+                        currentState.copy(reminders = sortReminders(updatedReminders))
                     }
                 }.onFailure { exception ->
                     _state.update { it.copy(error = exception.message) }

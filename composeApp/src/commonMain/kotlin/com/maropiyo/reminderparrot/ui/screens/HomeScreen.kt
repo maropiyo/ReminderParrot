@@ -85,6 +85,12 @@ fun HomeScreen(
                     // リマインダー作成後にインコの状態を再読み込み
                     parrotViewModel.loadParrot()
                 },
+                onUpdateReminder = { reminderId, newText ->
+                    reminderListViewModel.updateReminderText(reminderId, newText)
+                },
+                onDeleteReminder = { reminderId ->
+                    reminderListViewModel.deleteReminder(reminderId)
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
