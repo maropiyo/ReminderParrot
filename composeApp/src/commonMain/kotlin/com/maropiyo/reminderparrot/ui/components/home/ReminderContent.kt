@@ -1,6 +1,10 @@
 package com.maropiyo.reminderparrot.ui.components.home
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -51,6 +55,7 @@ import com.maropiyo.reminderparrot.ui.theme.ParrotYellow
 import com.maropiyo.reminderparrot.ui.theme.Secondary
 import com.maropiyo.reminderparrot.ui.theme.Shapes
 import com.maropiyo.reminderparrot.ui.theme.White
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import reminderparrot.composeapp.generated.resources.Res
@@ -235,8 +240,11 @@ private fun ReminderItems(
                     .background(MaterialTheme.colorScheme.background)
                     .padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
-                items(state.reminders) { reminder ->
-                    ReminderCard(
+                items(
+                    items = state.reminders,
+                    key = { it.id }
+                ) { reminder ->
+                    AnimatedReminderCard(
                         reminder = reminder,
                         onToggleCompletion = { onToggleCompletion(reminder.id) },
                         onCardClick = { onReminderClick(reminder) },
@@ -245,6 +253,46 @@ private fun ReminderItems(
                 }
             }
         }
+    }
+}
+
+/**
+ * アニメーション付きリマインダーカード
+ * 完了時にフェードアウトしてから削除される
+ */
+@Composable
+private fun AnimatedReminderCard(
+    reminder: Reminder,
+    onToggleCompletion: () -> Unit,
+    onCardClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var isVisible by remember { mutableStateOf(true) }
+    val scope = rememberCoroutineScope()
+
+    AnimatedVisibility(
+        visible = isVisible,
+        exit = fadeOut(animationSpec = tween(300)) + shrinkVertically(animationSpec = tween(300)),
+        modifier = modifier
+    ) {
+        ReminderCard(
+            reminder = reminder,
+            onToggleCompletion = {
+                if (!reminder.isCompleted) {
+                    // 完了にする場合はアニメーション後に削除
+                    scope.launch {
+                        onToggleCompletion()
+                        delay(100) // チェックマークアニメーションを少し見せる
+                        isVisible = false
+                        delay(300) // アニメーション完了まで待機
+                    }
+                } else {
+                    // 未完了に戻す場合は即座に実行
+                    onToggleCompletion()
+                }
+            },
+            onCardClick = onCardClick
+        )
     }
 }
 
