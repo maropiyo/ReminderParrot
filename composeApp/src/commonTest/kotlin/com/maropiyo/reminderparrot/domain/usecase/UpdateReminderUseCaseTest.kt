@@ -51,6 +51,10 @@ class UpdateReminderUseCaseTest {
                 Result.success(Unit)
             }
         }
+
+        override suspend fun deleteReminder(reminderId: String): Result<Unit> {
+            return Result.success(Unit)
+        }
     }
 
     /**

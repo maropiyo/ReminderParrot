@@ -17,6 +17,10 @@ UPDATE Reminder
 SET text = ?, is_completed = ?
 WHERE id = ?;
 
+deleteReminder:
+DELETE FROM Reminder
+WHERE id = ?;
+
 removeAllReminders:
 DELETE FROM Reminder;
 

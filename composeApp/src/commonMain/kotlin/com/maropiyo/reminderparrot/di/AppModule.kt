@@ -11,6 +11,7 @@ import com.maropiyo.reminderparrot.domain.repository.ParrotRepository
 import com.maropiyo.reminderparrot.domain.repository.ReminderRepository
 import com.maropiyo.reminderparrot.domain.usecase.AddParrotExperienceUseCase
 import com.maropiyo.reminderparrot.domain.usecase.CreateReminderUseCase
+import com.maropiyo.reminderparrot.domain.usecase.DeleteReminderUseCase
 import com.maropiyo.reminderparrot.domain.usecase.GetParrotUseCase
 import com.maropiyo.reminderparrot.domain.usecase.GetRemindersUseCase
 import com.maropiyo.reminderparrot.domain.usecase.UpdateReminderUseCase
@@ -24,13 +25,14 @@ import org.koin.dsl.module
 val appModule =
     module {
         // ViewModel
-        single<ReminderListViewModel> { ReminderListViewModel(get(), get(), get(), get()) }
+        single<ReminderListViewModel> { ReminderListViewModel(get(), get(), get(), get(), get()) }
         single<ParrotViewModel> { ParrotViewModel(get()) }
 
         // UseCase
         single<CreateReminderUseCase> { CreateReminderUseCase(get(), get()) }
         single<GetRemindersUseCase> { GetRemindersUseCase(get()) }
         single<UpdateReminderUseCase> { UpdateReminderUseCase(get()) }
+        single<DeleteReminderUseCase> { DeleteReminderUseCase(get()) }
         single<GetParrotUseCase> { GetParrotUseCase(get()) }
         single<AddParrotExperienceUseCase> { AddParrotExperienceUseCase(get()) }
 

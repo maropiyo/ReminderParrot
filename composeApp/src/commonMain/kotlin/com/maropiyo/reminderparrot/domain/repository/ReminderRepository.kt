@@ -28,4 +28,12 @@ interface ReminderRepository {
      * @return 更新結果
      */
     suspend fun updateReminder(reminder: Reminder): Result<Unit>
+
+    /**
+     * リマインダーを削除する
+     *
+     * @param reminderId 削除するリマインダーのID
+     * @return 削除結果
+     */
+    suspend fun deleteReminder(reminderId: String): Result<Unit>
 }
