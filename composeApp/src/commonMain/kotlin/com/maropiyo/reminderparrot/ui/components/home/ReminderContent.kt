@@ -31,6 +31,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import com.maropiyo.reminderparrot.domain.entity.Reminder
 import com.maropiyo.reminderparrot.presentation.state.ParrotState
 import com.maropiyo.reminderparrot.presentation.state.ReminderListState
+import com.maropiyo.reminderparrot.ui.components.common.CountdownText
 import com.maropiyo.reminderparrot.ui.components.state.EmptyState
 import com.maropiyo.reminderparrot.ui.components.state.ErrorState
 import com.maropiyo.reminderparrot.ui.components.state.LoadingState
@@ -57,7 +59,9 @@ import com.maropiyo.reminderparrot.ui.theme.Shapes
 import com.maropiyo.reminderparrot.ui.theme.White
 import com.maropiyo.reminderparrot.ui.util.TimeFormatUtil
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import org.jetbrains.compose.resources.painterResource
 import reminderparrot.composeapp.generated.resources.Res
 import reminderparrot.composeapp.generated.resources.reminko_face
@@ -308,9 +312,22 @@ private fun ReminderCard(
     onCardClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // 残り時間と透過度を計算
-    val timeUntilForget = TimeFormatUtil.formatTimeUntilForget(reminder.forgetAt)
-    val alpha = TimeFormatUtil.calculateAlpha(reminder.forgetAt, reminder.createdAt)
+    // 透過度をリアルタイムで更新
+    var alpha by remember { mutableStateOf(TimeFormatUtil.calculateAlpha(reminder.forgetAt, reminder.createdAt)) }
+
+    // 1秒ごとに透過度を更新
+    LaunchedEffect(reminder.forgetAt) {
+        while (isActive) {
+            alpha = TimeFormatUtil.calculateAlpha(reminder.forgetAt, reminder.createdAt)
+
+            // 既に忘れた場合は更新を停止
+            if (reminder.forgetAt <= Clock.System.now()) {
+                break
+            }
+
+            delay(1000)
+        }
+    }
 
     Card(
         modifier = modifier
@@ -354,10 +371,10 @@ private fun ReminderCard(
                 )
             }
 
-            // 残り時間表示
-            Text(
-                text = timeUntilForget,
-                style = MaterialTheme.typography.bodySmall,
+            // 残り時間表示（リアルタイムカウントダウン）
+            CountdownText(
+                forgetAt = reminder.forgetAt,
+                textStyle = MaterialTheme.typography.bodySmall,
                 color = Secondary.copy(alpha = 0.7f),
                 modifier = Modifier.padding(top = 4.dp)
             )
