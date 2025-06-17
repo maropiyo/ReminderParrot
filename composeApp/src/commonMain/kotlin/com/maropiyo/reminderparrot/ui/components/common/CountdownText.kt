@@ -24,22 +24,32 @@ import kotlinx.datetime.Instant
  * @param forgetAt 忘却時刻
  * @param textStyle テキストスタイル
  * @param color テキストカラー
+ * @param onExpired 時間切れ時のコールバック
  * @param modifier 修飾子
  */
 @Composable
-fun CountdownText(forgetAt: Instant, textStyle: TextStyle, color: Color, modifier: Modifier = Modifier) {
+fun CountdownText(
+    forgetAt: Instant,
+    textStyle: TextStyle,
+    color: Color,
+    onExpired: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     // 現在の残り時間テキストを保持
     var timeText by remember { mutableStateOf(TimeFormatUtil.formatTimeUntilForget(forgetAt)) }
 
     // 1秒ごとに更新
     LaunchedEffect(forgetAt) {
         while (isActive) {
-            timeText = TimeFormatUtil.formatTimeUntilForget(forgetAt)
-
-            // 既に忘れた場合は更新を停止
-            if (forgetAt <= Clock.System.now()) {
+            val currentTime = Clock.System.now()
+            
+            // 既に忘れた場合は削除を実行
+            if (forgetAt <= currentTime) {
+                onExpired()
                 break
             }
+            
+            timeText = TimeFormatUtil.formatTimeUntilForget(forgetAt, currentTime)
 
             // 1秒待機
             delay(1000)

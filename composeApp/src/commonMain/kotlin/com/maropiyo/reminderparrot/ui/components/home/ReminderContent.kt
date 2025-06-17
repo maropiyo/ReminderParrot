@@ -356,6 +356,7 @@ private fun ReminderCard(
                 forgetAt = reminder.forgetAt,
                 textStyle = MaterialTheme.typography.bodySmall,
                 color = Secondary.copy(alpha = 0.7f),
+                onExpired = { onToggleCompletion() },
                 modifier = Modifier.padding(top = 4.dp)
             )
         }
