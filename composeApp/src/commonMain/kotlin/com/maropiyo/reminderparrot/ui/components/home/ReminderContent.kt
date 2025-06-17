@@ -57,11 +57,8 @@ import com.maropiyo.reminderparrot.ui.theme.ParrotYellow
 import com.maropiyo.reminderparrot.ui.theme.Secondary
 import com.maropiyo.reminderparrot.ui.theme.Shapes
 import com.maropiyo.reminderparrot.ui.theme.White
-import com.maropiyo.reminderparrot.ui.util.TimeFormatUtil
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
 import org.jetbrains.compose.resources.painterResource
 import reminderparrot.composeapp.generated.resources.Res
 import reminderparrot.composeapp.generated.resources.reminko_face
@@ -312,30 +309,13 @@ private fun ReminderCard(
     onCardClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // 透過度をリアルタイムで更新
-    var alpha by remember { mutableStateOf(TimeFormatUtil.calculateAlpha(reminder.forgetAt, reminder.createdAt)) }
-
-    // 1秒ごとに透過度を更新
-    LaunchedEffect(reminder.forgetAt) {
-        while (isActive) {
-            alpha = TimeFormatUtil.calculateAlpha(reminder.forgetAt, reminder.createdAt)
-
-            // 既に忘れた場合は更新を停止
-            if (reminder.forgetAt <= Clock.System.now()) {
-                break
-            }
-
-            delay(1000)
-        }
-    }
-
     Card(
         modifier = modifier
             .fillMaxWidth()
             .clickable { onCardClick() },
         colors =
         CardDefaults.cardColors(
-            containerColor = White.copy(alpha = alpha)
+            containerColor = White
         ),
         shape = Shapes.extraLarge,
         elevation =
