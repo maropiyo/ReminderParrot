@@ -6,7 +6,10 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.hours
 import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 
 /**
  * CreateReminderUseCaseのテストクラス
@@ -58,6 +61,10 @@ class CreateReminderUseCaseTest {
         override suspend fun deleteReminder(reminderId: String): Result<Unit> {
             return Result.success(Unit)
         }
+
+        override suspend fun deleteExpiredReminders(currentTime: Instant): Int {
+            return 0
+        }
     }
 
     /**
@@ -84,7 +91,13 @@ class CreateReminderUseCaseTest {
     ) {
         suspend operator fun invoke(text: String): Result<Reminder> {
             val id = uuidGenerator.generateId()
-            val reminder = Reminder(id = id, text = text)
+            val currentTime = Clock.System.now()
+            val reminder = Reminder(
+                id = id,
+                text = text,
+                createdAt = currentTime,
+                forgetAt = currentTime + 24.hours
+            )
             return repository.createReminder(reminder)
         }
     }
@@ -101,7 +114,13 @@ class CreateReminderUseCaseTest {
         // Given
         val testText = "新しいリマインダー"
         val testId = "test-uuid-123"
-        val expectedReminder = Reminder(id = testId, text = testText)
+        val currentTime = Clock.System.now()
+        val expectedReminder = Reminder(
+            id = testId,
+            text = testText,
+            createdAt = currentTime,
+            forgetAt = currentTime + 24.hours
+        )
 
         testRepository.reset()
         testUuidGenerator.setIdToReturn(testId)
@@ -148,7 +167,13 @@ class CreateReminderUseCaseTest {
         // Given
         val testText = ""
         val testId = "test-uuid-789"
-        val expectedReminder = Reminder(id = testId, text = testText)
+        val currentTime = Clock.System.now()
+        val expectedReminder = Reminder(
+            id = testId,
+            text = testText,
+            createdAt = currentTime,
+            forgetAt = currentTime + 24.hours
+        )
 
         testRepository.reset()
         testUuidGenerator.setIdToReturn(testId)

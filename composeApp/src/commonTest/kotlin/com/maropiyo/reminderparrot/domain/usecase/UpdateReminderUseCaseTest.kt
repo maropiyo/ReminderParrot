@@ -5,7 +5,10 @@ import com.maropiyo.reminderparrot.domain.repository.ReminderRepository
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.hours
 import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 
 /**
  * UpdateReminderUseCaseのテストクラス
@@ -55,6 +58,10 @@ class UpdateReminderUseCaseTest {
         override suspend fun deleteReminder(reminderId: String): Result<Unit> {
             return Result.success(Unit)
         }
+
+        override suspend fun deleteExpiredReminders(currentTime: Instant): Int {
+            return 0
+        }
     }
 
     /**
@@ -77,7 +84,14 @@ class UpdateReminderUseCaseTest {
     @Test
     fun `正常な場合はリマインダーが更新される`() = runTest {
         // Given
-        val reminder = Reminder(id = "1", text = "更新テスト", isCompleted = true)
+        val currentTime = Clock.System.now()
+        val reminder = Reminder(
+            id = "1",
+            text = "更新テスト",
+            isCompleted = true,
+            createdAt = currentTime,
+            forgetAt = currentTime + 24.hours
+        )
         testRepository.reset()
         testRepository.setShouldReturnSuccess()
 
@@ -94,7 +108,13 @@ class UpdateReminderUseCaseTest {
     @Test
     fun `リポジトリエラーの場合はFailureが返される`() = runTest {
         // Given
-        val reminder = Reminder(id = "1", text = "エラーテスト")
+        val currentTime = Clock.System.now()
+        val reminder = Reminder(
+            id = "1",
+            text = "エラーテスト",
+            createdAt = currentTime,
+            forgetAt = currentTime + 24.hours
+        )
         val exception = RuntimeException("更新エラー")
         testRepository.reset()
         testRepository.setShouldReturnFailure(exception)
@@ -113,7 +133,14 @@ class UpdateReminderUseCaseTest {
     @Test
     fun `完了状態のリマインダーも正常に更新される`() = runTest {
         // Given
-        val completedReminder = Reminder(id = "2", text = "完了済み", isCompleted = true)
+        val currentTime = Clock.System.now()
+        val completedReminder = Reminder(
+            id = "2",
+            text = "完了済み",
+            isCompleted = true,
+            createdAt = currentTime,
+            forgetAt = currentTime + 24.hours
+        )
         testRepository.reset()
         testRepository.setShouldReturnSuccess()
 

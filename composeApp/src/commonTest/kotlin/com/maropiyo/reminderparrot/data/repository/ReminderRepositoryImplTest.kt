@@ -4,7 +4,9 @@ import com.maropiyo.reminderparrot.domain.entity.Reminder
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.hours
 import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.Clock
 
 /**
  * ReminderRepositoryImplのテストクラス
@@ -115,7 +117,13 @@ class ReminderRepositoryImplTest {
     @Test
     fun `createReminder - 正常な場合はリマインダーが作成される`() = runTest {
         // Given
-        val reminder = Reminder(id = "1", text = "テストリマインダー")
+        val currentTime = Clock.System.now()
+        val reminder = Reminder(
+            id = "1",
+            text = "テストリマインダー",
+            createdAt = currentTime,
+            forgetAt = currentTime + 24.hours
+        )
         testLocalDataSource.reset()
         testLocalDataSource.setReminderToReturn(reminder)
 
@@ -133,7 +141,13 @@ class ReminderRepositoryImplTest {
     @Test
     fun `createReminder - ローカルデータソースエラーの場合はFailureが返される`() = runTest {
         // Given
-        val reminder = Reminder(id = "1", text = "エラーテスト")
+        val currentTime = Clock.System.now()
+        val reminder = Reminder(
+            id = "1",
+            text = "エラーテスト",
+            createdAt = currentTime,
+            forgetAt = currentTime + 24.hours
+        )
         val exception = RuntimeException("ローカル保存エラー")
         testLocalDataSource.reset()
         testLocalDataSource.setShouldThrowException(exception)
@@ -152,9 +166,21 @@ class ReminderRepositoryImplTest {
     @Test
     fun `getReminders - 正常な場合はリマインダーリストが返される`() = runTest {
         // Given
+        val currentTime = Clock.System.now()
         val reminders = listOf(
-            Reminder(id = "1", text = "テスト1"),
-            Reminder(id = "2", text = "テスト2", isCompleted = true)
+            Reminder(
+                id = "1",
+                text = "テスト1",
+                createdAt = currentTime,
+                forgetAt = currentTime + 24.hours
+            ),
+            Reminder(
+                id = "2",
+                text = "テスト2",
+                isCompleted = true,
+                createdAt = currentTime,
+                forgetAt = currentTime + 24.hours
+            )
         )
         testLocalDataSource.reset()
         testLocalDataSource.setRemindersToReturn(reminders)
@@ -191,7 +217,14 @@ class ReminderRepositoryImplTest {
     @Test
     fun `updateReminder - 正常な場合はUnitが返される`() = runTest {
         // Given
-        val reminder = Reminder(id = "1", text = "更新テスト", isCompleted = true)
+        val currentTime = Clock.System.now()
+        val reminder = Reminder(
+            id = "1",
+            text = "更新テスト",
+            isCompleted = true,
+            createdAt = currentTime,
+            forgetAt = currentTime + 24.hours
+        )
         testLocalDataSource.reset()
 
         // When
@@ -208,7 +241,13 @@ class ReminderRepositoryImplTest {
     @Test
     fun `updateReminder - ローカルデータソースエラーの場合はFailureが返される`() = runTest {
         // Given
-        val reminder = Reminder(id = "1", text = "エラーテスト")
+        val currentTime = Clock.System.now()
+        val reminder = Reminder(
+            id = "1",
+            text = "エラーテスト",
+            createdAt = currentTime,
+            forgetAt = currentTime + 24.hours
+        )
         val exception = RuntimeException("更新エラー")
         testLocalDataSource.reset()
         testLocalDataSource.setShouldThrowException(exception)
