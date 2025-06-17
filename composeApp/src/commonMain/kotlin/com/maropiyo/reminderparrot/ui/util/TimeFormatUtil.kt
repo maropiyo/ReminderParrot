@@ -36,8 +36,7 @@ object TimeFormatUtil {
             remainingDuration >= 1.hours -> {
                 val hours = remainingDuration.inWholeHours
                 val minutes = (remainingDuration - hours.hours).inWholeMinutes
-                val seconds = (remainingDuration - hours.hours - minutes.minutes).inWholeSeconds
-                "わすれるまであと${hours}時間${minutes}分${seconds}秒"
+                "わすれるまであと${hours}時間${minutes}分"
             }
             remainingDuration >= 1.minutes -> {
                 val minutes = remainingDuration.inWholeMinutes
