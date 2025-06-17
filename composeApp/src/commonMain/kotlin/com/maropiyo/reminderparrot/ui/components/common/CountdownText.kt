@@ -42,13 +42,13 @@ fun CountdownText(
     LaunchedEffect(forgetAt) {
         while (isActive) {
             val currentTime = Clock.System.now()
-            
+
             // 既に忘れた場合は削除を実行
             if (forgetAt <= currentTime) {
                 onExpired()
                 break
             }
-            
+
             timeText = TimeFormatUtil.formatTimeUntilForget(forgetAt, currentTime)
 
             // 1秒待機

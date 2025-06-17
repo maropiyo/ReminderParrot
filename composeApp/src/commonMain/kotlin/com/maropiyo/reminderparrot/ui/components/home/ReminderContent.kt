@@ -31,7 +31,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -123,6 +122,7 @@ fun ReminderContent(
                     editingReminder = reminder
                     isShowEditBottomSheet = true
                 },
+                onDeleteReminder = onDeleteReminder,
                 modifier = Modifier.weight(1f).fillMaxWidth()
             )
         }
@@ -222,6 +222,7 @@ private fun ReminderItems(
     state: ReminderListState,
     onToggleCompletion: (String) -> Unit,
     onReminderClick: (Reminder) -> Unit,
+    onDeleteReminder: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     when {
@@ -250,6 +251,9 @@ private fun ReminderItems(
                         reminder = reminder,
                         onToggleCompletion = { onToggleCompletion(reminder.id) },
                         onCardClick = { onReminderClick(reminder) },
+                        onDeleteReminder = { // 期限切れによる自動削除は直接実行
+                            onDeleteReminder(reminder.id)
+                        },
                         modifier = Modifier.padding(vertical = 8.dp)
                     )
                 }
@@ -267,6 +271,7 @@ private fun AnimatedReminderCard(
     reminder: Reminder,
     onToggleCompletion: () -> Unit,
     onCardClick: () -> Unit,
+    onDeleteReminder: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var isVisible by remember { mutableStateOf(true) }
@@ -293,7 +298,8 @@ private fun AnimatedReminderCard(
                     onToggleCompletion()
                 }
             },
-            onCardClick = onCardClick
+            onCardClick = onCardClick,
+            onDeleteReminder = onDeleteReminder
         )
     }
 }
@@ -307,6 +313,7 @@ private fun ReminderCard(
     reminder: Reminder,
     onToggleCompletion: () -> Unit,
     onCardClick: () -> Unit,
+    onDeleteReminder: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -356,7 +363,7 @@ private fun ReminderCard(
                 forgetAt = reminder.forgetAt,
                 textStyle = MaterialTheme.typography.bodySmall,
                 color = Secondary.copy(alpha = 0.7f),
-                onExpired = { onToggleCompletion() },
+                onExpired = { onDeleteReminder() },
                 modifier = Modifier.padding(top = 4.dp)
             )
         }
