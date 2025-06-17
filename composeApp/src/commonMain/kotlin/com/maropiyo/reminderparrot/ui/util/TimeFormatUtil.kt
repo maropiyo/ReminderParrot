@@ -45,7 +45,11 @@ object TimeFormatUtil {
             }
             else -> {
                 val seconds = remainingDuration.inWholeSeconds
-                "わすれるまであと${seconds}秒"
+                if (seconds <= 0) {
+                    "ぽかん！"
+                } else {
+                    "わすれるまであと${seconds}秒"
+                }
             }
         }
     }
