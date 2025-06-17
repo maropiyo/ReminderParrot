@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 
 /**
  * リマインダー一覧のビューモデル
@@ -209,7 +210,7 @@ class ReminderListViewModel(
                             loadReminders()
                         } else {
                             // 削除がない場合でも、時間表示の更新のためにStateを更新
-                            _state.update { it.copy(lastUpdated = System.currentTimeMillis()) }
+                            _state.update { it.copy(lastUpdated = Clock.System.now().toEpochMilliseconds()) }
                         }
                     }
             }
