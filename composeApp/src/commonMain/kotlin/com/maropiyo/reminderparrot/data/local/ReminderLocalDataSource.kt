@@ -3,6 +3,7 @@ package com.maropiyo.reminderparrot.data.local
 import com.maropiyo.reminderparrot.data.mapper.ReminderMapper
 import com.maropiyo.reminderparrot.db.ReminderParrotDatabase
 import com.maropiyo.reminderparrot.domain.entity.Reminder
+import kotlinx.datetime.Instant
 
 /**
  * リマインダーのローカルデータソース
@@ -24,7 +25,9 @@ class ReminderLocalDataSource(
         database.reminderParrotDatabaseQueries.insertReminder(
             id = reminder.id,
             text = reminder.text,
-            is_completed = if (reminder.isCompleted) 1L else 0L
+            is_completed = if (reminder.isCompleted) 1L else 0L,
+            created_at = reminder.createdAt.toEpochMilliseconds(),
+            forget_at = reminder.forgetAt.toEpochMilliseconds()
         )
         return reminder
     }
@@ -55,5 +58,24 @@ class ReminderLocalDataSource(
      */
     fun deleteReminder(reminderId: String) {
         database.reminderParrotDatabaseQueries.deleteReminder(reminderId)
+    }
+
+    /**
+     * 期限切れリマインダーを削除する
+     *
+     * @param currentTime 現在時刻
+     * @return 削除されたリマインダー数
+     */
+    fun deleteExpiredReminders(currentTime: Instant): Int {
+        // 削除前のカウントを取得
+        val beforeCount = database.reminderParrotDatabaseQueries.selectAllReminders().executeAsList().size
+
+        // 期限切れリマインダーを削除
+        database.reminderParrotDatabaseQueries.deleteExpiredReminders(currentTime.toEpochMilliseconds())
+
+        // 削除後のカウントを取得して差分を計算
+        val afterCount = database.reminderParrotDatabaseQueries.selectAllReminders().executeAsList().size
+
+        return beforeCount - afterCount
     }
 }

@@ -4,6 +4,7 @@ import com.maropiyo.reminderparrot.data.local.ReminderLocalDataSource
 import com.maropiyo.reminderparrot.data.remote.ReminderRemoteDataSource
 import com.maropiyo.reminderparrot.domain.entity.Reminder
 import com.maropiyo.reminderparrot.domain.repository.ReminderRepository
+import kotlinx.datetime.Instant
 
 /**
  * リマインダーリポジトリの実装
@@ -66,5 +67,15 @@ class ReminderRepositoryImpl(
         Result.success(Unit)
     } catch (e: Exception) {
         Result.failure(e)
+    }
+
+    /**
+     * 期限切れリマインダーを削除する
+     *
+     * @param currentTime 現在時刻
+     * @return 削除されたリマインダー数
+     */
+    override suspend fun deleteExpiredReminders(currentTime: Instant): Int {
+        return localDataSource.deleteExpiredReminders(currentTime)
     }
 }

@@ -55,6 +55,7 @@ import com.maropiyo.reminderparrot.ui.theme.ParrotYellow
 import com.maropiyo.reminderparrot.ui.theme.Secondary
 import com.maropiyo.reminderparrot.ui.theme.Shapes
 import com.maropiyo.reminderparrot.ui.theme.White
+import com.maropiyo.reminderparrot.ui.util.TimeFormatUtil
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
@@ -307,13 +308,17 @@ private fun ReminderCard(
     onCardClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // 残り時間と透過度を計算
+    val timeUntilForget = TimeFormatUtil.formatTimeUntilForget(reminder.forgetAt)
+    val alpha = TimeFormatUtil.calculateAlpha(reminder.forgetAt, reminder.createdAt)
+
     Card(
         modifier = modifier
             .fillMaxWidth()
             .clickable { onCardClick() },
         colors =
         CardDefaults.cardColors(
-            containerColor = White
+            containerColor = White.copy(alpha = alpha)
         ),
         shape = Shapes.extraLarge,
         elevation =
@@ -321,29 +326,40 @@ private fun ReminderCard(
             defaultElevation = 4.dp
         )
     ) {
-        Row(
-            modifier =
-            Modifier
+        Column(
+            modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .padding(16.dp)
         ) {
-            // テキスト
-            Text(
-                text = reminder.text,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = Secondary,
-                textDecoration = if (reminder.isCompleted) TextDecoration.LineThrough else TextDecoration.None,
-                modifier = Modifier.weight(1f)
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // テキスト
+                Text(
+                    text = reminder.text,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = Secondary,
+                    textDecoration = if (reminder.isCompleted) TextDecoration.LineThrough else TextDecoration.None,
+                    modifier = Modifier.weight(1f)
+                )
 
-            // 丸いチェックボックス
-            CircularCheckbox(
-                checked = reminder.isCompleted,
-                onCheckedChange = { onToggleCompletion() },
-                modifier = Modifier.size(32.dp)
+                // 丸いチェックボックス
+                CircularCheckbox(
+                    checked = reminder.isCompleted,
+                    onCheckedChange = { onToggleCompletion() },
+                    modifier = Modifier.size(32.dp)
+                )
+            }
+
+            // 残り時間表示
+            Text(
+                text = timeUntilForget,
+                style = MaterialTheme.typography.bodySmall,
+                color = Secondary.copy(alpha = 0.7f),
+                modifier = Modifier.padding(top = 4.dp)
             )
         }
     }
