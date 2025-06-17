@@ -28,26 +28,26 @@ object TimeFormatUtil {
                 val days = remainingDuration.inWholeDays
                 val hours = (remainingDuration - days.days).inWholeHours
                 if (hours > 0) {
-                    "わすれるまであと${days}にちと${hours}じかん"
+                    "わすれるまであと${days}日と${hours}時間"
                 } else {
-                    "わすれるまであと${days}にち"
+                    "わすれるまであと${days}日"
                 }
             }
             remainingDuration >= 1.hours -> {
                 val hours = remainingDuration.inWholeHours
                 val minutes = (remainingDuration - hours.hours).inWholeMinutes
                 val seconds = (remainingDuration - hours.hours - minutes.minutes).inWholeSeconds
-                "わすれるまであと${hours}じかん${minutes}ふん${seconds}びょう"
+                "わすれるまであと${hours}時間${minutes}分${seconds}秒"
             }
             remainingDuration >= 1.minutes -> {
                 val minutes = remainingDuration.inWholeMinutes
                 val seconds = (remainingDuration - minutes.minutes).inWholeSeconds
-                "わすれるまであと${minutes}ふん${seconds}びょう"
+                "わすれるまであと${minutes}分${seconds}秒"
             }
             else -> {
                 val seconds = remainingDuration.inWholeSeconds
                 val displaySeconds = maxOf(1, seconds) // 最低1秒と表示
-                "わすれるまであと${displaySeconds}びょう"
+                "わすれるまであと${displaySeconds}秒"
             }
         }
     }
