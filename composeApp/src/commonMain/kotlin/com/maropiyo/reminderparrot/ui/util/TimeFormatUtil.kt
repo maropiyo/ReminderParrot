@@ -4,6 +4,7 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 
@@ -25,16 +26,28 @@ object TimeFormatUtil {
             remainingDuration <= Duration.ZERO -> "もうわすれちゃった"
             remainingDuration >= 1.days -> {
                 val days = remainingDuration.inWholeDays
-                "わすれるまであと${days}にち"
+                val hours = (remainingDuration - days.days).inWholeHours
+                if (hours > 0) {
+                    "わすれるまであと${days}にちと${hours}じかん"
+                } else {
+                    "わすれるまであと${days}にち"
+                }
             }
             remainingDuration >= 1.hours -> {
                 val hours = remainingDuration.inWholeHours
-                "わすれるまであと${hours}じかん"
+                val minutes = (remainingDuration - hours.hours).inWholeMinutes
+                val seconds = (remainingDuration - hours.hours - minutes.minutes).inWholeSeconds
+                "わすれるまであと${hours}じかん${minutes}ふん${seconds}びょう"
+            }
+            remainingDuration >= 1.minutes -> {
+                val minutes = remainingDuration.inWholeMinutes
+                val seconds = (remainingDuration - minutes.minutes).inWholeSeconds
+                "わすれるまであと${minutes}ふん${seconds}びょう"
             }
             else -> {
-                val minutes = remainingDuration.inWholeMinutes
-                val displayMinutes = maxOf(1, minutes) // 最低1分と表示
-                "わすれるまであと${displayMinutes}ふん"
+                val seconds = remainingDuration.inWholeSeconds
+                val displaySeconds = maxOf(1, seconds) // 最低1秒と表示
+                "わすれるまであと${displaySeconds}びょう"
             }
         }
     }
