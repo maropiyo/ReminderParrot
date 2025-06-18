@@ -35,11 +35,20 @@ class ForgetNotificationReceiver : BroadcastReceiver() {
             PendingIntent.FLAG_IMMUTABLE
         )
 
+        // 申し訳なさそうなメッセージをランダムに選択
+        val messages = listOf(
+            "ごめん、わすれちゃった...",
+            "あ...もうおぼえてない",
+            "わすれちゃってごめんね",
+            "きえちゃった...ごめん"
+        )
+        val randomMessage = messages.random()
+
         // 通知を作成
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_dialog_info) // 適切なアイコンに変更
             .setContentTitle("「$reminderText」をわすれちゃった！")
-            .setContentText("ぴよぴよ〜！もうおぼえてないや〜")
+            .setContentText(randomMessage)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)

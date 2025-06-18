@@ -59,10 +59,19 @@ class IOSNotificationService : NotificationService {
             return
         }
 
+        // 申し訳なさそうなメッセージをランダムに選択
+        val messages = listOf(
+            "ごめん、わすれちゃった...",
+            "あ...もうおぼえてない",
+            "わすれちゃってごめんね",
+            "きえちゃった...ごめん"
+        )
+        val randomMessage = messages.random()
+
         // 通知コンテンツを作成
         val content = UNMutableNotificationContent().apply {
             setTitle("「${reminder.text}」をわすれちゃった！")
-            setBody("ぴよぴよ〜！もうおぼえてないや〜")
+            setBody(randomMessage)
             setSound(null) // デフォルトサウンド
         }
 
@@ -119,9 +128,18 @@ class IOSNotificationService : NotificationService {
      * 即座に通知を表示（過去の時刻の場合）
      */
     private suspend fun showImmediateNotification(reminder: Reminder) {
+        // 申し訳なさそうなメッセージをランダムに選択
+        val messages = listOf(
+            "ごめん、わすれちゃった...",
+            "あ...もうおぼえてない",
+            "わすれちゃってごめんね",
+            "きえちゃった...ごめん"
+        )
+        val randomMessage = messages.random()
+
         val content = UNMutableNotificationContent().apply {
             setTitle("「${reminder.text}」をわすれちゃった！")
-            setBody("ぴよぴよ〜！もうおぼえてないや〜")
+            setBody(randomMessage)
             setSound(null)
         }
 
