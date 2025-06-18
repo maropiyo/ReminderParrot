@@ -38,8 +38,8 @@ class ForgetNotificationReceiver : BroadcastReceiver() {
         // 通知を作成
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_dialog_info) // 適切なアイコンに変更
-            .setContentTitle("リマインダーを忘れちゃった！")
-            .setContentText("「$reminderText」をもう忘れちゃいました")
+            .setContentTitle("リマインコが「$reminderText」をわすれちゃったよ")
+            .setContentText("タップしてアプリを開く")
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
