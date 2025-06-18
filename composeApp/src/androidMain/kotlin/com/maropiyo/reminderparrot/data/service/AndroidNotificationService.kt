@@ -154,8 +154,8 @@ class AndroidNotificationService(
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_dialog_info) // 適切なアイコンに変更
-            .setContentTitle("リマインコが「${reminder.text}」をわすれちゃったよ")
-            .setContentText("タップしてアプリを開く")
+            .setContentTitle("「${reminder.text}」をわすれちゃった！")
+            .setContentText("ぴよぴよ〜！もうおぼえてないや〜")
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)

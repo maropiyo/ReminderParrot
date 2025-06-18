@@ -61,8 +61,8 @@ class IOSNotificationService : NotificationService {
 
         // 通知コンテンツを作成
         val content = UNMutableNotificationContent().apply {
-            setTitle("リマインコが「${reminder.text}」をわすれちゃったよ")
-            setBody("タップしてアプリを開く")
+            setTitle("「${reminder.text}」をわすれちゃった！")
+            setBody("ぴよぴよ〜！もうおぼえてないや〜")
             setSound(null) // デフォルトサウンド
         }
 
@@ -120,8 +120,8 @@ class IOSNotificationService : NotificationService {
      */
     private suspend fun showImmediateNotification(reminder: Reminder) {
         val content = UNMutableNotificationContent().apply {
-            setTitle("リマインコが「${reminder.text}」をわすれちゃったよ")
-            setBody("タップしてアプリを開く")
+            setTitle("「${reminder.text}」をわすれちゃった！")
+            setBody("ぴよぴよ〜！もうおぼえてないや〜")
             setSound(null)
         }
 
