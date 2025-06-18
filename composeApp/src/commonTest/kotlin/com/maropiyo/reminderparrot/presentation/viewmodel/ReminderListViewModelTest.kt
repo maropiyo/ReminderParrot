@@ -9,6 +9,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.hours
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -19,6 +20,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import kotlinx.datetime.Clock
 
 /**
  * ReminderListViewModelのテストクラス
@@ -89,7 +91,15 @@ class ReminderListViewModelTest {
             return if (shouldReturnFailure) {
                 Result.failure(exceptionToThrow!!)
             } else {
-                Result.success(reminderToReturn ?: Reminder(id = "test-id", text = text))
+                val currentTime = Clock.System.now()
+                Result.success(
+                    reminderToReturn ?: Reminder(
+                        id = "test-id",
+                        text = text,
+                        createdAt = currentTime,
+                        forgetAt = currentTime + 24.hours
+                    )
+                )
             }
         }
     }
@@ -230,9 +240,21 @@ class ReminderListViewModelTest {
     @Test
     fun `初期状態は正しく設定される`() = runTest {
         // Given
+        val currentTime = Clock.System.now()
         val reminders = listOf(
-            Reminder(id = "1", text = "テスト1"),
-            Reminder(id = "2", text = "テスト2", isCompleted = true)
+            Reminder(
+                id = "1",
+                text = "テスト1",
+                createdAt = currentTime,
+                forgetAt = currentTime + 24.hours
+            ),
+            Reminder(
+                id = "2",
+                text = "テスト2",
+                isCompleted = true,
+                createdAt = currentTime,
+                forgetAt = currentTime + 24.hours
+            )
         )
         testGetRemindersUseCase.setRemindersToReturn(reminders)
 
@@ -260,8 +282,21 @@ class ReminderListViewModelTest {
     @Test
     fun `createReminder - 正常な場合はリマインダーが追加される`() = runTest {
         // Given
-        val initialReminders = listOf(Reminder(id = "1", text = "既存"))
-        val newReminder = Reminder(id = "2", text = "新規")
+        val currentTime = Clock.System.now()
+        val initialReminders = listOf(
+            Reminder(
+                id = "1",
+                text = "既存",
+                createdAt = currentTime,
+                forgetAt = currentTime + 24.hours
+            )
+        )
+        val newReminder = Reminder(
+            id = "2",
+            text = "新規",
+            createdAt = currentTime,
+            forgetAt = currentTime + 24.hours
+        )
 
         testGetRemindersUseCase.setRemindersToReturn(initialReminders)
         testCreateReminderUseCase.setReminderToReturn(newReminder)
@@ -291,7 +326,15 @@ class ReminderListViewModelTest {
     @Test
     fun `createReminder - エラーの場合はエラーメッセージが設定される`() = runTest {
         // Given
-        val initialReminders = listOf(Reminder(id = "1", text = "既存"))
+        val currentTime = Clock.System.now()
+        val initialReminders = listOf(
+            Reminder(
+                id = "1",
+                text = "既存",
+                createdAt = currentTime,
+                forgetAt = currentTime + 24.hours
+            )
+        )
         val exception = RuntimeException("作成エラー")
 
         testGetRemindersUseCase.setRemindersToReturn(initialReminders)
@@ -320,7 +363,14 @@ class ReminderListViewModelTest {
     @Test
     fun `toggleReminderCompletion - 正常な場合は完了状態が切り替わる`() = runTest {
         // Given
-        val reminder = Reminder(id = "1", text = "テスト", isCompleted = false)
+        val currentTime = Clock.System.now()
+        val reminder = Reminder(
+            id = "1",
+            text = "テスト",
+            isCompleted = false,
+            createdAt = currentTime,
+            forgetAt = currentTime + 24.hours
+        )
 
         testGetRemindersUseCase.setRemindersToReturn(listOf(reminder))
         testUpdateReminderUseCase.setShouldReturnSuccess()
@@ -348,7 +398,14 @@ class ReminderListViewModelTest {
     @Test
     fun `toggleReminderCompletion - エラーの場合はエラーメッセージが設定される`() = runTest {
         // Given
-        val reminder = Reminder(id = "1", text = "テスト", isCompleted = false)
+        val currentTime = Clock.System.now()
+        val reminder = Reminder(
+            id = "1",
+            text = "テスト",
+            isCompleted = false,
+            createdAt = currentTime,
+            forgetAt = currentTime + 24.hours
+        )
         val exception = RuntimeException("更新エラー")
 
         testGetRemindersUseCase.setRemindersToReturn(listOf(reminder))
@@ -376,7 +433,13 @@ class ReminderListViewModelTest {
     @Test
     fun `toggleReminderCompletion - 存在しないIDの場合は何も起こらない`() = runTest {
         // Given
-        val reminder = Reminder(id = "1", text = "テスト")
+        val currentTime = Clock.System.now()
+        val reminder = Reminder(
+            id = "1",
+            text = "テスト",
+            createdAt = currentTime,
+            forgetAt = currentTime + 24.hours
+        )
         testGetRemindersUseCase.setRemindersToReturn(listOf(reminder))
 
         val viewModel = TestReminderListViewModel(
@@ -426,11 +489,36 @@ class ReminderListViewModelTest {
     @Test
     fun `リマインダーリストは未完了が先頭にソートされる`() = runTest {
         // Given
+        val currentTime = Clock.System.now()
         val reminders = listOf(
-            Reminder(id = "1", text = "完了済み", isCompleted = true),
-            Reminder(id = "2", text = "未完了1", isCompleted = false),
-            Reminder(id = "3", text = "未完了2", isCompleted = false),
-            Reminder(id = "4", text = "完了済み2", isCompleted = true)
+            Reminder(
+                id = "1",
+                text = "完了済み",
+                isCompleted = true,
+                createdAt = currentTime,
+                forgetAt = currentTime + 24.hours
+            ),
+            Reminder(
+                id = "2",
+                text = "未完了1",
+                isCompleted = false,
+                createdAt = currentTime,
+                forgetAt = currentTime + 24.hours
+            ),
+            Reminder(
+                id = "3",
+                text = "未完了2",
+                isCompleted = false,
+                createdAt = currentTime,
+                forgetAt = currentTime + 24.hours
+            ),
+            Reminder(
+                id = "4",
+                text = "完了済み2",
+                isCompleted = true,
+                createdAt = currentTime,
+                forgetAt = currentTime + 24.hours
+            )
         )
         testGetRemindersUseCase.setRemindersToReturn(reminders)
 

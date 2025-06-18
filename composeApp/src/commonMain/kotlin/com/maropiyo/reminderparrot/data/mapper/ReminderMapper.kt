@@ -2,6 +2,7 @@ package com.maropiyo.reminderparrot.data.mapper
 
 import com.maropiyo.reminderparrot.data.model.ReminderDto
 import com.maropiyo.reminderparrot.domain.entity.Reminder
+import kotlinx.datetime.Instant
 
 /**
  * リマインダーのマッパー
@@ -16,7 +17,9 @@ class ReminderMapper {
     fun mapToEntity(dto: ReminderDto): Reminder = Reminder(
         id = dto.id,
         text = dto.text,
-        isCompleted = dto.isCompleted
+        isCompleted = dto.isCompleted,
+        createdAt = Instant.fromEpochMilliseconds(dto.createdAt),
+        forgetAt = Instant.fromEpochMilliseconds(dto.forgetAt)
     )
 
     /**
@@ -28,7 +31,9 @@ class ReminderMapper {
     fun mapToDto(entity: Reminder): ReminderDto = ReminderDto(
         id = entity.id,
         text = entity.text,
-        isCompleted = entity.isCompleted
+        isCompleted = entity.isCompleted,
+        createdAt = entity.createdAt.toEpochMilliseconds(),
+        forgetAt = entity.forgetAt.toEpochMilliseconds()
     )
 
     /**
@@ -37,11 +42,16 @@ class ReminderMapper {
      * @param id リマインダーID
      * @param text リマインダーテキスト
      * @param isCompleted 完了フラグ
+     * @param createdAt 作成日時（エポックミリ秒）
+     * @param forgetAt 忘却日時（エポックミリ秒）
      * @return リマインダー
      */
-    fun mapFromDatabase(id: String, text: String, isCompleted: Long): Reminder = Reminder(
-        id = id,
-        text = text,
-        isCompleted = isCompleted == 1L
-    )
+    fun mapFromDatabase(id: String, text: String, isCompleted: Long, createdAt: Long, forgetAt: Long): Reminder =
+        Reminder(
+            id = id,
+            text = text,
+            isCompleted = isCompleted == 1L,
+            createdAt = Instant.fromEpochMilliseconds(createdAt),
+            forgetAt = Instant.fromEpochMilliseconds(forgetAt)
+        )
 }

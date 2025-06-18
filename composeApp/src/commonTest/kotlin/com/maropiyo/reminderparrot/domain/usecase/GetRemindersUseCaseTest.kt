@@ -5,7 +5,10 @@ import com.maropiyo.reminderparrot.domain.repository.ReminderRepository
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.hours
 import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 
 /**
  * GetRemindersUseCaseのテストクラス
@@ -57,6 +60,10 @@ class GetRemindersUseCaseTest {
         override suspend fun deleteReminder(reminderId: String): Result<Unit> {
             return Result.success(Unit)
         }
+
+        override suspend fun deleteExpiredReminders(currentTime: Instant): Int {
+            return 0
+        }
     }
 
     /**
@@ -79,9 +86,21 @@ class GetRemindersUseCaseTest {
     @Test
     fun `正常な場合はリマインダーリストが返される`() = runTest {
         // Given
+        val currentTime = Clock.System.now()
         val expectedReminders = listOf(
-            Reminder(id = "1", text = "テスト1"),
-            Reminder(id = "2", text = "テスト2", isCompleted = true)
+            Reminder(
+                id = "1",
+                text = "テスト1",
+                createdAt = currentTime,
+                forgetAt = currentTime + 24.hours
+            ),
+            Reminder(
+                id = "2",
+                text = "テスト2",
+                isCompleted = true,
+                createdAt = currentTime,
+                forgetAt = currentTime + 24.hours
+            )
         )
         testRepository.reset()
         testRepository.setRemindersToReturn(expectedReminders)

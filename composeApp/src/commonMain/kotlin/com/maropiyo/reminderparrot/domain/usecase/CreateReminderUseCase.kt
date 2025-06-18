@@ -2,16 +2,21 @@ package com.maropiyo.reminderparrot.domain.usecase
 
 import com.maropiyo.reminderparrot.domain.common.UuidGenerator
 import com.maropiyo.reminderparrot.domain.entity.Reminder
+import com.maropiyo.reminderparrot.domain.repository.ParrotRepository
 import com.maropiyo.reminderparrot.domain.repository.ReminderRepository
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.datetime.Clock
 
 /**
  * リマインダー作成ユースケース
  *
  * @property reminderRepository リマインダーリポジトリ
+ * @property parrotRepository パロットリポジトリ
  * @property uuidGenerator UUIDジェネレーター
  */
 class CreateReminderUseCase(
     private val reminderRepository: ReminderRepository,
+    private val parrotRepository: ParrotRepository,
     private val uuidGenerator: UuidGenerator
 ) {
     /**
@@ -21,12 +26,28 @@ class CreateReminderUseCase(
      * @return 作成したリマインダー
      */
     suspend operator fun invoke(text: String): Result<Reminder> {
-        val reminder =
-            Reminder(
-                id = uuidGenerator.generateId(),
-                text = text
-            )
+        return try {
+            // インコの記憶時間を取得
+            val parrotResult = parrotRepository.getParrot()
+            if (parrotResult.isFailure) {
+                return Result.failure(parrotResult.exceptionOrNull()!!)
+            }
 
-        return reminderRepository.createReminder(reminder)
+            val parrot = parrotResult.getOrThrow()
+            val currentTime = Clock.System.now()
+            val forgetTime = currentTime + (parrot.memoryTimeHours * 3600).seconds
+
+            val reminder =
+                Reminder(
+                    id = uuidGenerator.generateId(),
+                    text = text,
+                    createdAt = currentTime,
+                    forgetAt = forgetTime
+                )
+
+            reminderRepository.createReminder(reminder)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }

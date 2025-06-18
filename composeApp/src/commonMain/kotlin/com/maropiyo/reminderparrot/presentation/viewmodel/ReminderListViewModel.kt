@@ -4,16 +4,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.maropiyo.reminderparrot.domain.usecase.AddParrotExperienceUseCase
 import com.maropiyo.reminderparrot.domain.usecase.CreateReminderUseCase
+import com.maropiyo.reminderparrot.domain.usecase.DeleteExpiredRemindersUseCase
 import com.maropiyo.reminderparrot.domain.usecase.DeleteReminderUseCase
 import com.maropiyo.reminderparrot.domain.usecase.GetRemindersUseCase
 import com.maropiyo.reminderparrot.domain.usecase.UpdateReminderUseCase
 import com.maropiyo.reminderparrot.presentation.state.ReminderListState
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 
 /**
  * リマインダー一覧のビューモデル
@@ -22,6 +25,7 @@ import kotlinx.coroutines.launch
  * @property createReminderUseCase リマインダー作成ユースケース
  * @property updateReminderUseCase リマインダー更新ユースケース
  * @property deleteReminderUseCase リマインダー削除ユースケース
+ * @property deleteExpiredRemindersUseCase 期限切れリマインダー削除ユースケース
  * @property addParrotExperienceUseCase インコの経験値追加ユースケース
  */
 class ReminderListViewModel(
@@ -29,14 +33,20 @@ class ReminderListViewModel(
     private val createReminderUseCase: CreateReminderUseCase,
     private val updateReminderUseCase: UpdateReminderUseCase,
     private val deleteReminderUseCase: DeleteReminderUseCase,
+    private val deleteExpiredRemindersUseCase: DeleteExpiredRemindersUseCase,
     private val addParrotExperienceUseCase: AddParrotExperienceUseCase
 ) : ViewModel() {
     private val _state = MutableStateFlow(ReminderListState())
     val state: StateFlow<ReminderListState> = _state.asStateFlow()
 
+    // 定期更新用のJob
+    private var periodicUpdateJob: Job? = null
+
     init {
         // 初期化時にリマインダーを取得
         loadReminders()
+        // 定期的な更新を開始
+        startPeriodicUpdate()
     }
 
     /**
@@ -171,6 +181,9 @@ class ReminderListViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
 
+            // 期限切れリマインダーを削除
+            deleteExpiredRemindersUseCase.execute()
+
             getRemindersUseCase()
                 .onSuccess { reminders ->
                     _state.update { it.copy(reminders = reminders, isLoading = false) }
@@ -178,5 +191,37 @@ class ReminderListViewModel(
                     _state.update { it.copy(error = exception.message, isLoading = false) }
                 }
         }
+    }
+
+    /**
+     * 定期的な更新を開始する
+     * 1分ごとに期限切れリマインダーの削除とUIの更新を行う
+     */
+    private fun startPeriodicUpdate() {
+        periodicUpdateJob = viewModelScope.launch {
+            while (true) {
+                delay(60_000) // 1分待機
+
+                // 期限切れリマインダーを削除
+                deleteExpiredRemindersUseCase.execute()
+                    .onSuccess { deletedCount ->
+                        if (deletedCount > 0) {
+                            // 削除されたリマインダーがある場合はリストを更新
+                            loadReminders()
+                        } else {
+                            // 削除がない場合でも、時間表示の更新のためにStateを更新
+                            _state.update { it.copy(lastUpdated = Clock.System.now().toEpochMilliseconds()) }
+                        }
+                    }
+            }
+        }
+    }
+
+    /**
+     * ViewModel破棄時のクリーンアップ
+     */
+    override fun onCleared() {
+        super.onCleared()
+        periodicUpdateJob?.cancel()
     }
 }

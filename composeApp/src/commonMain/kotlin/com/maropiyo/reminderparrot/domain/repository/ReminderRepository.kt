@@ -1,6 +1,7 @@
 package com.maropiyo.reminderparrot.domain.repository
 
 import com.maropiyo.reminderparrot.domain.entity.Reminder
+import kotlinx.datetime.Instant
 
 /**
  * リマインダーリポジトリ
@@ -36,4 +37,12 @@ interface ReminderRepository {
      * @return 削除結果
      */
     suspend fun deleteReminder(reminderId: String): Result<Unit>
+
+    /**
+     * 期限切れリマインダーを削除する
+     *
+     * @param currentTime 現在時刻
+     * @return 削除されたリマインダー数
+     */
+    suspend fun deleteExpiredReminders(currentTime: Instant): Int
 }

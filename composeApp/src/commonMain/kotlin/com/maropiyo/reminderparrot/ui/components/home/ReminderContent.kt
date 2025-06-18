@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import com.maropiyo.reminderparrot.domain.entity.Reminder
 import com.maropiyo.reminderparrot.presentation.state.ParrotState
 import com.maropiyo.reminderparrot.presentation.state.ReminderListState
+import com.maropiyo.reminderparrot.ui.components.common.CountdownText
 import com.maropiyo.reminderparrot.ui.components.state.EmptyState
 import com.maropiyo.reminderparrot.ui.components.state.ErrorState
 import com.maropiyo.reminderparrot.ui.components.state.LoadingState
@@ -121,6 +122,7 @@ fun ReminderContent(
                     editingReminder = reminder
                     isShowEditBottomSheet = true
                 },
+                onDeleteReminder = onDeleteReminder,
                 modifier = Modifier.weight(1f).fillMaxWidth()
             )
         }
@@ -220,6 +222,7 @@ private fun ReminderItems(
     state: ReminderListState,
     onToggleCompletion: (String) -> Unit,
     onReminderClick: (Reminder) -> Unit,
+    onDeleteReminder: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     when {
@@ -248,6 +251,9 @@ private fun ReminderItems(
                         reminder = reminder,
                         onToggleCompletion = { onToggleCompletion(reminder.id) },
                         onCardClick = { onReminderClick(reminder) },
+                        onDeleteReminder = { // 期限切れによる自動削除は直接実行
+                            onDeleteReminder(reminder.id)
+                        },
                         modifier = Modifier.padding(vertical = 8.dp)
                     )
                 }
@@ -265,6 +271,7 @@ private fun AnimatedReminderCard(
     reminder: Reminder,
     onToggleCompletion: () -> Unit,
     onCardClick: () -> Unit,
+    onDeleteReminder: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var isVisible by remember { mutableStateOf(true) }
@@ -291,7 +298,8 @@ private fun AnimatedReminderCard(
                     onToggleCompletion()
                 }
             },
-            onCardClick = onCardClick
+            onCardClick = onCardClick,
+            onDeleteReminder = onDeleteReminder
         )
     }
 }
@@ -305,6 +313,7 @@ private fun ReminderCard(
     reminder: Reminder,
     onToggleCompletion: () -> Unit,
     onCardClick: () -> Unit,
+    onDeleteReminder: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -321,29 +330,41 @@ private fun ReminderCard(
             defaultElevation = 4.dp
         )
     ) {
-        Row(
-            modifier =
-            Modifier
+        Column(
+            modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .padding(16.dp)
         ) {
-            // テキスト
-            Text(
-                text = reminder.text,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = Secondary,
-                textDecoration = if (reminder.isCompleted) TextDecoration.LineThrough else TextDecoration.None,
-                modifier = Modifier.weight(1f)
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // テキスト
+                Text(
+                    text = reminder.text,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = Secondary,
+                    textDecoration = if (reminder.isCompleted) TextDecoration.LineThrough else TextDecoration.None,
+                    modifier = Modifier.weight(1f)
+                )
 
-            // 丸いチェックボックス
-            CircularCheckbox(
-                checked = reminder.isCompleted,
-                onCheckedChange = { onToggleCompletion() },
-                modifier = Modifier.size(32.dp)
+                // 丸いチェックボックス
+                CircularCheckbox(
+                    checked = reminder.isCompleted,
+                    onCheckedChange = { onToggleCompletion() },
+                    modifier = Modifier.size(32.dp)
+                )
+            }
+
+            // 残り時間表示（リアルタイムカウントダウン）
+            CountdownText(
+                forgetAt = reminder.forgetAt,
+                textStyle = MaterialTheme.typography.bodySmall,
+                color = Secondary.copy(alpha = 0.7f),
+                onExpired = { onDeleteReminder() },
+                modifier = Modifier.padding(top = 4.dp)
             )
         }
     }
