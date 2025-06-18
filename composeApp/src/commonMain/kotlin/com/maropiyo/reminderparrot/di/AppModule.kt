@@ -16,6 +16,7 @@ import com.maropiyo.reminderparrot.domain.usecase.DeleteExpiredRemindersUseCase
 import com.maropiyo.reminderparrot.domain.usecase.DeleteReminderUseCase
 import com.maropiyo.reminderparrot.domain.usecase.GetParrotUseCase
 import com.maropiyo.reminderparrot.domain.usecase.GetRemindersUseCase
+import com.maropiyo.reminderparrot.domain.usecase.RequestNotificationPermissionUseCase
 import com.maropiyo.reminderparrot.domain.usecase.ScheduleForgetNotificationUseCase
 import com.maropiyo.reminderparrot.domain.usecase.UpdateReminderUseCase
 import com.maropiyo.reminderparrot.presentation.viewmodel.ParrotViewModel
@@ -41,6 +42,7 @@ val appModule =
         single<AddParrotExperienceUseCase> { AddParrotExperienceUseCase(get()) }
         single<ScheduleForgetNotificationUseCase> { ScheduleForgetNotificationUseCase(get()) }
         single<CancelForgetNotificationUseCase> { CancelForgetNotificationUseCase(get()) }
+        single<RequestNotificationPermissionUseCase> { RequestNotificationPermissionUseCase(get()) }
 
         // Repository
         single<ReminderRepository> { ReminderRepositoryImpl(get(), get()) }

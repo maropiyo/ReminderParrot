@@ -38,7 +38,8 @@ class CreateReminderUseCase(
 
             val parrot = parrotResult.getOrThrow()
             val currentTime = Clock.System.now()
-            val forgetTime = currentTime + (parrot.memoryTimeHours * 3600).seconds
+            // デバッグ用: 30秒後に忘却
+            val forgetTime = currentTime + 30.seconds
 
             val reminder =
                 Reminder(
