@@ -4,7 +4,8 @@ import com.maropiyo.reminderparrot.domain.common.UuidGenerator
 import com.maropiyo.reminderparrot.domain.entity.Reminder
 import com.maropiyo.reminderparrot.domain.repository.ParrotRepository
 import com.maropiyo.reminderparrot.domain.repository.ReminderRepository
-import kotlin.time.Duration.Companion.seconds
+import com.maropiyo.reminderparrot.domain.service.NotificationService
+import kotlin.time.Duration.Companion.hours
 import kotlinx.datetime.Clock
 
 /**
@@ -13,11 +14,13 @@ import kotlinx.datetime.Clock
  * @property reminderRepository リマインダーリポジトリ
  * @property parrotRepository パロットリポジトリ
  * @property uuidGenerator UUIDジェネレーター
+ * @property notificationService 通知サービス
  */
 class CreateReminderUseCase(
     private val reminderRepository: ReminderRepository,
     private val parrotRepository: ParrotRepository,
-    private val uuidGenerator: UuidGenerator
+    private val uuidGenerator: UuidGenerator,
+    private val notificationService: NotificationService
 ) {
     /**
      * リマインダーを作成する
@@ -35,7 +38,8 @@ class CreateReminderUseCase(
 
             val parrot = parrotResult.getOrThrow()
             val currentTime = Clock.System.now()
-            val forgetTime = currentTime + (parrot.memoryTimeHours * 3600).seconds
+            // インコの記憶時間に基づいて忘却時刻を計算
+            val forgetTime = currentTime + parrot.memoryTimeHours.hours
 
             val reminder =
                 Reminder(
@@ -45,7 +49,19 @@ class CreateReminderUseCase(
                     forgetAt = forgetTime
                 )
 
-            reminderRepository.createReminder(reminder)
+            val createResult = reminderRepository.createReminder(reminder)
+
+            // リマインダーの作成が成功した場合、忘却通知をスケジュール
+            if (createResult.isSuccess) {
+                try {
+                    notificationService.scheduleForgetNotification(createResult.getOrThrow())
+                } catch (e: Exception) {
+                    // 通知のスケジューリングに失敗してもリマインダー作成は成功とする
+                    // ログ出力などのエラーハンドリングは実装に応じて追加
+                }
+            }
+
+            createResult
         } catch (e: Exception) {
             Result.failure(e)
         }

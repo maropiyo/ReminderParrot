@@ -4,6 +4,7 @@ import androidx.compose.ui.window.ComposeUIViewController
 import com.maropiyo.reminderparrot.config.getSupabaseConfig
 import com.maropiyo.reminderparrot.di.databaseModule
 import com.maropiyo.reminderparrot.di.initKoin
+import com.maropiyo.reminderparrot.di.platformModule
 import platform.UIKit.UIViewController
 
 fun MainViewController(): UIViewController {
@@ -12,7 +13,8 @@ fun MainViewController(): UIViewController {
         supabaseConfig = getSupabaseConfig(),
         additionalModules =
         listOf(
-            databaseModule
+            databaseModule,
+            platformModule
         )
     )
 

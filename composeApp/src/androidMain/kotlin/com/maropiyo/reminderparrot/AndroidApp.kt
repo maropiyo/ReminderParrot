@@ -4,6 +4,7 @@ import android.app.Application
 import com.maropiyo.reminderparrot.config.getSupabaseConfig
 import com.maropiyo.reminderparrot.di.databaseModule
 import com.maropiyo.reminderparrot.di.initKoin
+import com.maropiyo.reminderparrot.di.platformModule
 import org.koin.android.ext.koin.androidContext
 
 class AndroidApp : Application() {
@@ -15,7 +16,8 @@ class AndroidApp : Application() {
             supabaseConfig = getSupabaseConfig(),
             additionalModules =
             listOf(
-                databaseModule
+                databaseModule,
+                platformModule
             )
         ).apply {
             // AndroidContextの設定
