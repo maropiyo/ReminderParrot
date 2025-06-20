@@ -1,9 +1,13 @@
 package com.maropiyo.reminderparrot.data.service
 
+import android.Manifest
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.maropiyo.reminderparrot.MainActivity
@@ -54,9 +58,25 @@ class ForgetNotificationReceiver : BroadcastReceiver() {
             .setAutoCancel(true)
             .build()
 
-        // 通知を表示
+        // 通知を表示（Android 13以降の権限チェック付き）
         val notificationManager = NotificationManagerCompat.from(context)
         val notificationId = 10000 + reminderId.hashCode()
-        notificationManager.notify(notificationId, notification)
+
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                if (ActivityCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.POST_NOTIFICATIONS
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
+                    notificationManager.notify(notificationId, notification)
+                }
+            } else {
+                notificationManager.notify(notificationId, notification)
+            }
+        } catch (e: SecurityException) {
+            // 権限エラーをログに記録（本番環境ではログシステムを使用）
+            e.printStackTrace()
+        }
     }
 }

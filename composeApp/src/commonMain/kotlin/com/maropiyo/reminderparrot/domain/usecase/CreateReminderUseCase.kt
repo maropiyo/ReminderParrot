@@ -5,7 +5,7 @@ import com.maropiyo.reminderparrot.domain.entity.Reminder
 import com.maropiyo.reminderparrot.domain.repository.ParrotRepository
 import com.maropiyo.reminderparrot.domain.repository.ReminderRepository
 import com.maropiyo.reminderparrot.domain.service.NotificationService
-import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Duration.Companion.hours
 import kotlinx.datetime.Clock
 
 /**
@@ -38,8 +38,8 @@ class CreateReminderUseCase(
 
             val parrot = parrotResult.getOrThrow()
             val currentTime = Clock.System.now()
-            // デバッグ用: 30秒後に忘却
-            val forgetTime = currentTime + 30.seconds
+            // インコの記憶時間に基づいて忘却時刻を計算
+            val forgetTime = currentTime + parrot.memoryTimeHours.hours
 
             val reminder =
                 Reminder(
