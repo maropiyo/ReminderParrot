@@ -167,7 +167,7 @@ class AndroidNotificationService(
         val notification =
             NotificationCompat
                 .Builder(context, CHANNEL_ID)
-                .setSmallIcon(com.maropiyo.reminderparrot.R.mipmap.ic_launcher) // 適切なアイコンに変更
+                .setSmallIcon(com.maropiyo.reminderparrot.R.mipmap.ic_launcher)
                 .setContentTitle("「${reminder.text}」をわすれちゃった！")
                 .setContentText(randomMessage)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
