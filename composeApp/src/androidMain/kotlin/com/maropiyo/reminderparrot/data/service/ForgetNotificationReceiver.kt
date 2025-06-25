@@ -20,10 +20,7 @@ class ForgetNotificationReceiver : BroadcastReceiver() {
         private const val CHANNEL_ID = "reminder_forget_channel"
     }
 
-    override fun onReceive(
-        context: Context,
-        intent: Intent
-    ) {
+    override fun onReceive(context: Context, intent: Intent) {
         val reminderId = intent.getStringExtra("reminder_id") ?: return
         val reminderText = intent.getStringExtra("reminder_text") ?: "リマインダー"
 
