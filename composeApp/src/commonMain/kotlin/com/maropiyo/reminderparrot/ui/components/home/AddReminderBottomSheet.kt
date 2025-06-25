@@ -20,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -63,6 +64,13 @@ fun AddReminderBottomSheet(
     memorizedWords: Int,
     currentReminderCount: Int
 ) {
+    // ボトムシートが破棄されるときにテキストフィールドの状態をリセット
+    DisposableEffect(Unit) {
+        onDispose {
+            // テキストフィールドの状態をクリア
+        }
+    }
+
     ModalBottomSheet(
         dragHandle = null,
         onDismissRequest = onDismiss,

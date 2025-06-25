@@ -31,6 +31,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -97,6 +98,21 @@ fun ReminderContent(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     // 編集ボトムシートの状態
     val editSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    // ボトムシートが閉じられたときにシートの状態をリセット
+    LaunchedEffect(isShowBottomSheet) {
+        if (!isShowBottomSheet && sheetState.isVisible) {
+            sheetState.hide()
+        }
+    }
+
+    // 編集ボトムシートが閉じられたときにシートの状態をリセット
+    LaunchedEffect(isShowEditBottomSheet) {
+        if (!isShowEditBottomSheet && editSheetState.isVisible) {
+            editSheetState.hide()
+        }
+    }
+
     // コルーチンスコープとキーボードコントローラーの取得
     val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -130,8 +146,17 @@ fun ReminderContent(
         // フローティングアクションボタン
         ReminderFloatingActionButton(
             onClick = {
-                reminderText = ""
-                isShowBottomSheet = true
+                scope.launch {
+                    // シートを初期位置にリセット
+                    if (sheetState.isVisible) {
+                        sheetState.hide()
+                    }
+                    reminderText = ""
+                    isShowBottomSheet = true
+                    // 少し遅延を入れてからシートを表示
+                    delay(100)
+                    sheetState.show()
+                }
             },
             modifier =
             Modifier
@@ -146,15 +171,18 @@ fun ReminderContent(
                 onReminderTextChange = { reminderText = it },
                 onDismiss = {
                     keyboardController?.hide()
-                    isShowBottomSheet = false
-                    reminderText = ""
+                    scope.launch {
+                        sheetState.hide()
+                        isShowBottomSheet = false
+                        reminderText = ""
+                    }
                 },
                 onSaveReminder = {
                     scope.launch {
                         onCreateReminder(reminderText)
+                        sheetState.hide()
                         isShowBottomSheet = false
                         reminderText = ""
-                        sheetState.hide()
                     }
                 },
                 sheetState = sheetState,
