@@ -25,7 +25,6 @@ import kotlinx.datetime.Clock
 class AndroidNotificationService(
     private val context: Context
 ) : NotificationService {
-
     companion object {
         private const val CHANNEL_ID = "reminder_forget_channel"
         private const val CHANNEL_NAME = "リマインダー忘却通知"
@@ -49,8 +48,8 @@ class AndroidNotificationService(
         }
     }
 
-    override suspend fun isNotificationPermissionGranted(): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+    override suspend fun isNotificationPermissionGranted(): Boolean =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             ActivityCompat.checkSelfPermission(
                 context,
                 Manifest.permission.POST_NOTIFICATIONS
@@ -59,7 +58,6 @@ class AndroidNotificationService(
             // Android 12 以下では通知権限チェック不要
             NotificationManagerCompat.from(context).areNotificationsEnabled()
         }
-    }
 
     override suspend fun scheduleForgetNotification(reminder: Reminder) {
         if (!isNotificationPermissionGranted()) {
@@ -68,12 +66,13 @@ class AndroidNotificationService(
 
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = createNotificationIntent(reminder)
-        val pendingIntent = PendingIntent.getBroadcast(
-            context,
-            getRequestCode(reminder.id),
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
+        val pendingIntent =
+            PendingIntent.getBroadcast(
+                context,
+                getRequestCode(reminder.id),
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
 
         val triggerTime = reminder.forgetAt.toEpochMilliseconds()
         val currentTime = Clock.System.now().toEpochMilliseconds()
@@ -102,12 +101,13 @@ class AndroidNotificationService(
     override suspend fun cancelForgetNotification(reminderId: String) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(context, ForgetNotificationReceiver::class.java)
-        val pendingIntent = PendingIntent.getBroadcast(
-            context,
-            getRequestCode(reminderId),
-            intent,
-            PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
-        )
+        val pendingIntent =
+            PendingIntent.getBroadcast(
+                context,
+                getRequestCode(reminderId),
+                intent,
+                PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
+            )
 
         pendingIntent?.let {
             alarmManager.cancel(it)
@@ -125,13 +125,14 @@ class AndroidNotificationService(
      */
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                CHANNEL_NAME,
-                NotificationManager.IMPORTANCE_DEFAULT
-            ).apply {
-                description = CHANNEL_DESCRIPTION
-            }
+            val channel =
+                NotificationChannel(
+                    CHANNEL_ID,
+                    CHANNEL_NAME,
+                    NotificationManager.IMPORTANCE_DEFAULT
+                ).apply {
+                    description = CHANNEL_DESCRIPTION
+                }
 
             val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
@@ -145,30 +146,34 @@ class AndroidNotificationService(
         if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) return
 
         val intent = Intent(context, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(
-            context,
-            0,
-            intent,
-            PendingIntent.FLAG_IMMUTABLE
-        )
+        val pendingIntent =
+            PendingIntent.getActivity(
+                context,
+                0,
+                intent,
+                PendingIntent.FLAG_IMMUTABLE
+            )
 
         // 申し訳なさそうなメッセージをランダムに選択
-        val messages = listOf(
-            "ごめん、わすれちゃった...",
-            "あ...もうおぼえてない",
-            "わすれちゃってごめんね",
-            "きえちゃった...ごめん"
-        )
+        val messages =
+            listOf(
+                "ごめん、わすれちゃった...",
+                "あ...もうおぼえてない",
+                "わすれちゃってごめんね",
+                "きえちゃった...ごめん"
+            )
         val randomMessage = messages.random()
 
-        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.ic_dialog_info) // 適切なアイコンに変更
-            .setContentTitle("「${reminder.text}」をわすれちゃった！")
-            .setContentText(randomMessage)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .setContentIntent(pendingIntent)
-            .setAutoCancel(true)
-            .build()
+        val notification =
+            NotificationCompat
+                .Builder(context, CHANNEL_ID)
+                .setSmallIcon(com.maropiyo.reminderparrot.R.mipmap.ic_launcher)
+                .setContentTitle("「${reminder.text}」をわすれちゃった！")
+                .setContentText(randomMessage)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true)
+                .build()
 
         val notificationManager = NotificationManagerCompat.from(context)
         notificationManager.notify(getRequestCode(reminder.id), notification)
@@ -177,17 +182,14 @@ class AndroidNotificationService(
     /**
      * 通知用のIntentを作成
      */
-    private fun createNotificationIntent(reminder: Reminder): Intent {
-        return Intent(context, ForgetNotificationReceiver::class.java).apply {
+    private fun createNotificationIntent(reminder: Reminder): Intent =
+        Intent(context, ForgetNotificationReceiver::class.java).apply {
             putExtra("reminder_id", reminder.id)
             putExtra("reminder_text", reminder.text)
         }
-    }
 
     /**
      * リマインダーIDに基づいてリクエストコードを生成
      */
-    private fun getRequestCode(reminderId: String): Int {
-        return NOTIFICATION_REQUEST_CODE_BASE + reminderId.hashCode()
-    }
+    private fun getRequestCode(reminderId: String): Int = NOTIFICATION_REQUEST_CODE_BASE + reminderId.hashCode()
 }
