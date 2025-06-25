@@ -16,12 +16,14 @@ import com.maropiyo.reminderparrot.MainActivity
  * リマインダー忘却通知を受信するBroadcastReceiver
  */
 class ForgetNotificationReceiver : BroadcastReceiver() {
-
     companion object {
         private const val CHANNEL_ID = "reminder_forget_channel"
     }
 
-    override fun onReceive(context: Context, intent: Intent) {
+    override fun onReceive(
+        context: Context,
+        intent: Intent
+    ) {
         val reminderId = intent.getStringExtra("reminder_id") ?: return
         val reminderText = intent.getStringExtra("reminder_text") ?: "リマインダー"
 
@@ -32,31 +34,35 @@ class ForgetNotificationReceiver : BroadcastReceiver() {
 
         // メインアクティビティを開くIntent
         val mainIntent = Intent(context, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(
-            context,
-            0,
-            mainIntent,
-            PendingIntent.FLAG_IMMUTABLE
-        )
+        val pendingIntent =
+            PendingIntent.getActivity(
+                context,
+                0,
+                mainIntent,
+                PendingIntent.FLAG_IMMUTABLE
+            )
 
         // 申し訳なさそうなメッセージをランダムに選択
-        val messages = listOf(
-            "ごめん、わすれちゃった...",
-            "あ...もうおぼえてない",
-            "わすれちゃってごめんね",
-            "きえちゃった...ごめん"
-        )
+        val messages =
+            listOf(
+                "ごめん、わすれちゃった...",
+                "あ...もうおぼえてない",
+                "わすれちゃってごめんね",
+                "きえちゃった...ごめん"
+            )
         val randomMessage = messages.random()
 
         // 通知を作成
-        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.ic_dialog_info) // 適切なアイコンに変更
-            .setContentTitle("「$reminderText」をわすれちゃった！")
-            .setContentText(randomMessage)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .setContentIntent(pendingIntent)
-            .setAutoCancel(true)
-            .build()
+        val notification =
+            NotificationCompat
+                .Builder(context, CHANNEL_ID)
+                .setSmallIcon(com.maropiyo.reminderparrot.R.mipmap.ic_launcher)
+                .setContentTitle("「$reminderText」をわすれちゃった！")
+                .setContentText(randomMessage)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true)
+                .build()
 
         // 通知を表示（Android 13以降の権限チェック付き）
         val notificationManager = NotificationManagerCompat.from(context)
