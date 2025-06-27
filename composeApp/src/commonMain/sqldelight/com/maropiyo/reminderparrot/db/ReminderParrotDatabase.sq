@@ -30,14 +30,41 @@ deleteExpiredReminders:
 DELETE FROM Reminder
 WHERE forget_at < ?;
 
--- Parrotテーブルの定義
+-- Parrotテーブルの定義（拡張版）
 CREATE TABLE Parrot (
     id INTEGER PRIMARY KEY DEFAULT 1,
     level INTEGER NOT NULL DEFAULT 1,
     current_experience INTEGER NOT NULL DEFAULT 0,
-    max_experience INTEGER NOT NULL DEFAULT 1,
+    max_experience INTEGER NOT NULL DEFAULT 10,
     memorized_words INTEGER NOT NULL DEFAULT 1,
-    memory_time_hours INTEGER NOT NULL DEFAULT 1
+    memory_time_hours INTEGER NOT NULL DEFAULT 1,
+    -- 個性特性
+    cheerfulness INTEGER NOT NULL DEFAULT 50,
+    diligence INTEGER NOT NULL DEFAULT 50,
+    curiosity INTEGER NOT NULL DEFAULT 50,
+    empathy INTEGER NOT NULL DEFAULT 50,
+    -- 統計情報
+    emotional_range INTEGER NOT NULL DEFAULT 1,
+    social_connections INTEGER NOT NULL DEFAULT 0,
+    learning_speed REAL NOT NULL DEFAULT 1.0,
+    streak_days INTEGER NOT NULL DEFAULT 0
+);
+
+-- スキル解放状況テーブル
+CREATE TABLE ParrotSkill (
+    skill_id TEXT PRIMARY KEY,
+    parrot_id INTEGER NOT NULL DEFAULT 1,
+    unlocked_at INTEGER NOT NULL,
+    FOREIGN KEY (parrot_id) REFERENCES Parrot(id)
+);
+
+-- 装飾アイテムテーブル
+CREATE TABLE ParrotCosmeticItem (
+    item_id TEXT PRIMARY KEY,
+    parrot_id INTEGER NOT NULL DEFAULT 1,
+    acquired_at INTEGER NOT NULL,
+    is_active INTEGER NOT NULL DEFAULT 0,
+    FOREIGN KEY (parrot_id) REFERENCES Parrot(id)
 );
 
 -- インコデータの取得（単一レコードのみ存在）
@@ -48,11 +75,50 @@ WHERE id = 1;
 
 -- インコデータの挿入（初回のみ）
 insertParrot:
-INSERT OR REPLACE INTO Parrot(id, level, current_experience, max_experience, memorized_words, memory_time_hours)
-VALUES(1, ?, ?, ?, ?, ?);
+INSERT OR REPLACE INTO Parrot(
+    id, level, current_experience, max_experience, memorized_words, memory_time_hours,
+    cheerfulness, diligence, curiosity, empathy,
+    emotional_range, social_connections, learning_speed, streak_days
+)
+VALUES(1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 -- インコデータの更新
 updateParrot:
 UPDATE Parrot
-SET level = ?, current_experience = ?, max_experience = ?, memorized_words = ?, memory_time_hours = ?
+SET level = ?, current_experience = ?, max_experience = ?, memorized_words = ?, memory_time_hours = ?,
+    cheerfulness = ?, diligence = ?, curiosity = ?, empathy = ?,
+    emotional_range = ?, social_connections = ?, learning_speed = ?, streak_days = ?
 WHERE id = 1;
+
+-- スキル関連クエリ
+selectParrotSkills:
+SELECT skill_id, unlocked_at
+FROM ParrotSkill
+WHERE parrot_id = 1;
+
+insertParrotSkill:
+INSERT OR REPLACE INTO ParrotSkill(skill_id, parrot_id, unlocked_at)
+VALUES(?, 1, ?);
+
+deleteParrotSkill:
+DELETE FROM ParrotSkill
+WHERE skill_id = ? AND parrot_id = 1;
+
+-- 装飾アイテム関連クエリ
+selectParrotCosmeticItems:
+SELECT item_id, acquired_at, is_active
+FROM ParrotCosmeticItem
+WHERE parrot_id = 1;
+
+insertParrotCosmeticItem:
+INSERT OR REPLACE INTO ParrotCosmeticItem(item_id, parrot_id, acquired_at, is_active)
+VALUES(?, 1, ?, ?);
+
+updateParrotCosmeticItemActive:
+UPDATE ParrotCosmeticItem
+SET is_active = ?
+WHERE item_id = ? AND parrot_id = 1;
+
+deleteParrotCosmeticItem:
+DELETE FROM ParrotCosmeticItem
+WHERE item_id = ? AND parrot_id = 1;
