@@ -83,9 +83,9 @@ fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
                     )
                 },
                 colors =
-                    TopAppBarDefaults.topAppBarColors(
-                        containerColor = White
-                    )
+                TopAppBarDefaults.topAppBarColors(
+                    containerColor = White
+                )
             )
         },
         containerColor = Background
@@ -108,7 +108,7 @@ fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "よみこんでいるよ...",
+                            text = "リマインネットに接続中...",
                             style = MaterialTheme.typography.bodyMedium,
                             color = Secondary
                         )
@@ -141,10 +141,10 @@ fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
                 // 投稿リスト
                 LazyColumn(
                     modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues),
-                    contentPadding = PaddingValues(16.dp),
+                    Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 100.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(state.posts, key = { it.id }) { post ->
@@ -160,24 +160,21 @@ fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
  * リマインネット投稿カード
  */
 @Composable
-private fun RemindNetPostCard(
-    post: RemindNetPost,
-    modifier: Modifier = Modifier
-) {
+private fun RemindNetPostCard(post: RemindNetPost, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier.fillMaxWidth(),
         colors =
-            CardDefaults.cardColors(
-                containerColor = White
-            ),
-        shape = Shapes.large,
+        CardDefaults.cardColors(
+            containerColor = White
+        ),
+        shape = Shapes.extraLarge,
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
+            Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
         ) {
             // アイコンとユーザー名
             Row(
@@ -188,10 +185,10 @@ private fun RemindNetPostCard(
                     painter = painterResource(Res.drawable.reminko_face),
                     contentDescription = "リマインコ",
                     modifier =
-                        Modifier
-                            .size(32.dp)
-                            .clip(CircleShape)
-                            .background(ParrotYellow, CircleShape),
+                    Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(ParrotYellow, CircleShape),
                     contentScale = ContentScale.Crop
                 )
 

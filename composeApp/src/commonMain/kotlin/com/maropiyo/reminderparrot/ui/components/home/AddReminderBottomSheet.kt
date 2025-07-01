@@ -80,7 +80,7 @@ fun AddReminderBottomSheet(
             ReminderInputCard(
                 reminderText = reminderText,
                 onReminderTextChange = onReminderTextChange,
-                onSaveReminder = { onSaveReminder(false) },
+                onSaveReminder = { onSaveReminder(true) },
                 modifier =
                 Modifier
                     .fillMaxWidth()
