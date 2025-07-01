@@ -162,20 +162,30 @@ private fun ReminderInputCard(
                     .padding(horizontal = 16.dp)
             )
 
-            Spacer(Modifier.size(8.dp))
+            Spacer(Modifier.size(12.dp))
 
-            // リマインネット投稿チェックボックス
+            // リマインネット投稿セクション
             if (!isReachedLimit) {
-                RemindNetCheckbox(
-                    checked = shouldPostToRemindNet,
-                    onCheckedChange = onPostToRemindNetChange,
+                Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                )
+                        .padding(horizontal = 16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Secondary.copy(alpha = 0.05f)
+                    ),
+                    shape = Shapes.medium
+                ) {
+                    RemindNetCheckbox(
+                        checked = shouldPostToRemindNet,
+                        onCheckedChange = onPostToRemindNetChange,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp)
+                    )
+                }
             }
 
-            Spacer(Modifier.size(8.dp))
+            Spacer(Modifier.size(16.dp))
 
             // 送信ボタン
             SaveReminderButton(
@@ -263,23 +273,44 @@ private fun RemindNetCheckbox(checked: Boolean, onCheckedChange: (Boolean) -> Un
     Row(
         modifier = modifier
             .clickable { onCheckedChange(!checked) }
-            .padding(4.dp),
+            .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        RadioButton(
-            selected = checked,
-            onClick = { onCheckedChange(!checked) },
-            colors = RadioButtonDefaults.colors(
-                selectedColor = Secondary,
-                unselectedColor = Secondary.copy(alpha = 0.6f)
+        // アイコン部分
+        Box(
+            modifier = Modifier
+                .size(20.dp)
+                .padding(end = 4.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "📢",
+                style = MaterialTheme.typography.bodyMedium
             )
-        )
-        Text(
-            text = "みんなにもおくる",
-            style = MaterialTheme.typography.bodyMedium,
-            color = Secondary,
-            modifier = Modifier.padding(start = 8.dp)
-        )
+        }
+
+        // チェックボックスとテキスト
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.weight(1f)
+        ) {
+            RadioButton(
+                selected = checked,
+                onClick = { onCheckedChange(!checked) },
+                colors = RadioButtonDefaults.colors(
+                    selectedColor = Secondary,
+                    unselectedColor = Secondary.copy(alpha = 0.6f)
+                ),
+                modifier = Modifier.size(20.dp)
+            )
+            Text(
+                text = "みんなにもおくる",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Secondary,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.padding(start = 8.dp)
+            )
+        }
     }
 }
 
