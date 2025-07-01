@@ -117,14 +117,14 @@ fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "まだ なにも ないよ",
+                            text = "まだなにもないよ",
                             style = MaterialTheme.typography.titleMedium,
                             color = Secondary,
                             fontWeight = FontWeight.Bold
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "さいしょの リマインダーを おくってみよう！",
+                            text = "さいしょのリマインダーをおくってみよう！",
                             style = MaterialTheme.typography.bodyMedium,
                             color = Secondary.copy(alpha = 0.7f)
                         )
