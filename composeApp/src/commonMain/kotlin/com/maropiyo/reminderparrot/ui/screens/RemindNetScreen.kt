@@ -1,17 +1,22 @@
 package com.maropiyo.reminderparrot.ui.screens
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -30,6 +35,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -40,7 +47,10 @@ import com.maropiyo.reminderparrot.ui.theme.Primary
 import com.maropiyo.reminderparrot.ui.theme.Secondary
 import com.maropiyo.reminderparrot.ui.theme.Shapes
 import com.maropiyo.reminderparrot.ui.theme.White
+import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
+import reminderparrot.composeapp.generated.resources.Res
+import reminderparrot.composeapp.generated.resources.reminko_raising_hand
 
 /**
  * リマインネット画面
@@ -161,15 +171,33 @@ private fun RemindNetPostCard(post: RemindNetPost, modifier: Modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            // ユーザー名
-            Text(
-                text = post.userName,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
-                color = Secondary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            // アイコンとユーザー名
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // リマインコアイコン
+                Image(
+                    painter = painterResource(Res.drawable.reminko_raising_hand),
+                    contentDescription = "リマインコ",
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .border(2.dp, Secondary.copy(alpha = 0.3f), CircleShape),
+                    contentScale = ContentScale.Crop
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                // ユーザー名
+                Text(
+                    text = post.userName,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = Secondary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
 
             Spacer(modifier = Modifier.height(12.dp))
 
