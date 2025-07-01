@@ -1,6 +1,7 @@
 package com.maropiyo.reminderparrot.ui.components.home
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,12 +14,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -260,16 +261,17 @@ private fun ReminderTextField(
 @Composable
 private fun RemindNetCheckbox(checked: Boolean, onCheckedChange: (Boolean) -> Unit, modifier: Modifier = Modifier) {
     Row(
-        modifier = modifier,
+        modifier = modifier
+            .clickable { onCheckedChange(!checked) }
+            .padding(4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Checkbox(
-            checked = checked,
-            onCheckedChange = onCheckedChange,
-            colors = CheckboxDefaults.colors(
-                checkedColor = Secondary,
-                uncheckedColor = Secondary.copy(alpha = 0.6f),
-                checkmarkColor = White
+        RadioButton(
+            selected = checked,
+            onClick = { onCheckedChange(!checked) },
+            colors = RadioButtonDefaults.colors(
+                selectedColor = Secondary,
+                unselectedColor = Secondary.copy(alpha = 0.6f)
             )
         )
         Text(
