@@ -80,7 +80,7 @@ fun ReminderContent(
     state: ReminderListState,
     parrotState: ParrotState,
     onToggleCompletion: (String) -> Unit,
-    onCreateReminder: suspend (String) -> Unit,
+    onCreateReminder: suspend (String, Boolean) -> Unit,
     onUpdateReminder: (String, String) -> Unit,
     onDeleteReminder: (String) -> Unit,
     modifier: Modifier = Modifier
@@ -149,9 +149,9 @@ fun ReminderContent(
                     isShowBottomSheet = false
                     reminderText = ""
                 },
-                onSaveReminder = {
+                onSaveReminder = { shouldPostToRemindNet ->
                     scope.launch {
-                        onCreateReminder(reminderText)
+                        onCreateReminder(reminderText, shouldPostToRemindNet)
                         isShowBottomSheet = false
                         reminderText = ""
                         sheetState.hide()

@@ -3,6 +3,7 @@ package com.maropiyo.reminderparrot.ui.components.home
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -12,6 +13,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -58,11 +61,13 @@ fun AddReminderBottomSheet(
     reminderText: String,
     onReminderTextChange: (String) -> Unit,
     onDismiss: () -> Unit,
-    onSaveReminder: () -> Unit,
+    onSaveReminder: (Boolean) -> Unit,
     sheetState: androidx.compose.material3.SheetState,
     memorizedWords: Int,
     currentReminderCount: Int
 ) {
+    // リマインネット投稿のチェック状態を管理
+    var shouldPostToRemindNet by remember { mutableStateOf(false) }
     ModalBottomSheet(
         dragHandle = null,
         onDismissRequest = onDismiss,
@@ -80,7 +85,9 @@ fun AddReminderBottomSheet(
             ReminderInputCard(
                 reminderText = reminderText,
                 onReminderTextChange = onReminderTextChange,
-                onSaveReminder = onSaveReminder,
+                onSaveReminder = { onSaveReminder(shouldPostToRemindNet) },
+                shouldPostToRemindNet = shouldPostToRemindNet,
+                onPostToRemindNetChange = { shouldPostToRemindNet = it },
                 modifier =
                 Modifier
                     .fillMaxWidth()
@@ -111,6 +118,8 @@ private fun ReminderInputCard(
     reminderText: String,
     onReminderTextChange: (String) -> Unit,
     onSaveReminder: () -> Unit,
+    shouldPostToRemindNet: Boolean,
+    onPostToRemindNetChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
     memorizedWords: Int,
     currentReminderCount: Int
@@ -152,7 +161,20 @@ private fun ReminderInputCard(
                     .padding(horizontal = 16.dp)
             )
 
-            Spacer(Modifier.size(16.dp))
+            Spacer(Modifier.size(8.dp))
+
+            // リマインネット投稿チェックボックス
+            if (!isReachedLimit) {
+                RemindNetCheckbox(
+                    checked = shouldPostToRemindNet,
+                    onCheckedChange = onPostToRemindNetChange,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                )
+            }
+
+            Spacer(Modifier.size(8.dp))
 
             // 送信ボタン
             SaveReminderButton(
@@ -230,6 +252,33 @@ private fun ReminderTextField(
         singleLine = true,
         shape = Shapes.large
     )
+}
+
+/**
+ * リマインネット投稿チェックボックス
+ */
+@Composable
+private fun RemindNetCheckbox(checked: Boolean, onCheckedChange: (Boolean) -> Unit, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Checkbox(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            colors = CheckboxDefaults.colors(
+                checkedColor = Secondary,
+                uncheckedColor = Secondary.copy(alpha = 0.6f),
+                checkmarkColor = White
+            )
+        )
+        Text(
+            text = "リマインネットにも投稿する",
+            style = MaterialTheme.typography.bodyMedium,
+            color = Secondary,
+            modifier = Modifier.padding(start = 8.dp)
+        )
+    }
 }
 
 /**

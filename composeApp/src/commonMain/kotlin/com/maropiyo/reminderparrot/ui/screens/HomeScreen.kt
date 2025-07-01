@@ -80,8 +80,8 @@ fun HomeScreen(
                     // リマインダー完了後にインコの状態を再読み込み
                     parrotViewModel.loadParrot()
                 },
-                onCreateReminder = { text ->
-                    reminderListViewModel.createReminder(text)
+                onCreateReminder = { text, shouldPostToRemindNet ->
+                    reminderListViewModel.createReminder(text, shouldPostToRemindNet)
                     // リマインダー作成後にインコの状態を再読み込み
                     parrotViewModel.loadParrot()
                 },

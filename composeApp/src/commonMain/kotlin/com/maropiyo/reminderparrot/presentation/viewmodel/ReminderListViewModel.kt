@@ -8,6 +8,7 @@ import com.maropiyo.reminderparrot.domain.usecase.DeleteExpiredRemindersUseCase
 import com.maropiyo.reminderparrot.domain.usecase.DeleteReminderUseCase
 import com.maropiyo.reminderparrot.domain.usecase.GetRemindersUseCase
 import com.maropiyo.reminderparrot.domain.usecase.UpdateReminderUseCase
+import com.maropiyo.reminderparrot.domain.usecase.remindnet.CreateRemindNetPostUseCase
 import com.maropiyo.reminderparrot.presentation.state.ReminderListState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -34,7 +35,8 @@ class ReminderListViewModel(
     private val updateReminderUseCase: UpdateReminderUseCase,
     private val deleteReminderUseCase: DeleteReminderUseCase,
     private val deleteExpiredRemindersUseCase: DeleteExpiredRemindersUseCase,
-    private val addParrotExperienceUseCase: AddParrotExperienceUseCase
+    private val addParrotExperienceUseCase: AddParrotExperienceUseCase,
+    private val createRemindNetPostUseCase: CreateRemindNetPostUseCase
 ) : ViewModel() {
     private val _state = MutableStateFlow(ReminderListState())
     val state: StateFlow<ReminderListState> = _state.asStateFlow()
@@ -53,8 +55,9 @@ class ReminderListViewModel(
      * リマインダーを作成する
      *
      * @param text リマインダーのテキスト
+     * @param shouldPostToRemindNet リマインネットに投稿するかどうか
      */
-    fun createReminder(text: String) {
+    fun createReminder(text: String, shouldPostToRemindNet: Boolean = false) {
         viewModelScope.launch {
             createReminderUseCase(text)
                 .onSuccess { reminder ->
@@ -69,6 +72,14 @@ class ReminderListViewModel(
                     }
                     // インコの経験値を追加（+1）
                     addParrotExperienceUseCase()
+
+                    // リマインネットに投稿する場合
+                    if (shouldPostToRemindNet) {
+                        createRemindNetPostUseCase(
+                            reminderText = reminder.text,
+                            forgetAt = reminder.forgetAt
+                        )
+                    }
                 }.onFailure { exception ->
                     // リマインダーの作成に失敗した場合、エラーメッセージを表示する
                     _state.update { it.copy(error = exception.message) }
