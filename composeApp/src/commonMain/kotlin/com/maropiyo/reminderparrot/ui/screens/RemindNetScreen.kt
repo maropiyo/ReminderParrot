@@ -4,14 +4,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
@@ -42,9 +40,6 @@ import com.maropiyo.reminderparrot.ui.theme.Primary
 import com.maropiyo.reminderparrot.ui.theme.Secondary
 import com.maropiyo.reminderparrot.ui.theme.Shapes
 import com.maropiyo.reminderparrot.ui.theme.White
-import kotlinx.datetime.Instant
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import org.koin.compose.koinInject
 
 /**
@@ -166,67 +161,26 @@ private fun RemindNetPostCard(post: RemindNetPost, modifier: Modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            // ユーザー名と投稿時間
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = post.userName,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = Secondary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f)
-                )
-                Text(
-                    text = formatDateTime(post.createdAt),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Secondary.copy(alpha = 0.6f)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // リマインダーテキスト
+            // ユーザー名
             Text(
-                text = post.reminderText,
-                style = MaterialTheme.typography.bodyLarge,
+                text = post.userName,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
                 color = Secondary,
-                fontWeight = FontWeight.Medium
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-            // 忘却時間
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "わすれるじかん:",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Secondary.copy(alpha = 0.7f)
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = formatDateTime(post.forgetAt),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Secondary.copy(alpha = 0.7f),
-                    fontWeight = FontWeight.Medium
-                )
-            }
+            // リマインダーテキスト（メイン）
+            Text(
+                text = post.reminderText,
+                style = MaterialTheme.typography.titleMedium,
+                color = Secondary,
+                fontWeight = FontWeight.Medium,
+                lineHeight = MaterialTheme.typography.titleMedium.lineHeight
+            )
         }
     }
-}
-
-/**
- * 日時をフォーマットする
- */
-private fun formatDateTime(instant: Instant): String {
-    val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
-    return "${localDateTime.monthNumber}/${localDateTime.dayOfMonth} ${
-    localDateTime.hour.toString().padStart(2, '0')
-    }:${localDateTime.minute.toString().padStart(2, '0')}"
 }
