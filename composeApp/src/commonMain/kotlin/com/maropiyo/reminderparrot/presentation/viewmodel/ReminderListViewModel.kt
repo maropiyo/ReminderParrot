@@ -76,6 +76,7 @@ class ReminderListViewModel(
                     // リマインネットに投稿する場合
                     if (shouldPostToRemindNet) {
                         createRemindNetPostUseCase(
+                            reminderId = reminder.id,
                             reminderText = reminder.text,
                             forgetAt = reminder.forgetAt
                         )

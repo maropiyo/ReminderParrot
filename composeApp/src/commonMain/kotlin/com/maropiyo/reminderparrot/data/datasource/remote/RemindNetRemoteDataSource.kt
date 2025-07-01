@@ -21,6 +21,7 @@ class RemindNetRemoteDataSource(
      * リマインネットに投稿を作成する
      */
     suspend fun createPost(
+        reminderId: String,
         reminderText: String,
         forgetAt: Instant,
         userId: String?,
@@ -28,9 +29,10 @@ class RemindNetRemoteDataSource(
     ): Result<RemindNetPost> {
         return try {
             val dto = RemindNetPostDto(
+                id = reminderId,
                 reminderText = reminderText,
                 userId = userId,
-                userName = userName ?: "なまえなしのインコさん",
+                userName = userName ?: "名無しのインコ",
                 forgetAt = forgetAt.toString()
             )
 
@@ -98,9 +100,10 @@ class RemindNetRemoteDataSource(
 
 @Serializable
 data class RemindNetPostDto(
+    val id: String,
     @SerialName("reminder_text") val reminderText: String,
     @SerialName("user_id") val userId: String? = null,
-    @SerialName("user_name") val userName: String = "なまえなしのインコさん",
+    @SerialName("user_name") val userName: String = "名無しのインコ",
     @SerialName("forget_at") val forgetAt: String
 )
 

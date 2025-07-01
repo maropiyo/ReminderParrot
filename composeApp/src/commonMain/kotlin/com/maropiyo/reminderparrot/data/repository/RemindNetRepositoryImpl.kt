@@ -14,12 +14,13 @@ class RemindNetRepositoryImpl(
 ) : RemindNetRepository {
 
     override suspend fun createPost(
+        reminderId: String,
         reminderText: String,
         forgetAt: Instant,
         userId: String?,
         userName: String?
     ): Result<RemindNetPost> {
-        return remoteDataSource.createPost(reminderText, forgetAt, userId, userName)
+        return remoteDataSource.createPost(reminderId, reminderText, forgetAt, userId, userName)
     }
 
     override fun getAllPosts(): Flow<List<RemindNetPost>> {

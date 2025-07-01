@@ -12,6 +12,7 @@ import com.maropiyo.reminderparrot.domain.common.UuidGenerator
 import com.maropiyo.reminderparrot.domain.repository.ParrotRepository
 import com.maropiyo.reminderparrot.domain.repository.RemindNetRepository
 import com.maropiyo.reminderparrot.domain.repository.ReminderRepository
+import com.maropiyo.reminderparrot.domain.service.UserIdService
 import com.maropiyo.reminderparrot.domain.usecase.AddParrotExperienceUseCase
 import com.maropiyo.reminderparrot.domain.usecase.CancelForgetNotificationUseCase
 import com.maropiyo.reminderparrot.domain.usecase.CreateReminderUseCase
@@ -50,7 +51,7 @@ val appModule =
         single<ScheduleForgetNotificationUseCase> { ScheduleForgetNotificationUseCase(get()) }
         single<CancelForgetNotificationUseCase> { CancelForgetNotificationUseCase(get()) }
         single<RequestNotificationPermissionUseCase> { RequestNotificationPermissionUseCase(get()) }
-        single<CreateRemindNetPostUseCase> { CreateRemindNetPostUseCase(get()) }
+        single<CreateRemindNetPostUseCase> { CreateRemindNetPostUseCase(get(), get()) }
         single<GetRemindNetPostsUseCase> { GetRemindNetPostsUseCase(get()) }
 
         // Repository

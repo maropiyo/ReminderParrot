@@ -1,7 +1,9 @@
 package com.maropiyo.reminderparrot.di
 
 import com.maropiyo.reminderparrot.data.service.AndroidNotificationService
+import com.maropiyo.reminderparrot.data.service.AndroidUserIdService
 import com.maropiyo.reminderparrot.domain.service.NotificationService
+import com.maropiyo.reminderparrot.domain.service.UserIdService
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
@@ -10,4 +12,5 @@ import org.koin.dsl.module
  */
 val platformModule = module {
     single<NotificationService> { AndroidNotificationService(androidContext()) }
+    single<UserIdService> { AndroidUserIdService(androidContext(), get()) }
 }

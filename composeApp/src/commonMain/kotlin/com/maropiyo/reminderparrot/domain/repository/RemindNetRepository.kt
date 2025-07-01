@@ -11,6 +11,7 @@ interface RemindNetRepository {
      * リマインネットに投稿を作成する
      */
     suspend fun createPost(
+        reminderId: String,
         reminderText: String,
         forgetAt: kotlinx.datetime.Instant,
         userId: String? = null,
