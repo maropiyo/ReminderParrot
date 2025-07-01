@@ -1,5 +1,6 @@
 package com.maropiyo.reminderparrot.domain.entity
 
+import com.maropiyo.reminderparrot.domain.common.TimeUtils
 import kotlinx.datetime.Instant
 
 /**
@@ -15,4 +16,11 @@ data class RemindNetPost(
     val forgetAt: Instant,
     val likesCount: Int = 0,
     val isDeleted: Boolean = false
-)
+) {
+    /**
+     * 投稿からの経過時間を取得する
+     * @return 経過時間の文字列（例: "3分前", "2時間前"）
+     */
+    val timeAgoText: String
+        get() = TimeUtils.getTimeAgoText(createdAt)
+}

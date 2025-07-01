@@ -199,15 +199,26 @@ private fun RemindNetPostCard(post: RemindNetPost, modifier: Modifier = Modifier
 
                 Spacer(modifier = Modifier.width(8.dp))
 
-                // ユーザー名
-                Text(
-                    text = post.userName,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = Secondary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    // ユーザー名
+                    Text(
+                        text = post.userName,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = Secondary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    
+                    // 投稿時間
+                    Text(
+                        text = post.timeAgoText,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Secondary.copy(alpha = 0.6f)
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(12.dp))
