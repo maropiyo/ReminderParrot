@@ -62,6 +62,11 @@ fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
     val state by remindNetViewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
+    // 画面に遷移した時に投稿を再取得
+    LaunchedEffect(Unit) {
+        remindNetViewModel.onScreenEntered()
+    }
+
     // エラー表示
     LaunchedEffect(state.error) {
         state.error?.let { error ->

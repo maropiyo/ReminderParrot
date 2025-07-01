@@ -61,6 +61,13 @@ class RemindNetViewModel(
     }
 
     /**
+     * 画面に遷移した時に呼ばれる
+     */
+    fun onScreenEntered() {
+        loadPosts()
+    }
+
+    /**
      * エラーをクリア
      */
     fun clearError() {
