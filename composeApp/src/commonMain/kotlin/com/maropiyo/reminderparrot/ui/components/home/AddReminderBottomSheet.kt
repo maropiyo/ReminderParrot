@@ -1,10 +1,8 @@
 package com.maropiyo.reminderparrot.ui.components.home
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,8 +16,6 @@ import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -67,8 +63,6 @@ fun AddReminderBottomSheet(
     memorizedWords: Int,
     currentReminderCount: Int
 ) {
-    // リマインネット投稿のチェック状態を管理
-    var shouldPostToRemindNet by remember { mutableStateOf(false) }
     ModalBottomSheet(
         dragHandle = null,
         onDismissRequest = onDismiss,
@@ -86,9 +80,7 @@ fun AddReminderBottomSheet(
             ReminderInputCard(
                 reminderText = reminderText,
                 onReminderTextChange = onReminderTextChange,
-                onSaveReminder = { onSaveReminder(shouldPostToRemindNet) },
-                shouldPostToRemindNet = shouldPostToRemindNet,
-                onPostToRemindNetChange = { shouldPostToRemindNet = it },
+                onSaveReminder = { onSaveReminder(false) },
                 modifier =
                 Modifier
                     .fillMaxWidth()
@@ -119,8 +111,6 @@ private fun ReminderInputCard(
     reminderText: String,
     onReminderTextChange: (String) -> Unit,
     onSaveReminder: () -> Unit,
-    shouldPostToRemindNet: Boolean,
-    onPostToRemindNetChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
     memorizedWords: Int,
     currentReminderCount: Int
@@ -161,29 +151,6 @@ private fun ReminderInputCard(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
             )
-
-            Spacer(Modifier.size(12.dp))
-
-            // リマインネット投稿セクション
-            if (!isReachedLimit) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Secondary.copy(alpha = 0.05f)
-                    ),
-                    shape = Shapes.medium
-                ) {
-                    RemindNetCheckbox(
-                        checked = shouldPostToRemindNet,
-                        onCheckedChange = onPostToRemindNetChange,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(12.dp)
-                    )
-                }
-            }
 
             Spacer(Modifier.size(16.dp))
 
@@ -263,55 +230,6 @@ private fun ReminderTextField(
         singleLine = true,
         shape = Shapes.large
     )
-}
-
-/**
- * リマインネット投稿チェックボックス
- */
-@Composable
-private fun RemindNetCheckbox(checked: Boolean, onCheckedChange: (Boolean) -> Unit, modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier
-            .clickable { onCheckedChange(!checked) }
-            .padding(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // アイコン部分
-        Box(
-            modifier = Modifier
-                .size(20.dp)
-                .padding(end = 4.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "📢",
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-
-        // チェックボックスとテキスト
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.weight(1f)
-        ) {
-            RadioButton(
-                selected = checked,
-                onClick = { onCheckedChange(!checked) },
-                colors = RadioButtonDefaults.colors(
-                    selectedColor = Secondary,
-                    unselectedColor = Secondary.copy(alpha = 0.6f)
-                ),
-                modifier = Modifier.size(20.dp)
-            )
-            Text(
-                text = "みんなにもおくる",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Secondary,
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier.padding(start = 8.dp)
-            )
-        }
-    }
 }
 
 /**
