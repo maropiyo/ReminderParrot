@@ -1,7 +1,7 @@
 package com.maropiyo.reminderparrot.ui.screens
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import com.maropiyo.reminderparrot.domain.entity.RemindNetPost
 import com.maropiyo.reminderparrot.presentation.viewmodel.RemindNetViewModel
 import com.maropiyo.reminderparrot.ui.theme.Background
+import com.maropiyo.reminderparrot.ui.theme.ParrotYellow
 import com.maropiyo.reminderparrot.ui.theme.Primary
 import com.maropiyo.reminderparrot.ui.theme.Secondary
 import com.maropiyo.reminderparrot.ui.theme.Shapes
@@ -50,7 +51,7 @@ import com.maropiyo.reminderparrot.ui.theme.White
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 import reminderparrot.composeapp.generated.resources.Res
-import reminderparrot.composeapp.generated.resources.reminko_raising_hand
+import reminderparrot.composeapp.generated.resources.reminko_face
 
 /**
  * リマインネット画面
@@ -81,9 +82,10 @@ fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
                         fontWeight = FontWeight.Bold
                     )
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = White
-                )
+                colors =
+                    TopAppBarDefaults.topAppBarColors(
+                        containerColor = White
+                    )
             )
         },
         containerColor = Background
@@ -138,9 +140,10 @@ fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
             } else {
                 // 投稿リスト
                 LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
@@ -157,19 +160,24 @@ fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
  * リマインネット投稿カード
  */
 @Composable
-private fun RemindNetPostCard(post: RemindNetPost, modifier: Modifier = Modifier) {
+private fun RemindNetPostCard(
+    post: RemindNetPost,
+    modifier: Modifier = Modifier
+) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = White
-        ),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = White
+            ),
         shape = Shapes.large,
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
         ) {
             // アイコンとユーザー名
             Row(
@@ -177,12 +185,13 @@ private fun RemindNetPostCard(post: RemindNetPost, modifier: Modifier = Modifier
             ) {
                 // リマインコアイコン
                 Image(
-                    painter = painterResource(Res.drawable.reminko_raising_hand),
+                    painter = painterResource(Res.drawable.reminko_face),
                     contentDescription = "リマインコ",
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(CircleShape)
-                        .border(2.dp, Secondary.copy(alpha = 0.3f), CircleShape),
+                    modifier =
+                        Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .background(ParrotYellow, CircleShape),
                     contentScale = ContentScale.Crop
                 )
 
