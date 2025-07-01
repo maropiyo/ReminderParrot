@@ -273,7 +273,7 @@ private fun RemindNetCheckbox(checked: Boolean, onCheckedChange: (Boolean) -> Un
             )
         )
         Text(
-            text = "リマインネットにも投稿する",
+            text = "みんなにも おくる",
             style = MaterialTheme.typography.bodyMedium,
             color = Secondary,
             modifier = Modifier.padding(start = 8.dp)

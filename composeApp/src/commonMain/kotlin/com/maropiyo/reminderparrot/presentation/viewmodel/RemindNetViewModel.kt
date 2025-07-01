@@ -37,7 +37,7 @@ class RemindNetViewModel(
                     _state.update {
                         it.copy(
                             isLoading = false,
-                            error = exception.message ?: "投稿の取得に失敗しました"
+                            error = exception.message ?: "うまくいかなかったよ"
                         )
                     }
                 }

@@ -30,7 +30,7 @@ class RemindNetRemoteDataSource(
             val dto = RemindNetPostDto(
                 reminderText = reminderText,
                 userId = userId,
-                userName = userName ?: "名無しのインコさん",
+                userName = userName ?: "なまえなしのインコさん",
                 forgetAt = forgetAt.toString()
             )
 
@@ -100,7 +100,7 @@ class RemindNetRemoteDataSource(
 data class RemindNetPostDto(
     @SerialName("reminder_text") val reminderText: String,
     @SerialName("user_id") val userId: String? = null,
-    @SerialName("user_name") val userName: String = "名無しのインコさん",
+    @SerialName("user_name") val userName: String = "なまえなしのインコさん",
     @SerialName("forget_at") val forgetAt: String
 )
 
