@@ -20,7 +20,7 @@ class CreateRemindNetPostUseCase(
     ): Result<RemindNetPost> {
         // デバイス固有のユーザーIDを自動取得
         val userId = userIdService.getUserId()
-        
+
         return remindNetRepository.createPost(reminderId, reminderText, forgetAt, userId, userName)
     }
 }

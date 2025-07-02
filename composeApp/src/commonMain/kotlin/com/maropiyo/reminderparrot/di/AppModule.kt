@@ -1,6 +1,7 @@
 package com.maropiyo.reminderparrot.di
 
 import com.maropiyo.reminderparrot.data.datasource.remote.RemindNetRemoteDataSource
+import com.maropiyo.reminderparrot.data.local.DatabaseInitializer
 import com.maropiyo.reminderparrot.data.local.ParrotLocalDataSource
 import com.maropiyo.reminderparrot.data.local.ReminderLocalDataSource
 import com.maropiyo.reminderparrot.data.mapper.ParrotMapper
@@ -12,7 +13,6 @@ import com.maropiyo.reminderparrot.domain.common.UuidGenerator
 import com.maropiyo.reminderparrot.domain.repository.ParrotRepository
 import com.maropiyo.reminderparrot.domain.repository.RemindNetRepository
 import com.maropiyo.reminderparrot.domain.repository.ReminderRepository
-import com.maropiyo.reminderparrot.domain.service.UserIdService
 import com.maropiyo.reminderparrot.domain.usecase.AddParrotExperienceUseCase
 import com.maropiyo.reminderparrot.domain.usecase.CancelForgetNotificationUseCase
 import com.maropiyo.reminderparrot.domain.usecase.CreateReminderUseCase
@@ -66,6 +66,9 @@ val appModule =
         // LocalDataSource
         single<ReminderLocalDataSource> { ReminderLocalDataSource(get(), get()) }
         single<ParrotLocalDataSource> { ParrotLocalDataSource(get(), get()) }
+
+        // Database
+        single<DatabaseInitializer> { DatabaseInitializer(get()) }
 
         // RemoteDataSource
         single<RemindNetRemoteDataSource> { RemindNetRemoteDataSource(get()) }

@@ -211,7 +211,7 @@ private fun RemindNetPostCard(post: RemindNetPost, modifier: Modifier = Modifier
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                    
+
                     // 投稿時間
                     Text(
                         text = post.timeAgoText,
