@@ -47,6 +47,7 @@ fun MainScreen() {
                         text = when (currentRoute) {
                             NavigationItem.Home.route -> "こんにちは"
                             NavigationItem.RemindNet.route -> "リマインネット"
+                            NavigationItem.Settings.route -> "せってい"
                             else -> ""
                         },
                         style = MaterialTheme.typography.headlineLarge
@@ -74,6 +75,9 @@ fun MainScreen() {
             }
             NavigationItem.RemindNet.route -> {
                 RemindNetScreen()
+            }
+            NavigationItem.Settings.route -> {
+                SettingsScreen()
             }
         }
     }
