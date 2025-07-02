@@ -7,6 +7,7 @@ import com.maropiyo.reminderparrot.domain.usecase.CreateReminderUseCase
 import com.maropiyo.reminderparrot.domain.usecase.DeleteExpiredRemindersUseCase
 import com.maropiyo.reminderparrot.domain.usecase.DeleteReminderUseCase
 import com.maropiyo.reminderparrot.domain.usecase.GetRemindersUseCase
+import com.maropiyo.reminderparrot.domain.usecase.GetUserSettingsUseCase
 import com.maropiyo.reminderparrot.domain.usecase.UpdateReminderUseCase
 import com.maropiyo.reminderparrot.domain.usecase.remindnet.CreateRemindNetPostUseCase
 import com.maropiyo.reminderparrot.presentation.state.ReminderListState
@@ -36,7 +37,8 @@ class ReminderListViewModel(
     private val deleteReminderUseCase: DeleteReminderUseCase,
     private val deleteExpiredRemindersUseCase: DeleteExpiredRemindersUseCase,
     private val addParrotExperienceUseCase: AddParrotExperienceUseCase,
-    private val createRemindNetPostUseCase: CreateRemindNetPostUseCase
+    private val createRemindNetPostUseCase: CreateRemindNetPostUseCase,
+    private val getUserSettingsUseCase: GetUserSettingsUseCase
 ) : ViewModel() {
     private val _state = MutableStateFlow(ReminderListState())
     val state: StateFlow<ReminderListState> = _state.asStateFlow()
@@ -55,9 +57,8 @@ class ReminderListViewModel(
      * リマインダーを作成する
      *
      * @param text リマインダーのテキスト
-     * @param shouldPostToRemindNet リマインネットに投稿するかどうか
      */
-    fun createReminder(text: String, shouldPostToRemindNet: Boolean = false) {
+    fun createReminder(text: String) {
         viewModelScope.launch {
             createReminderUseCase(text)
                 .onSuccess { reminder ->
@@ -73,8 +74,9 @@ class ReminderListViewModel(
                     // インコの経験値を追加（+1）
                     addParrotExperienceUseCase()
 
-                    // リマインネットに投稿する場合
-                    if (shouldPostToRemindNet) {
+                    // 設定を確認してリマインネットに投稿するかどうかを決める
+                    val settings = getUserSettingsUseCase()
+                    if (settings.isRemindNetSharingEnabled) {
                         createRemindNetPostUseCase(
                             reminderId = reminder.id,
                             reminderText = reminder.text,

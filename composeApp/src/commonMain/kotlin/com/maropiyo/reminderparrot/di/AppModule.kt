@@ -20,7 +20,9 @@ import com.maropiyo.reminderparrot.domain.usecase.DeleteExpiredRemindersUseCase
 import com.maropiyo.reminderparrot.domain.usecase.DeleteReminderUseCase
 import com.maropiyo.reminderparrot.domain.usecase.GetParrotUseCase
 import com.maropiyo.reminderparrot.domain.usecase.GetRemindersUseCase
+import com.maropiyo.reminderparrot.domain.usecase.GetUserSettingsUseCase
 import com.maropiyo.reminderparrot.domain.usecase.RequestNotificationPermissionUseCase
+import com.maropiyo.reminderparrot.domain.usecase.SaveUserSettingsUseCase
 import com.maropiyo.reminderparrot.domain.usecase.ScheduleForgetNotificationUseCase
 import com.maropiyo.reminderparrot.domain.usecase.UpdateReminderUseCase
 import com.maropiyo.reminderparrot.domain.usecase.remindnet.CreateRemindNetPostUseCase
@@ -28,6 +30,7 @@ import com.maropiyo.reminderparrot.domain.usecase.remindnet.GetRemindNetPostsUse
 import com.maropiyo.reminderparrot.presentation.viewmodel.ParrotViewModel
 import com.maropiyo.reminderparrot.presentation.viewmodel.RemindNetViewModel
 import com.maropiyo.reminderparrot.presentation.viewmodel.ReminderListViewModel
+import com.maropiyo.reminderparrot.presentation.viewmodel.SettingsViewModel
 import org.koin.dsl.module
 
 /**
@@ -36,9 +39,10 @@ import org.koin.dsl.module
 val appModule =
     module {
         // ViewModel
-        single<ReminderListViewModel> { ReminderListViewModel(get(), get(), get(), get(), get(), get(), get()) }
+        single<ReminderListViewModel> { ReminderListViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
         single<ParrotViewModel> { ParrotViewModel(get()) }
         single<RemindNetViewModel> { RemindNetViewModel(get()) }
+        single<SettingsViewModel> { SettingsViewModel(get(), get()) }
 
         // UseCase
         single<CreateReminderUseCase> { CreateReminderUseCase(get(), get(), get(), get()) }
@@ -53,6 +57,8 @@ val appModule =
         single<RequestNotificationPermissionUseCase> { RequestNotificationPermissionUseCase(get()) }
         single<CreateRemindNetPostUseCase> { CreateRemindNetPostUseCase(get(), get()) }
         single<GetRemindNetPostsUseCase> { GetRemindNetPostsUseCase(get()) }
+        single<GetUserSettingsUseCase> { GetUserSettingsUseCase(get()) }
+        single<SaveUserSettingsUseCase> { SaveUserSettingsUseCase(get()) }
 
         // Repository
         single<ReminderRepository> { ReminderRepositoryImpl(get(), get()) }
