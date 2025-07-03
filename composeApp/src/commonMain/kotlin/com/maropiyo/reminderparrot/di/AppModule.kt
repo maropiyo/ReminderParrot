@@ -45,7 +45,7 @@ val appModule =
         single<SettingsViewModel> { SettingsViewModel(get(), get()) }
 
         // UseCase
-        single<CreateReminderUseCase> { CreateReminderUseCase(get(), get(), get(), get()) }
+        single<CreateReminderUseCase> { CreateReminderUseCase(get(), get(), get(), get(), get()) }
         single<GetRemindersUseCase> { GetRemindersUseCase(get()) }
         single<UpdateReminderUseCase> { UpdateReminderUseCase(get()) }
         single<DeleteReminderUseCase> { DeleteReminderUseCase(get()) }

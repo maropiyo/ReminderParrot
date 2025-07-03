@@ -6,6 +6,7 @@ import com.maropiyo.reminderparrot.domain.repository.ParrotRepository
 import com.maropiyo.reminderparrot.domain.repository.ReminderRepository
 import com.maropiyo.reminderparrot.domain.service.NotificationService
 import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.datetime.Clock
 
 /**
@@ -15,12 +16,14 @@ import kotlinx.datetime.Clock
  * @property parrotRepository パロットリポジトリ
  * @property uuidGenerator UUIDジェネレーター
  * @property notificationService 通知サービス
+ * @property getUserSettingsUseCase ユーザー設定取得ユースケース
  */
 class CreateReminderUseCase(
     private val reminderRepository: ReminderRepository,
     private val parrotRepository: ParrotRepository,
     private val uuidGenerator: UuidGenerator,
-    private val notificationService: NotificationService
+    private val notificationService: NotificationService,
+    private val getUserSettingsUseCase: GetUserSettingsUseCase
 ) {
     /**
      * リマインダーを作成する
@@ -30,16 +33,23 @@ class CreateReminderUseCase(
      */
     suspend operator fun invoke(text: String): Result<Reminder> {
         return try {
-            // インコの記憶時間を取得
-            val parrotResult = parrotRepository.getParrot()
-            if (parrotResult.isFailure) {
-                return Result.failure(parrotResult.exceptionOrNull()!!)
-            }
+            // ユーザー設定を取得
+            val userSettings = getUserSettingsUseCase()
 
-            val parrot = parrotResult.getOrThrow()
             val currentTime = Clock.System.now()
-            // インコの記憶時間に基づいて忘却時刻を計算
-            val forgetTime = currentTime + parrot.memoryTimeHours.hours
+            val forgetTime = if (userSettings.isDebugFastMemoryEnabled) {
+                // デバッグモードが有効な場合は5秒後に忘却
+                currentTime + 5.seconds
+            } else {
+                // 通常モードの場合はインコの記憶時間を使用
+                val parrotResult = parrotRepository.getParrot()
+                if (parrotResult.isFailure) {
+                    return Result.failure(parrotResult.exceptionOrNull()!!)
+                }
+                val parrot = parrotResult.getOrThrow()
+                // インコの記憶時間に基づいて忘却時刻を計算
+                currentTime + parrot.memoryTimeHours.hours
+            }
 
             val reminder =
                 Reminder(
