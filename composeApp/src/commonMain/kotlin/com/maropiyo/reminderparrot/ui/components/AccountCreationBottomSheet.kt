@@ -39,13 +39,15 @@ import reminderparrot.composeapp.generated.resources.reminko_raising_hand
  * @param onDismiss ボトムシートが閉じられたときのコールバック
  * @param onCreateAccount アカウント作成ボタンが押されたときのコールバック
  * @param sheetState ボトムシートの状態
+ * @param errorMessage エラーメッセージ（nullの場合は表示しない）
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountCreationBottomSheet(
     onDismiss: () -> Unit,
     onCreateAccount: () -> Unit,
-    sheetState: androidx.compose.material3.SheetState
+    sheetState: androidx.compose.material3.SheetState,
+    errorMessage: String? = null
 ) {
     ModalBottomSheet(
         dragHandle = null,
@@ -62,6 +64,7 @@ fun AccountCreationBottomSheet(
         ) {
             AccountCreationCard(
                 onCreateAccount = onCreateAccount,
+                errorMessage = errorMessage,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 104.dp)
@@ -84,7 +87,11 @@ fun AccountCreationBottomSheet(
  * アカウント作成カード
  */
 @Composable
-private fun AccountCreationCard(onCreateAccount: () -> Unit, modifier: Modifier = Modifier) {
+private fun AccountCreationCard(
+    onCreateAccount: () -> Unit,
+    errorMessage: String? = null,
+    modifier: Modifier = Modifier
+) {
     Card(
         modifier = modifier,
         colors = CardDefaults.cardColors(
@@ -127,6 +134,18 @@ private fun AccountCreationCard(onCreateAccount: () -> Unit, modifier: Modifier 
                     .padding(horizontal = 16.dp)
                     .height(50.dp)
             )
+
+            // エラーメッセージ表示
+            errorMessage?.let { error ->
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    text = error,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+            }
         }
     }
 }

@@ -26,6 +26,9 @@ class RemindNetViewModel(
     private val _needsAccountCreation = MutableStateFlow(false)
     val needsAccountCreation: StateFlow<Boolean> = _needsAccountCreation.asStateFlow()
 
+    private val _accountCreationError = MutableStateFlow<String?>(null)
+    val accountCreationError: StateFlow<String?> = _accountCreationError.asStateFlow()
+
     init {
         checkAccountAndLoadPosts()
     }
@@ -100,6 +103,9 @@ class RemindNetViewModel(
     fun createAccount() {
         viewModelScope.launch {
             try {
+                // エラーをクリア
+                _accountCreationError.value = null
+
                 // 匿名認証でアカウントを作成
                 val userId = authService.getUserId()
                 println("RemindNetViewModel: アカウント作成成功 - UserId: $userId")
@@ -115,11 +121,16 @@ class RemindNetViewModel(
                     else ->
                         "アカウントのさくせいにしっぱいしました。\nもういちどためしてください。"
                 }
-                _state.update {
-                    it.copy(error = errorMessage)
-                }
+                _accountCreationError.value = errorMessage
             }
         }
+    }
+
+    /**
+     * アカウント作成エラーをクリア
+     */
+    fun clearAccountCreationError() {
+        _accountCreationError.value = null
     }
 }
 

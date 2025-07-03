@@ -25,6 +25,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -56,6 +57,7 @@ fun SettingsScreen() {
     val viewModel = koinInject<SettingsViewModel>()
     val settings by viewModel.settings.collectAsState()
     val userId by viewModel.userId.collectAsState()
+    val accountCreationError by viewModel.accountCreationError.collectAsState()
     val scope = rememberCoroutineScope()
 
     // アカウント作成ボトムシートの状態
@@ -63,6 +65,17 @@ fun SettingsScreen() {
     val accountCreationSheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true
     )
+
+    // アカウント作成成功時にボトムシートを閉じる
+    LaunchedEffect(userId) {
+        if (userId != null && showAccountCreationBottomSheet) {
+            scope.launch {
+                accountCreationSheetState.hide()
+                showAccountCreationBottomSheet = false
+                viewModel.clearAccountCreationError()
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -334,17 +347,15 @@ fun SettingsScreen() {
                         scope.launch {
                             accountCreationSheetState.hide()
                             showAccountCreationBottomSheet = false
+                            viewModel.clearAccountCreationError()
                         }
                     },
                     onCreateAccount = {
                         // アカウント作成処理を実行
                         viewModel.createAccount()
-                        scope.launch {
-                            accountCreationSheetState.hide()
-                            showAccountCreationBottomSheet = false
-                        }
                     },
-                    sheetState = accountCreationSheetState
+                    sheetState = accountCreationSheetState,
+                    errorMessage = accountCreationError
                 )
             }
         }

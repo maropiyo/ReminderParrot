@@ -67,14 +67,16 @@ import reminderparrot.composeapp.generated.resources.reminko_face
 fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
     val state by remindNetViewModel.state.collectAsState()
     val needsAccountCreation by remindNetViewModel.needsAccountCreation.collectAsState()
+    val accountCreationError by remindNetViewModel.accountCreationError.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
     // アカウント作成ボトムシートの状態
     var showAccountCreationBottomSheet by remember { mutableStateOf(false) }
-    val accountCreationSheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true
-    )
+    val accountCreationSheetState =
+        rememberModalBottomSheetState(
+            skipPartiallyExpanded = true
+        )
 
     // 画面に遷移した時に投稿を再取得
     LaunchedEffect(Unit) {
@@ -93,6 +95,12 @@ fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
     LaunchedEffect(needsAccountCreation) {
         if (needsAccountCreation) {
             showAccountCreationBottomSheet = true
+        } else {
+            // アカウント作成成功時にボトムシートを閉じる
+            if (showAccountCreationBottomSheet) {
+                accountCreationSheetState.hide()
+                showAccountCreationBottomSheet = false
+            }
         }
     }
 
@@ -109,9 +117,9 @@ fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
                     )
                 },
                 colors =
-                TopAppBarDefaults.topAppBarColors(
-                    containerColor = White
-                )
+                    TopAppBarDefaults.topAppBarColors(
+                        containerColor = White
+                    )
             )
         },
         containerColor = Background
@@ -150,7 +158,7 @@ fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "みんなどこ行った？",
+                            text = "だれかいませんか？",
                             style = MaterialTheme.typography.titleMedium,
                             color = Secondary,
                             fontWeight = FontWeight.Bold
@@ -161,9 +169,9 @@ fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
                 // 投稿リスト
                 LazyColumn(
                     modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
+                        Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
                     contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 100.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
@@ -181,17 +189,15 @@ fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
                     scope.launch {
                         accountCreationSheetState.hide()
                         showAccountCreationBottomSheet = false
+                        remindNetViewModel.clearAccountCreationError()
                     }
                 },
                 onCreateAccount = {
                     // アカウント作成処理を実行
                     remindNetViewModel.createAccount()
-                    scope.launch {
-                        accountCreationSheetState.hide()
-                        showAccountCreationBottomSheet = false
-                    }
                 },
-                sheetState = accountCreationSheetState
+                sheetState = accountCreationSheetState,
+                errorMessage = accountCreationError
             )
         }
     }
@@ -201,21 +207,24 @@ fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
  * リマインネット投稿カード
  */
 @Composable
-private fun RemindNetPostCard(post: RemindNetPost, modifier: Modifier = Modifier) {
+private fun RemindNetPostCard(
+    post: RemindNetPost,
+    modifier: Modifier = Modifier
+) {
     Card(
         modifier = modifier.fillMaxWidth(),
         colors =
-        CardDefaults.cardColors(
-            containerColor = White
-        ),
+            CardDefaults.cardColors(
+                containerColor = White
+            ),
         shape = Shapes.extraLarge,
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
             modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
         ) {
             // アイコンとユーザー名
             Row(
@@ -226,10 +235,10 @@ private fun RemindNetPostCard(post: RemindNetPost, modifier: Modifier = Modifier
                     painter = painterResource(Res.drawable.reminko_face),
                     contentDescription = "リマインコ",
                     modifier =
-                    Modifier
-                        .size(32.dp)
-                        .clip(CircleShape)
-                        .background(ParrotYellow, CircleShape),
+                        Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .background(ParrotYellow, CircleShape),
                     contentScale = ContentScale.Crop
                 )
 

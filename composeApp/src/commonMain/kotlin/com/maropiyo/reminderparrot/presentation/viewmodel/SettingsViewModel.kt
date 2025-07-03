@@ -27,6 +27,9 @@ class SettingsViewModel(
     private val _userId = MutableStateFlow<String?>(null)
     val userId: StateFlow<String?> = _userId.asStateFlow()
 
+    private val _accountCreationError = MutableStateFlow<String?>(null)
+    val accountCreationError: StateFlow<String?> = _accountCreationError.asStateFlow()
+
     init {
         loadSettings()
         loadUserId()
@@ -119,6 +122,9 @@ class SettingsViewModel(
     fun createAccount() {
         viewModelScope.launch {
             try {
+                // エラーをクリア
+                _accountCreationError.value = null
+
                 // 匿名認証でアカウントを作成
                 val userId = authService.getUserId()
                 println("SettingsViewModel: アカウント作成成功 - UserId: $userId")
@@ -127,8 +133,21 @@ class SettingsViewModel(
                 loadUserId()
             } catch (e: Exception) {
                 println("SettingsViewModel: アカウント作成エラー: ${e.message}")
-                // エラーハンドリングは必要に応じて追加
+                val errorMessage = when {
+                    e.message?.contains("anonymous_provider_disabled") == true ->
+                        "アカウントのせっていがひつようです。\nかんりしゃにれんらくしてください。"
+                    else ->
+                        "アカウントのさくせいにしっぱいしました。\nもういちどためしてください。"
+                }
+                _accountCreationError.value = errorMessage
             }
         }
+    }
+
+    /**
+     * アカウント作成エラーをクリア
+     */
+    fun clearAccountCreationError() {
+        _accountCreationError.value = null
     }
 }
