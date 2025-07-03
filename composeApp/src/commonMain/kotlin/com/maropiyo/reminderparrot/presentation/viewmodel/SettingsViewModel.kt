@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.maropiyo.reminderparrot.domain.entity.UserSettings
 import com.maropiyo.reminderparrot.domain.usecase.GetUserSettingsUseCase
 import com.maropiyo.reminderparrot.domain.usecase.SaveUserSettingsUseCase
+import com.maropiyo.reminderparrot.util.BuildConfig
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -53,6 +54,9 @@ class SettingsViewModel(
      * デバッグ用高速記憶設定を更新する
      */
     fun updateDebugFastMemoryEnabled(enabled: Boolean) {
+        // リリースビルドでは無効
+        if (!BuildConfig.isDebug) return
+
         viewModelScope.launch {
             // デバッグ用ログ
             println("SettingsViewModel: updateDebugFastMemoryEnabled called")
@@ -64,6 +68,20 @@ class SettingsViewModel(
             _settings.value = newSettings
 
             println("  saved and updated state")
+        }
+    }
+
+    /**
+     * デバッグ用忘却時間を更新する
+     */
+    fun updateDebugForgetTimeSeconds(seconds: Int) {
+        // リリースビルドでは無効
+        if (!BuildConfig.isDebug) return
+
+        viewModelScope.launch {
+            val newSettings = _settings.value.copy(debugForgetTimeSeconds = seconds)
+            saveUserSettingsUseCase(newSettings)
+            _settings.value = newSettings
         }
     }
 }

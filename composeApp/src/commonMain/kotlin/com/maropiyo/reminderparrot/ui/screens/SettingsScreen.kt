@@ -16,6 +16,8 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -35,6 +37,7 @@ import com.maropiyo.reminderparrot.ui.theme.CardBackgroundColor
 import com.maropiyo.reminderparrot.ui.theme.Primary
 import com.maropiyo.reminderparrot.ui.theme.Secondary
 import com.maropiyo.reminderparrot.ui.theme.White
+import com.maropiyo.reminderparrot.util.BuildConfig
 import org.koin.compose.koinInject
 
 /**
@@ -127,59 +130,122 @@ fun SettingsScreen() {
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            // デバッグ設定（デバッグビルド時のみ表示）
+            if (BuildConfig.isDebug) {
+                Spacer(modifier = Modifier.height(24.dp))
 
-            // デバッグ設定
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = CardBackgroundColor),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(20.dp)
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = CardBackgroundColor),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                 ) {
-                    Text(
-                        text = "デバッグせってい",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = Secondary,
-                        fontWeight = FontWeight.Bold
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // 高速記憶設定
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                    Column(
+                        modifier = Modifier.padding(20.dp)
                     ) {
-                        Column(
-                            modifier = Modifier.weight(1f)
+                        Text(
+                            text = "デバッグせってい",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = Secondary,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // 高速記憶設定
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                text = "すぐわすれるモード",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = Secondary,
-                                fontWeight = FontWeight.Medium
-                            )
-                            Text(
-                                text = "5びょうですぐにわすれるよ",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = Secondary.copy(alpha = 0.7f)
+                            Column(
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text(
+                                    text = "すぐわすれるモード",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = Secondary,
+                                    fontWeight = FontWeight.Medium
+                                )
+                                Text(
+                                    text = "${settings.debugForgetTimeSeconds}びょうですぐにわすれるよ",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = Secondary.copy(alpha = 0.7f)
+                                )
+                            }
+
+                            Switch(
+                                checked = settings.isDebugFastMemoryEnabled,
+                                onCheckedChange = { viewModel.updateDebugFastMemoryEnabled(it) },
+                                colors = SwitchDefaults.colors(
+                                    checkedThumbColor = Color.White,
+                                    checkedTrackColor = Primary,
+                                    uncheckedThumbColor = Color.White,
+                                    uncheckedTrackColor = Secondary.copy(alpha = 0.3f)
+                                )
                             )
                         }
 
-                        Switch(
-                            checked = settings.isDebugFastMemoryEnabled,
-                            onCheckedChange = { viewModel.updateDebugFastMemoryEnabled(it) },
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = Color.White,
-                                checkedTrackColor = Primary,
-                                uncheckedThumbColor = Color.White,
-                                uncheckedTrackColor = Secondary.copy(alpha = 0.3f)
-                            )
-                        )
+                        // スライダー（すぐわすれるモードが有効な場合のみ表示）
+                        if (settings.isDebugFastMemoryEnabled) {
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            Column {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = "わすれるまでの時間",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = Secondary,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                    Text(
+                                        text = "${settings.debugForgetTimeSeconds}びょう",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = Primary,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                Slider(
+                                    value = settings.debugForgetTimeSeconds.toFloat(),
+                                    onValueChange = { value ->
+                                        // 10秒刻みに丸める
+                                        val roundedValue = (value / 10f).toInt() * 10
+                                        viewModel.updateDebugForgetTimeSeconds(roundedValue)
+                                    },
+                                    valueRange = 10f..60f,
+                                    steps = 4,
+                                    colors = SliderDefaults.colors(
+                                        thumbColor = Primary,
+                                        activeTrackColor = Primary,
+                                        inactiveTrackColor = Secondary.copy(alpha = 0.3f)
+                                    ),
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        text = "10びょう",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = Secondary.copy(alpha = 0.7f)
+                                    )
+                                    Text(
+                                        text = "60びょう",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = Secondary.copy(alpha = 0.7f)
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
