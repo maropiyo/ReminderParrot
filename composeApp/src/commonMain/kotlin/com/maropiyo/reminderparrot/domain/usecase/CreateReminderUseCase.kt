@@ -42,9 +42,11 @@ class CreateReminderUseCase(
 
             val currentTime = Clock.System.now()
             val forgetTime = if (userSettings.isDebugFastMemoryEnabled) {
-                // デバッグモードが有効な場合は5秒後に忘却
-                println("CreateReminderUseCase: Debug mode enabled - using 5 seconds")
-                currentTime + 5.seconds
+                // デバッグモードが有効な場合は設定された秒数後に忘却
+                println(
+                    "CreateReminderUseCase: Debug mode enabled - using ${userSettings.debugForgetTimeSeconds} seconds"
+                )
+                currentTime + userSettings.debugForgetTimeSeconds.seconds
             } else {
                 // 通常モードの場合はインコの記憶時間を使用
                 println("CreateReminderUseCase: Normal mode - using parrot memory time")
