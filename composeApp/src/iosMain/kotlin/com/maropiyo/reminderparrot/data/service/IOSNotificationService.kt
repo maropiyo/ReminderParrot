@@ -45,7 +45,14 @@ class IOSNotificationService : NotificationService {
     }
 
     override suspend fun scheduleForgetNotification(reminder: Reminder) {
+        // デバッグ用ログ
+        println("IOSNotificationService: scheduleForgetNotification called")
+        println("  reminder.id: ${reminder.id}")
+        println("  reminder.text: ${reminder.text}")
+        println("  reminder.forgetAt: ${reminder.forgetAt}")
+
         if (!isNotificationPermissionGranted()) {
+            println("  notification permission not granted")
             throw IllegalStateException("通知権限が許可されていません")
         }
 
@@ -53,8 +60,13 @@ class IOSNotificationService : NotificationService {
         val forgetTime = reminder.forgetAt.toEpochMilliseconds()
         val timeInterval = (forgetTime - currentTime) / 1000.0
 
+        println("  currentTime: $currentTime")
+        println("  forgetTime: $forgetTime")
+        println("  timeInterval: $timeInterval seconds")
+
         // 既に過去の時刻の場合は即座に通知
         if (timeInterval <= 0) {
+            println("  scheduling immediate notification (past time)")
             showImmediateNotification(reminder)
             return
         }
@@ -92,8 +104,10 @@ class IOSNotificationService : NotificationService {
         suspendCancellableCoroutine { continuation ->
             notificationCenter.addNotificationRequest(request) { error ->
                 if (error != null) {
+                    println("  notification scheduling failed: $error")
                     continuation.resume(Unit) // エラーでも継続
                 } else {
+                    println("  notification scheduled successfully")
                     continuation.resume(Unit)
                 }
             }

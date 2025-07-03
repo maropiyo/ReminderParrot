@@ -36,18 +36,25 @@ class CreateReminderUseCase(
             // ユーザー設定を取得
             val userSettings = getUserSettingsUseCase()
 
+            // デバッグ用ログ
+            println("CreateReminderUseCase: getUserSettings called")
+            println("  isDebugFastMemoryEnabled: ${userSettings.isDebugFastMemoryEnabled}")
+
             val currentTime = Clock.System.now()
             val forgetTime = if (userSettings.isDebugFastMemoryEnabled) {
                 // デバッグモードが有効な場合は5秒後に忘却
+                println("CreateReminderUseCase: Debug mode enabled - using 5 seconds")
                 currentTime + 5.seconds
             } else {
                 // 通常モードの場合はインコの記憶時間を使用
+                println("CreateReminderUseCase: Normal mode - using parrot memory time")
                 val parrotResult = parrotRepository.getParrot()
                 if (parrotResult.isFailure) {
                     return Result.failure(parrotResult.exceptionOrNull()!!)
                 }
                 val parrot = parrotResult.getOrThrow()
                 // インコの記憶時間に基づいて忘却時刻を計算
+                println("CreateReminderUseCase: Parrot memory time: ${parrot.memoryTimeHours} hours")
                 currentTime + parrot.memoryTimeHours.hours
             }
 

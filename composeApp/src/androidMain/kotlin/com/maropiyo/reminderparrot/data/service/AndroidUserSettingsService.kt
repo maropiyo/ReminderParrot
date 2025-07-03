@@ -14,12 +14,22 @@ class AndroidUserSettingsService(
     companion object {
         private const val PREFS_NAME = "user_settings"
         private const val KEY_REMIND_NET_SHARING_ENABLED = "remind_net_sharing_enabled"
+        private const val KEY_DEBUG_FAST_MEMORY_ENABLED = "debug_fast_memory_enabled"
     }
 
     override suspend fun getUserSettings(): UserSettings {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val isRemindNetSharingEnabled = prefs.getBoolean(KEY_REMIND_NET_SHARING_ENABLED, false)
+        val isDebugFastMemoryEnabled = prefs.getBoolean(KEY_DEBUG_FAST_MEMORY_ENABLED, false)
+
+        // デバッグ用ログ
+        println("AndroidUserSettingsService: getUserSettings called")
+        println("  isRemindNetSharingEnabled: $isRemindNetSharingEnabled")
+        println("  isDebugFastMemoryEnabled: $isDebugFastMemoryEnabled")
+
         return UserSettings(
-            isRemindNetSharingEnabled = prefs.getBoolean(KEY_REMIND_NET_SHARING_ENABLED, false)
+            isRemindNetSharingEnabled = isRemindNetSharingEnabled,
+            isDebugFastMemoryEnabled = isDebugFastMemoryEnabled
         )
     }
 
@@ -27,6 +37,12 @@ class AndroidUserSettingsService(
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         prefs.edit()
             .putBoolean(KEY_REMIND_NET_SHARING_ENABLED, settings.isRemindNetSharingEnabled)
+            .putBoolean(KEY_DEBUG_FAST_MEMORY_ENABLED, settings.isDebugFastMemoryEnabled)
             .apply()
+
+        // デバッグ用ログ
+        println("AndroidUserSettingsService: saveUserSettings called")
+        println("  isRemindNetSharingEnabled: ${settings.isRemindNetSharingEnabled}")
+        println("  isDebugFastMemoryEnabled: ${settings.isDebugFastMemoryEnabled}")
     }
 }

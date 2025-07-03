@@ -30,7 +30,11 @@ class SettingsViewModel(
      */
     private fun loadSettings() {
         viewModelScope.launch {
-            _settings.value = getUserSettingsUseCase()
+            // デバッグ用ログ
+            println("SettingsViewModel: loadSettings called")
+            val settings = getUserSettingsUseCase()
+            println("  loaded settings: isDebugFastMemoryEnabled = ${settings.isDebugFastMemoryEnabled}")
+            _settings.value = settings
         }
     }
 
@@ -42,6 +46,24 @@ class SettingsViewModel(
             val newSettings = _settings.value.copy(isRemindNetSharingEnabled = enabled)
             saveUserSettingsUseCase(newSettings)
             _settings.value = newSettings
+        }
+    }
+
+    /**
+     * デバッグ用高速記憶設定を更新する
+     */
+    fun updateDebugFastMemoryEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            // デバッグ用ログ
+            println("SettingsViewModel: updateDebugFastMemoryEnabled called")
+            println("  current value: ${_settings.value.isDebugFastMemoryEnabled}")
+            println("  new value: $enabled")
+
+            val newSettings = _settings.value.copy(isDebugFastMemoryEnabled = enabled)
+            saveUserSettingsUseCase(newSettings)
+            _settings.value = newSettings
+
+            println("  saved and updated state")
         }
     }
 }

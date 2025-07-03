@@ -72,7 +72,6 @@ fun SettingsScreen() {
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
             // リマインネット設定
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -117,6 +116,63 @@ fun SettingsScreen() {
                         Switch(
                             checked = settings.isRemindNetSharingEnabled,
                             onCheckedChange = { viewModel.updateRemindNetSharingEnabled(it) },
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = Color.White,
+                                checkedTrackColor = Primary,
+                                uncheckedThumbColor = Color.White,
+                                uncheckedTrackColor = Secondary.copy(alpha = 0.3f)
+                            )
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // デバッグ設定
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = CardBackgroundColor),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(20.dp)
+                ) {
+                    Text(
+                        text = "デバッグせってい",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = Secondary,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // 高速記憶設定
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(
+                                text = "すぐわすれるモード",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = Secondary,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Text(
+                                text = "5びょうですぐにわすれるよ",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Secondary.copy(alpha = 0.7f)
+                            )
+                        }
+
+                        Switch(
+                            checked = settings.isDebugFastMemoryEnabled,
+                            onCheckedChange = { viewModel.updateDebugFastMemoryEnabled(it) },
                             colors = SwitchDefaults.colors(
                                 checkedThumbColor = Color.White,
                                 checkedTrackColor = Primary,
