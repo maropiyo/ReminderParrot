@@ -1,4 +1,4 @@
-CREATE TABLE Reminder (
+CREATE TABLE IF NOT EXISTS Reminder (
     id TEXT PRIMARY KEY,
     text TEXT NOT NULL,
     is_completed INTEGER NOT NULL DEFAULT 0,
@@ -31,7 +31,7 @@ DELETE FROM Reminder
 WHERE forget_at < ?;
 
 -- Parrotテーブルの定義
-CREATE TABLE Parrot (
+CREATE TABLE IF NOT EXISTS Parrot (
     id INTEGER PRIMARY KEY DEFAULT 1,
     level INTEGER NOT NULL DEFAULT 1,
     current_experience INTEGER NOT NULL DEFAULT 0,

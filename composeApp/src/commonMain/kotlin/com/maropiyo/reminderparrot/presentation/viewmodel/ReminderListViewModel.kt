@@ -3,11 +3,15 @@ package com.maropiyo.reminderparrot.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.maropiyo.reminderparrot.domain.usecase.AddParrotExperienceUseCase
+import com.maropiyo.reminderparrot.domain.usecase.CancelForgetNotificationUseCase
 import com.maropiyo.reminderparrot.domain.usecase.CreateReminderUseCase
 import com.maropiyo.reminderparrot.domain.usecase.DeleteExpiredRemindersUseCase
 import com.maropiyo.reminderparrot.domain.usecase.DeleteReminderUseCase
 import com.maropiyo.reminderparrot.domain.usecase.GetRemindersUseCase
+import com.maropiyo.reminderparrot.domain.usecase.GetUserSettingsUseCase
+import com.maropiyo.reminderparrot.domain.usecase.ScheduleForgetNotificationUseCase
 import com.maropiyo.reminderparrot.domain.usecase.UpdateReminderUseCase
+import com.maropiyo.reminderparrot.domain.usecase.remindnet.CreateRemindNetPostUseCase
 import com.maropiyo.reminderparrot.presentation.state.ReminderListState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -27,6 +31,8 @@ import kotlinx.datetime.Clock
  * @property deleteReminderUseCase リマインダー削除ユースケース
  * @property deleteExpiredRemindersUseCase 期限切れリマインダー削除ユースケース
  * @property addParrotExperienceUseCase インコの経験値追加ユースケース
+ * @property cancelForgetNotificationUseCase 忘却通知キャンセルユースケース
+ * @property scheduleForgetNotificationUseCase 忘却通知スケジューリングユースケース
  */
 class ReminderListViewModel(
     private val getRemindersUseCase: GetRemindersUseCase,
@@ -34,7 +40,11 @@ class ReminderListViewModel(
     private val updateReminderUseCase: UpdateReminderUseCase,
     private val deleteReminderUseCase: DeleteReminderUseCase,
     private val deleteExpiredRemindersUseCase: DeleteExpiredRemindersUseCase,
-    private val addParrotExperienceUseCase: AddParrotExperienceUseCase
+    private val addParrotExperienceUseCase: AddParrotExperienceUseCase,
+    private val cancelForgetNotificationUseCase: CancelForgetNotificationUseCase,
+    private val scheduleForgetNotificationUseCase: ScheduleForgetNotificationUseCase,
+    private val createRemindNetPostUseCase: CreateRemindNetPostUseCase,
+    private val getUserSettingsUseCase: GetUserSettingsUseCase
 ) : ViewModel() {
     private val _state = MutableStateFlow(ReminderListState())
     val state: StateFlow<ReminderListState> = _state.asStateFlow()
@@ -69,6 +79,16 @@ class ReminderListViewModel(
                     }
                     // インコの経験値を追加（+1）
                     addParrotExperienceUseCase()
+
+                    // 設定を確認してリマインネットに投稿するかどうかを決める
+                    val settings = getUserSettingsUseCase()
+                    if (settings.isRemindNetSharingEnabled) {
+                        createRemindNetPostUseCase(
+                            reminderId = reminder.id,
+                            reminderText = reminder.text,
+                            forgetAt = reminder.forgetAt
+                        )
+                    }
                 }.onFailure { exception ->
                     // リマインダーの作成に失敗した場合、エラーメッセージを表示する
                     _state.update { it.copy(error = exception.message) }
@@ -102,6 +122,10 @@ class ReminderListViewModel(
 
                 // アニメーションの完了を待ってから削除
                 delay(400) // アニメーション時間（100ms + 300ms）
+
+                // 通知をキャンセル
+                cancelForgetNotificationUseCase(reminderId)
+
                 deleteReminderUseCase(reminderId)
                     .onSuccess {
                         _state.update { currentState ->
@@ -147,6 +171,15 @@ class ReminderListViewModel(
                             }
                         currentState.copy(reminders = updatedReminders)
                     }
+
+                    // 通知のテキストを更新するために再スケジューリング
+                    try {
+                        // 既存の通知をキャンセルしてから新しいテキストで再スケジューリング
+                        cancelForgetNotificationUseCase(reminderId)
+                        scheduleForgetNotificationUseCase(updatedReminder)
+                    } catch (e: Exception) {
+                        // 通知の更新に失敗してもリマインダー更新は成功とする
+                    }
                 }.onFailure { exception ->
                     _state.update { it.copy(error = exception.message) }
                 }
@@ -160,6 +193,9 @@ class ReminderListViewModel(
      */
     fun deleteReminder(reminderId: String) {
         viewModelScope.launch {
+            // 通知をキャンセル
+            cancelForgetNotificationUseCase(reminderId)
+
             deleteReminderUseCase(reminderId)
                 .onSuccess {
                     _state.update { currentState ->
@@ -184,6 +220,9 @@ class ReminderListViewModel(
             // 期限切れリマインダーを削除
             deleteExpiredRemindersUseCase.execute()
 
+            // 期限切れリマインダーの通知は個別にキャンセルされるため、
+            // 全ての通知をキャンセルする必要はない
+
             getRemindersUseCase()
                 .onSuccess { reminders ->
                     _state.update { it.copy(reminders = reminders, isLoading = false) }
@@ -207,6 +246,8 @@ class ReminderListViewModel(
                     .onSuccess { deletedCount ->
                         if (deletedCount > 0) {
                             // 削除されたリマインダーがある場合はリストを更新
+                            // 期限切れリマインダーの通知は個別にキャンセルされるため、
+                            // 全ての通知をキャンセルする必要はない
                             loadReminders()
                         } else {
                             // 削除がない場合でも、時間表示の更新のためにStateを更新

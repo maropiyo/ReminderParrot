@@ -4,7 +4,10 @@ Claude Codeでの開発時のガイドライン
 
 ## プロジェクト概要
 
-ReminderParrot は Kotlin Multiplatform Mobile (KMM) アプリケーション。Android と iOS の両方で動作し、Jetpack Compose Multiplatform を使用してUIを構築。
+ReminderParrot(リマインコ) は Kotlin Multiplatform Mobile (KMM) アプリケーション。Android と iOS の両方で動作し、Jetpack Compose Multiplatform を使用してUIを構築。
+ユーザーは3歳から8歳の子供向けを意識しており、シンプルかつ直感的なUIが理想。
+なるべく漢字を利用しないように意識する。
+インコに言葉を覚えさせるコンセプトに沿うこと。
 
 ## 基本コマンド
 
@@ -15,11 +18,56 @@ ReminderParrot は Kotlin Multiplatform Mobile (KMM) アプリケーション。
 ./gradlew :composeApp:lintDebug  # Android Lint
 ```
 
-### ビルド・テスト
+### ビルド
 ```bash
-./gradlew :composeApp:assembleDebug          # Android APK
-./gradlew :composeApp:compileKotlinIosX64    # iOS framework
+# Android
+./gradlew :composeApp:assembleDebug          # Debug APK
+./gradlew :composeApp:assembleRelease        # Release APK
+./gradlew :composeApp:bundle                 # AAB (App Bundle)
+
+# iOS
+./gradlew :composeApp:compileKotlinIosX64            # iOS x64 framework
+./gradlew :composeApp:compileKotlinIosArm64          # iOS ARM64 framework  
+./gradlew :composeApp:compileKotlinIosSimulatorArm64 # iOS Simulator ARM64
+```
+
+### テスト実行
+```bash
+# 全プラットフォーム
 ./gradlew allTests                           # 全テスト実行
+./gradlew cleanAllTests                      # テスト結果をクリーン
+
+# Android専用
+./gradlew :composeApp:testDebugUnitTest      # Debug単体テスト
+./gradlew :composeApp:testReleaseUnitTest    # Release単体テスト
+./gradlew :composeApp:test                   # 全variant単体テスト
+./gradlew :composeApp:connectedDebugAndroidTest  # 実機/エミュレータテスト
+
+# iOS専用
+./gradlew :composeApp:iosSimulatorArm64Test  # iOS Simulatorテスト
+./gradlew :composeApp:iosX64Test             # iOS x64テスト
+
+# 共通テスト
+./gradlew :composeApp:testDebugUnitTest :composeApp:testReleaseUnitTest
+```
+
+### デバッグ・開発
+```bash
+# インストール/アンインストール
+./gradlew :composeApp:installDebug           # Debugビルドをインストール
+./gradlew :composeApp:uninstallDebug         # Debugビルドをアンインストール
+
+# クリーン
+./gradlew clean                              # ビルドディレクトリ削除
+./gradlew cleanAllTests                      # テスト結果削除
+
+# 依存関係
+./gradlew :composeApp:dependencies           # 依存関係ツリー表示
+./gradlew :composeApp:resolveIdeDependencies # IDE用依存関係解決
+
+# SQLDelight
+./gradlew generateSqlDelightInterface        # DB インターフェース生成
+./gradlew verifySqlDelightMigration         # マイグレーション検証
 ```
 
 ## アーキテクチャ
@@ -100,12 +148,25 @@ docs: README更新
 ### Android
 `local.properties`:
 ```properties
-supabase.url=your_supabase_url
-supabase.key=your_anon_key
+# Supabase設定（BuildConfigで利用）
+SUPABASE_URL=your_supabase_url
+SUPABASE_KEY=your_anon_key
 ```
 
 ### iOS  
-`iosApp/Configuration/Config.xcconfig` を `Config.xcconfig.template` からコピーして設定
+`iosApp/Configuration/Config.xcconfig` を `Config.xcconfig.template` からコピーして設定:
+```xcconfig
+SUPABASE_URL=your_supabase_url
+SUPABASE_ANON_KEY=your_anon_key
+```
+
+### Gradle設定
+`gradle.properties`:
+```properties
+# メモリ設定（必要に応じて調整）
+org.gradle.jvmargs=-Xmx2048M -Dfile.encoding=UTF-8
+kotlin.daemon.jvmargs=-Xmx2048M
+```
 
 ## KMP開発のポイント
 
@@ -126,4 +187,53 @@ supabase.key=your_anon_key
 find . -name "*UseCase.kt"      # UseCase実装
 find . -name "*ViewModel.kt"    # ViewModel実装
 find . -name "*Repository*.kt"  # Repository実装
+```
+
+## CI/CD 設定
+
+### GitHub Actions ワークフロー
+- **Lint** (`lint.yml`): ktlint + Android Lint
+- **Test** (`test.yml`): 共通テスト + iOS テスト + 全プラットフォームテスト
+- **Build** (`build.yml`): Android APK + iOS framework ビルド
+
+### ローカルでCI相当のチェック
+```bash
+# CI前の確認コマンド（推奨）
+./gradlew ktlintCheck && \
+./gradlew :composeApp:lintDebug && \
+./gradlew allTests
+
+# 問題を自動修正
+./gradlew ktlintFormat
+```
+
+## トラブルシューティング
+
+### ビルドエラー時
+```bash
+# キャッシュクリア
+./gradlew clean
+rm -rf ~/.gradle/caches/
+rm -rf .gradle/
+
+# 依存関係の再取得
+./gradlew --refresh-dependencies
+```
+
+### テスト関連
+```bash
+# 特定のテストクラスを実行（Android）
+./gradlew :composeApp:testDebugUnitTest --tests="com.maropiyo.reminderparrot.*TestClassName"
+
+# テストレポート確認
+open composeApp/build/reports/tests/testDebugUnitTest/index.html
+```
+
+### iOS ビルド問題
+```bash
+# Kotlin/Native キャッシュクリア
+rm -rf ~/.konan
+
+# iOS シミュレータ向けビルド
+./gradlew :composeApp:linkDebugFrameworkIosSimulatorArm64
 ```

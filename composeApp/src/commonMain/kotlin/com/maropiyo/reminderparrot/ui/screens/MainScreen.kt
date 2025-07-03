@@ -14,6 +14,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.maropiyo.reminderparrot.data.local.DatabaseInitializer
 import com.maropiyo.reminderparrot.domain.usecase.RequestNotificationPermissionUseCase
 import com.maropiyo.reminderparrot.ui.navigation.BottomNavigation
 import com.maropiyo.reminderparrot.ui.navigation.NavigationItem
@@ -32,9 +33,15 @@ fun MainScreen() {
     // 通知権限要求
     val requestNotificationPermission = koinInject<RequestNotificationPermissionUseCase>()
 
-    // アプリ起動時に通知権限を要求
+    // データベース初期化
+    val databaseInitializer = koinInject<DatabaseInitializer>()
+
+    // アプリ起動時にデータベース初期化と通知権限を要求
     LaunchedEffect(Unit) {
         launch {
+            // データベース初期化を先に実行
+            databaseInitializer.initialize()
+            // その後通知権限を要求
             requestNotificationPermission()
         }
     }
@@ -47,6 +54,7 @@ fun MainScreen() {
                         text = when (currentRoute) {
                             NavigationItem.Home.route -> "こんにちは"
                             NavigationItem.RemindNet.route -> "リマインネット"
+                            NavigationItem.Settings.route -> "せってい"
                             else -> ""
                         },
                         style = MaterialTheme.typography.headlineLarge
@@ -74,6 +82,9 @@ fun MainScreen() {
             }
             NavigationItem.RemindNet.route -> {
                 RemindNetScreen()
+            }
+            NavigationItem.Settings.route -> {
+                SettingsScreen()
             }
         }
     }

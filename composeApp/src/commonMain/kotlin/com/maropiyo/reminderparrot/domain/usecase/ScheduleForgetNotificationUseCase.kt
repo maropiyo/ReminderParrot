@@ -21,6 +21,7 @@ class ScheduleForgetNotificationUseCase(
         return try {
             // 通知権限の確認
             val hasPermission = notificationService.isNotificationPermissionGranted()
+
             if (!hasPermission) {
                 val permissionGranted = notificationService.requestNotificationPermission()
                 if (!permissionGranted) {

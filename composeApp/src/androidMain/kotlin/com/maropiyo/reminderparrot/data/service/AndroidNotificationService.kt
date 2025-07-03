@@ -100,19 +100,21 @@ class AndroidNotificationService(
 
     override suspend fun cancelForgetNotification(reminderId: String) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val intent = Intent(context, ForgetNotificationReceiver::class.java)
-        val pendingIntent =
-            PendingIntent.getBroadcast(
-                context,
-                getRequestCode(reminderId),
-                intent,
-                PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
-            )
 
-        pendingIntent?.let {
-            alarmManager.cancel(it)
-            it.cancel()
+        // 既存のPendingIntentを作成してキャンセル
+        val cancelIntent = Intent(context, ForgetNotificationReceiver::class.java).apply {
+            action = "forget_notification_$reminderId"
         }
+
+        val cancelPendingIntent = PendingIntent.getBroadcast(
+            context,
+            getRequestCode(reminderId),
+            cancelIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        alarmManager.cancel(cancelPendingIntent)
+        cancelPendingIntent.cancel()
     }
 
     override suspend fun cancelAllForgetNotifications() {
@@ -143,7 +145,9 @@ class AndroidNotificationService(
      * 忘却通知を表示
      */
     private fun showForgetNotification(reminder: Reminder) {
-        if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) return
+        if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) {
+            return
+        }
 
         val intent = Intent(context, MainActivity::class.java)
         val pendingIntent =
@@ -176,7 +180,8 @@ class AndroidNotificationService(
                 .build()
 
         val notificationManager = NotificationManagerCompat.from(context)
-        notificationManager.notify(getRequestCode(reminder.id), notification)
+        val notificationId = getRequestCode(reminder.id)
+        notificationManager.notify(notificationId, notification)
     }
 
     /**
@@ -184,6 +189,7 @@ class AndroidNotificationService(
      */
     private fun createNotificationIntent(reminder: Reminder): Intent =
         Intent(context, ForgetNotificationReceiver::class.java).apply {
+            action = "forget_notification_${reminder.id}"
             putExtra("reminder_id", reminder.id)
             putExtra("reminder_text", reminder.text)
         }

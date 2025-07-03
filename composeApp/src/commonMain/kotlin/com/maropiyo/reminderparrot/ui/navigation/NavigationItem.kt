@@ -4,6 +4,7 @@ import org.jetbrains.compose.resources.DrawableResource
 import reminderparrot.composeapp.generated.resources.Res
 import reminderparrot.composeapp.generated.resources.home
 import reminderparrot.composeapp.generated.resources.network
+import reminderparrot.composeapp.generated.resources.settings
 
 /**
  * ボトムナビゲーションの項目を定義
@@ -39,10 +40,20 @@ sealed class NavigationItem(
         unselectedIcon = Res.drawable.network
     )
 
+    /**
+     * 設定画面
+     */
+    data object Settings : NavigationItem(
+        route = "settings",
+        label = "せってい",
+        selectedIcon = Res.drawable.settings,
+        unselectedIcon = Res.drawable.settings
+    )
+
     companion object {
         /**
          * すべてのナビゲーション項目を取得
          */
-        fun getItems(): List<NavigationItem> = listOf(Home, RemindNet)
+        fun getItems(): List<NavigationItem> = listOf(Home, RemindNet, Settings)
     }
 }

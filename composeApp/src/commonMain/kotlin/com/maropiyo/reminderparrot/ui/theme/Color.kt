@@ -27,3 +27,4 @@ val ErrorDark = Color(0xFF8B3A2A)
 
 // 背景色
 val Background = Color(0xFFF6EFD8)
+val CardBackgroundColor = Color(0xFFFFFFFF)

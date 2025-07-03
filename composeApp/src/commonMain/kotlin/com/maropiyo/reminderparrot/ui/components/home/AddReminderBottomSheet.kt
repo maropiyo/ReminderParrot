@@ -58,7 +58,7 @@ fun AddReminderBottomSheet(
     reminderText: String,
     onReminderTextChange: (String) -> Unit,
     onDismiss: () -> Unit,
-    onSaveReminder: () -> Unit,
+    onSaveReminder: (Boolean) -> Unit,
     sheetState: androidx.compose.material3.SheetState,
     memorizedWords: Int,
     currentReminderCount: Int
@@ -80,7 +80,7 @@ fun AddReminderBottomSheet(
             ReminderInputCard(
                 reminderText = reminderText,
                 onReminderTextChange = onReminderTextChange,
-                onSaveReminder = onSaveReminder,
+                onSaveReminder = { onSaveReminder(true) },
                 modifier =
                 Modifier
                     .fillMaxWidth()
