@@ -158,7 +158,11 @@ fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "だれかいませんか？",
+                            text = if (needsAccountCreation) {
+                                "リマインネットに参加していません"
+                            } else {
+                                "だれかいませんか？"
+                            },
                             style = MaterialTheme.typography.titleMedium,
                             color = Secondary,
                             fontWeight = FontWeight.Bold

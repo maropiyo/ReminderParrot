@@ -128,7 +128,7 @@ fun SettingsScreen() {
                     modifier = Modifier.padding(20.dp)
                 ) {
                     Text(
-                        text = "インコじょうほう",
+                        text = "リマインコについて",
                         style = MaterialTheme.typography.titleMedium,
                         color = Secondary,
                         fontWeight = FontWeight.Bold
@@ -187,7 +187,7 @@ fun SettingsScreen() {
                     // インコID表示
                     Column {
                         Text(
-                            text = "インコID",
+                            text = "リマインコID",
                             style = MaterialTheme.typography.bodyMedium,
                             color = Secondary,
                             fontWeight = FontWeight.Medium

@@ -117,7 +117,7 @@ private fun AccountCreationCard(
 
             // 説明テキスト
             Text(
-                text = "リマインネットはインコどうしで\nことばをきょうゆうするきのうだよ！\n\nつかうまえにアカウントをつくろう",
+                text = "リマインネットはリマインコどうしで\nことばをきょうゆうするきのうだよ！",
                 color = Secondary.copy(alpha = 0.8f),
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
