@@ -11,7 +11,7 @@ import com.maropiyo.reminderparrot.util.BuildConfig
  * @property debugForgetTimeSeconds すぐわすれるモード時の忘却時間（秒）
  */
 data class UserSettings(
-    val parrotName: String = "",
+    val parrotName: String = "むめいのインコ",
     val isRemindNetSharingEnabled: Boolean = false,
     val isDebugFastMemoryEnabled: Boolean = false && BuildConfig.isDebug,
     val debugForgetTimeSeconds: Int = 10

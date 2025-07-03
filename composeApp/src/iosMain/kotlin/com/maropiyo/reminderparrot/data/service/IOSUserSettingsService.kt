@@ -18,7 +18,7 @@ class IOSUserSettingsService : UserSettingsService {
 
     override suspend fun getUserSettings(): UserSettings {
         val userDefaults = NSUserDefaults.standardUserDefaults
-        val parrotName = userDefaults.stringForKey(KEY_PARROT_NAME) ?: "リマインコ"
+        val parrotName = userDefaults.stringForKey(KEY_PARROT_NAME) ?: "むめいのインコ"
         val isRemindNetSharingEnabled = userDefaults.boolForKey(KEY_REMIND_NET_SHARING_ENABLED)
         val isDebugFastMemoryEnabled = userDefaults.boolForKey(KEY_DEBUG_FAST_MEMORY_ENABLED)
         val debugForgetTimeSeconds = userDefaults.integerForKey(KEY_DEBUG_FORGET_TIME_SECONDS).toInt().let {

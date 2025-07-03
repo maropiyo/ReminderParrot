@@ -21,7 +21,7 @@ class AndroidUserSettingsService(
 
     override suspend fun getUserSettings(): UserSettings {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val parrotName = prefs.getString(KEY_PARROT_NAME, "リマインコ") ?: "リマインコ"
+        val parrotName = prefs.getString(KEY_PARROT_NAME, "むめいのインコ") ?: "むめいのインコ"
         val isRemindNetSharingEnabled = prefs.getBoolean(KEY_REMIND_NET_SHARING_ENABLED, false)
         val isDebugFastMemoryEnabled = prefs.getBoolean(KEY_DEBUG_FAST_MEMORY_ENABLED, false)
         val debugForgetTimeSeconds = prefs.getInt(KEY_DEBUG_FORGET_TIME_SECONDS, 10)

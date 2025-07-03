@@ -86,7 +86,7 @@ class ReminderListViewModel(
                         val userName = if (settings.parrotName.isNotBlank()) {
                             settings.parrotName
                         } else {
-                            "リマインコ"
+                            "むめいのインコ"
                         }
                         createRemindNetPostUseCase(
                             reminderId = reminder.id,

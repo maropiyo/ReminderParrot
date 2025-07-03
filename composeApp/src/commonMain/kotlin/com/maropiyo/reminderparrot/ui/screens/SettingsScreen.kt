@@ -152,7 +152,7 @@ fun SettingsScreen() {
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = parrotNameDisplay.ifEmpty { "リマインコ" },
+                                text = parrotNameDisplay.ifEmpty { "むめいのインコ" },
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = Secondary,
                                 fontWeight = FontWeight.Medium,
