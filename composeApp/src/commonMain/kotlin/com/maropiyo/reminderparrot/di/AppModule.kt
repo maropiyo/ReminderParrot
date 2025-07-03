@@ -40,7 +40,7 @@ val appModule =
     module {
         // ViewModel
         single<ReminderListViewModel> {
-            ReminderListViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get())
+            ReminderListViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
         }
         single<ParrotViewModel> { ParrotViewModel(get()) }
         single<RemindNetViewModel> { RemindNetViewModel(get()) }
