@@ -83,10 +83,16 @@ class ReminderListViewModel(
                     // 設定を確認してリマインネットに投稿するかどうかを決める
                     val settings = getUserSettingsUseCase()
                     if (settings.isRemindNetSharingEnabled) {
+                        val userName = if (settings.parrotName.isNotBlank()) {
+                            settings.parrotName
+                        } else {
+                            "リマインコ"
+                        }
                         createRemindNetPostUseCase(
                             reminderId = reminder.id,
                             reminderText = reminder.text,
-                            forgetAt = reminder.forgetAt
+                            forgetAt = reminder.forgetAt,
+                            userName = userName
                         )
                     }
                 }.onFailure { exception ->

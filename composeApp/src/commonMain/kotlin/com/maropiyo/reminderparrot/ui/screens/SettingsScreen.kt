@@ -1,5 +1,6 @@
 package com.maropiyo.reminderparrot.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,9 +12,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
@@ -45,6 +50,7 @@ import com.maropiyo.reminderparrot.ui.theme.Primary
 import com.maropiyo.reminderparrot.ui.theme.Secondary
 import com.maropiyo.reminderparrot.ui.theme.White
 import com.maropiyo.reminderparrot.util.BuildConfig
+import com.maropiyo.reminderparrot.util.ParrotNameGenerator
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
@@ -59,6 +65,14 @@ fun SettingsScreen() {
     val userId by viewModel.userId.collectAsState()
     val accountCreationError by viewModel.accountCreationError.collectAsState()
     val scope = rememberCoroutineScope()
+
+    // リマインコの名前表示状態
+    var parrotNameDisplay by remember { mutableStateOf("") }
+
+    // 設定が読み込まれたときに表示フィールドを更新
+    LaunchedEffect(settings.parrotName) {
+        parrotNameDisplay = settings.parrotName
+    }
 
     // アカウント作成ボトムシートの状態
     var showAccountCreationBottomSheet by remember { mutableStateOf(false) }
@@ -122,6 +136,54 @@ fun SettingsScreen() {
 
                     Spacer(modifier = Modifier.height(16.dp))
 
+                    // リマインコの名前設定
+                    Column {
+                        Text(
+                            text = "リマインコのなまえ",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Secondary,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = parrotNameDisplay.ifEmpty { "リマインコ" },
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = Secondary,
+                                fontWeight = FontWeight.Medium,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .background(
+                                        color = Secondary.copy(alpha = 0.1f),
+                                        shape = RoundedCornerShape(16.dp)
+                                    )
+                                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                            )
+
+                            IconButton(
+                                onClick = {
+                                    val newName = ParrotNameGenerator.generateRandomName()
+                                    parrotNameDisplay = newName
+                                    viewModel.updateParrotName(newName)
+                                },
+                                modifier = Modifier
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Refresh,
+                                    contentDescription = "なまえをかえる",
+                                    tint = Secondary
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
                     // インコID表示
                     Column {
                         Text(
@@ -134,13 +196,7 @@ fun SettingsScreen() {
                         Text(
                             text = userId ?: "みしゅとく",
                             style = MaterialTheme.typography.bodySmall,
-                            color = Secondary.copy(alpha = 0.7f),
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
-                        Text(
-                            text = "リマインネットでのあなたのインコのしきべつばんごうです",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Secondary.copy(alpha = 0.6f)
+                            color = Secondary.copy(alpha = 0.7f)
                         )
                     }
                 }
@@ -331,14 +387,6 @@ fun SettingsScreen() {
             }
 
             Spacer(modifier = Modifier.height(24.dp))
-
-            // 説明テキスト
-            Text(
-                text = "こうかいをオンにすると、あたらしいことばがリマインネットにじどうでとうこうされるよ！",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Secondary.copy(alpha = 0.8f),
-                modifier = Modifier.padding(horizontal = 8.dp)
-            )
 
             // アカウント作成ボトムシート
             if (showAccountCreationBottomSheet) {

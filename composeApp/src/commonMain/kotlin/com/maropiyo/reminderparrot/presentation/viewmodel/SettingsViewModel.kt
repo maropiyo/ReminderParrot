@@ -60,6 +60,17 @@ class SettingsViewModel(
     }
 
     /**
+     * リマインコの名前を更新
+     */
+    fun updateParrotName(name: String) {
+        val newSettings = _settings.value.copy(parrotName = name)
+        viewModelScope.launch {
+            saveUserSettingsUseCase(newSettings)
+            _settings.value = newSettings
+        }
+    }
+
+    /**
      * デバッグ用高速記憶設定を更新する
      */
     fun updateDebugFastMemoryEnabled(enabled: Boolean) {
