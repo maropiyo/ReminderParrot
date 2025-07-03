@@ -22,4 +22,16 @@ interface AuthService {
      * 新しい匿名ユーザーでの認証を強制する
      */
     suspend fun resetAuth()
+
+    /**
+     * 現在のユーザーの表示名を取得する
+     * * @return 表示名、未認証または未設定の場合はnull
+     */
+    suspend fun getDisplayName(): String?
+
+    /**
+     * 現在のユーザーの表示名を更新する
+     * * @param displayName 新しい表示名
+     */
+    suspend fun updateDisplayName(displayName: String)
 }

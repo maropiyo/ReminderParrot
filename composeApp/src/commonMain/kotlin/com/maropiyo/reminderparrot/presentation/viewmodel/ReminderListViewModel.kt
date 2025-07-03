@@ -2,6 +2,7 @@ package com.maropiyo.reminderparrot.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.maropiyo.reminderparrot.domain.service.AuthService
 import com.maropiyo.reminderparrot.domain.usecase.AddParrotExperienceUseCase
 import com.maropiyo.reminderparrot.domain.usecase.CancelForgetNotificationUseCase
 import com.maropiyo.reminderparrot.domain.usecase.CreateReminderUseCase
@@ -44,7 +45,8 @@ class ReminderListViewModel(
     private val cancelForgetNotificationUseCase: CancelForgetNotificationUseCase,
     private val scheduleForgetNotificationUseCase: ScheduleForgetNotificationUseCase,
     private val createRemindNetPostUseCase: CreateRemindNetPostUseCase,
-    private val getUserSettingsUseCase: GetUserSettingsUseCase
+    private val getUserSettingsUseCase: GetUserSettingsUseCase,
+    private val authService: AuthService
 ) : ViewModel() {
     private val _state = MutableStateFlow(ReminderListState())
     val state: StateFlow<ReminderListState> = _state.asStateFlow()
@@ -83,11 +85,12 @@ class ReminderListViewModel(
                     // 設定を確認してリマインネットに投稿するかどうかを決める
                     val settings = getUserSettingsUseCase()
                     if (settings.isRemindNetSharingEnabled) {
-                        val userName = if (settings.parrotName.isNotBlank()) {
-                            settings.parrotName
-                        } else {
-                            "むめいのインコ"
+                        val displayName = try {
+                            authService.getDisplayName()
+                        } catch (e: Exception) {
+                            null
                         }
+                        val userName = displayName?.takeIf { it.isNotBlank() } ?: "ひよっこインコ"
                         createRemindNetPostUseCase(
                             reminderId = reminder.id,
                             reminderText = reminder.text,

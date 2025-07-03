@@ -63,15 +63,13 @@ fun SettingsScreen() {
     val viewModel = koinInject<SettingsViewModel>()
     val settings by viewModel.settings.collectAsState()
     val userId by viewModel.userId.collectAsState()
+    val displayName by viewModel.displayName.collectAsState()
     val accountCreationError by viewModel.accountCreationError.collectAsState()
     val scope = rememberCoroutineScope()
 
-    // リマインコの名前表示状態
-    var parrotNameDisplay by remember { mutableStateOf("") }
-
-    // 設定が読み込まれたときに表示フィールドを更新
-    LaunchedEffect(settings.parrotName) {
-        parrotNameDisplay = settings.parrotName
+    // タブ切り替え時に最新情報を取得
+    LaunchedEffect(Unit) {
+        viewModel.refreshAll()
     }
 
     // アカウント作成ボトムシートの状態
@@ -152,7 +150,7 @@ fun SettingsScreen() {
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = parrotNameDisplay.ifEmpty { "むめいのインコ" },
+                                text = displayName?.takeIf { it.isNotBlank() } ?: "ひよっこインコ",
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = Secondary,
                                 fontWeight = FontWeight.Medium,
@@ -168,7 +166,6 @@ fun SettingsScreen() {
                             IconButton(
                                 onClick = {
                                     val newName = ParrotNameGenerator.generateRandomName()
-                                    parrotNameDisplay = newName
                                     viewModel.updateParrotName(newName)
                                 },
                                 modifier = Modifier

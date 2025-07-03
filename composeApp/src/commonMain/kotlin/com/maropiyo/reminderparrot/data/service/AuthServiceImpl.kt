@@ -5,6 +5,8 @@ import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 
 /**
  * SupabaseAuthを使用した認証サービス実装
@@ -36,6 +38,22 @@ class AuthServiceImpl(
             supabaseClient.auth.signOut()
         } catch (e: Exception) {
             // サインアウトに失敗しても継続
+        }
+    }
+
+    override suspend fun getDisplayName(): String? {
+        val currentUser = supabaseClient.auth.currentUserOrNull()
+        return currentUser?.userMetadata?.get("display_name") as? String
+    }
+
+    override suspend fun updateDisplayName(displayName: String) {
+        val currentUser = supabaseClient.auth.currentUserOrNull()
+            ?: throw IllegalStateException("ユーザーが認証されていません")
+
+        supabaseClient.auth.updateUser {
+            data = buildJsonObject {
+                put("display_name", displayName)
+            }
         }
     }
 }

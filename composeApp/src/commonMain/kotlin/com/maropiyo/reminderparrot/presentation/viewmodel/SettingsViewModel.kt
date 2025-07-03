@@ -27,12 +27,16 @@ class SettingsViewModel(
     private val _userId = MutableStateFlow<String?>(null)
     val userId: StateFlow<String?> = _userId.asStateFlow()
 
+    private val _displayName = MutableStateFlow<String?>(null)
+    val displayName: StateFlow<String?> = _displayName.asStateFlow()
+
     private val _accountCreationError = MutableStateFlow<String?>(null)
     val accountCreationError: StateFlow<String?> = _accountCreationError.asStateFlow()
 
     init {
         loadSettings()
         loadUserId()
+        loadDisplayName()
     }
 
     /**
@@ -60,13 +64,30 @@ class SettingsViewModel(
     }
 
     /**
+     * 表示名を読み込む
+     */
+    private fun loadDisplayName() {
+        viewModelScope.launch {
+            try {
+                val name = authService.getDisplayName()
+                _displayName.value = name
+            } catch (e: Exception) {
+                println("SettingsViewModel: 表示名の読み込みエラー - $e")
+            }
+        }
+    }
+
+    /**
      * リマインコの名前を更新
      */
     fun updateParrotName(name: String) {
-        val newSettings = _settings.value.copy(parrotName = name)
         viewModelScope.launch {
-            saveUserSettingsUseCase(newSettings)
-            _settings.value = newSettings
+            try {
+                authService.updateDisplayName(name)
+                _displayName.value = name
+            } catch (e: Exception) {
+                println("SettingsViewModel: 表示名の更新エラー - $e")
+            }
         }
     }
 
@@ -125,6 +146,17 @@ class SettingsViewModel(
      */
     fun refreshUserId() {
         loadUserId()
+        loadDisplayName()
+    }
+
+    /**
+     * 全ての設定情報を再読み込みする
+     * タブ切り替え時などに呼び出される
+     */
+    fun refreshAll() {
+        loadSettings()
+        loadUserId()
+        loadDisplayName()
     }
 
     /**
@@ -140,8 +172,14 @@ class SettingsViewModel(
                 val userId = authService.getUserId()
                 println("SettingsViewModel: アカウント作成成功 - UserId: $userId")
 
+                // 初期名を設定
+                authService.updateDisplayName("ひよっこインコ")
+                println("SettingsViewModel: 初期名を設定 - ひよっこインコ")
+
                 // ユーザーIDを再読み込み
                 loadUserId()
+                // 表示名を再読み込み
+                loadDisplayName()
             } catch (e: Exception) {
                 println("SettingsViewModel: アカウント作成エラー: ${e.message}")
                 val errorMessage = when {
