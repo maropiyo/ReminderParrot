@@ -2,6 +2,9 @@ package com.maropiyo.reminderparrot.di
 
 import com.maropiyo.reminderparrot.config.SupabaseConfig
 import com.maropiyo.reminderparrot.data.remote.ReminderRemoteDataSource
+import com.maropiyo.reminderparrot.data.service.AuthServiceImpl
+import com.maropiyo.reminderparrot.domain.service.AuthService
+import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
 import org.koin.core.KoinApplication
@@ -38,8 +41,12 @@ private fun createSupabaseModule(supabaseConfig: SupabaseConfig): Module = modul
             supabaseKey = supabaseConfig.key
         ) {
             install(Postgrest)
+            install(Auth)
         }
     }
+
+    // Services
+    single<AuthService> { AuthServiceImpl(get()) }
 
     // RemoteDataSource
     single { ReminderRemoteDataSource(get(), get()) }

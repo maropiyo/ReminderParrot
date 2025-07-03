@@ -43,6 +43,7 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.supabase.core)
             implementation(libs.supabase.postgrest)
+            implementation(libs.supabase.auth)
             implementation(libs.ktor.client.core)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.koin.core)

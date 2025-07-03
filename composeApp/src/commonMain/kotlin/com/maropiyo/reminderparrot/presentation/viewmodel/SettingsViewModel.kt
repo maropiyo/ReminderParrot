@@ -3,6 +3,7 @@ package com.maropiyo.reminderparrot.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.maropiyo.reminderparrot.domain.entity.UserSettings
+import com.maropiyo.reminderparrot.domain.service.AuthService
 import com.maropiyo.reminderparrot.domain.usecase.GetUserSettingsUseCase
 import com.maropiyo.reminderparrot.domain.usecase.SaveUserSettingsUseCase
 import com.maropiyo.reminderparrot.util.BuildConfig
@@ -16,14 +17,19 @@ import kotlinx.coroutines.launch
  */
 class SettingsViewModel(
     private val getUserSettingsUseCase: GetUserSettingsUseCase,
-    private val saveUserSettingsUseCase: SaveUserSettingsUseCase
+    private val saveUserSettingsUseCase: SaveUserSettingsUseCase,
+    private val authService: AuthService
 ) : ViewModel() {
 
     private val _settings = MutableStateFlow(UserSettings())
     val settings: StateFlow<UserSettings> = _settings.asStateFlow()
 
+    private val _userId = MutableStateFlow<String?>(null)
+    val userId: StateFlow<String?> = _userId.asStateFlow()
+
     init {
         loadSettings()
+        loadUserId()
     }
 
     /**
@@ -82,6 +88,47 @@ class SettingsViewModel(
             val newSettings = _settings.value.copy(debugForgetTimeSeconds = seconds)
             saveUserSettingsUseCase(newSettings)
             _settings.value = newSettings
+        }
+    }
+
+    /**
+     * ユーザーIDを読み込む
+     */
+    private fun loadUserId() {
+        viewModelScope.launch {
+            try {
+                val currentUserId = authService.getCurrentUserId()
+                _userId.value = currentUserId
+            } catch (e: Exception) {
+                println("SettingsViewModel: ユーザーID取得エラー: ${e.message}")
+                _userId.value = null
+            }
+        }
+    }
+
+    /**
+     * ユーザーIDを再読み込みする
+     */
+    fun refreshUserId() {
+        loadUserId()
+    }
+
+    /**
+     * アカウントを作成する
+     */
+    fun createAccount() {
+        viewModelScope.launch {
+            try {
+                // 匿名認証でアカウントを作成
+                val userId = authService.getUserId()
+                println("SettingsViewModel: アカウント作成成功 - UserId: $userId")
+
+                // ユーザーIDを再読み込み
+                loadUserId()
+            } catch (e: Exception) {
+                println("SettingsViewModel: アカウント作成エラー: ${e.message}")
+                // エラーハンドリングは必要に応じて追加
+            }
         }
     }
 }

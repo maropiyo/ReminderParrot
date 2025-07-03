@@ -23,21 +23,28 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.maropiyo.reminderparrot.presentation.viewmodel.SettingsViewModel
+import com.maropiyo.reminderparrot.ui.components.AccountCreationBottomSheet
 import com.maropiyo.reminderparrot.ui.theme.Background
 import com.maropiyo.reminderparrot.ui.theme.CardBackgroundColor
 import com.maropiyo.reminderparrot.ui.theme.Primary
 import com.maropiyo.reminderparrot.ui.theme.Secondary
 import com.maropiyo.reminderparrot.ui.theme.White
 import com.maropiyo.reminderparrot.util.BuildConfig
+import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 /**
@@ -48,6 +55,14 @@ import org.koin.compose.koinInject
 fun SettingsScreen() {
     val viewModel = koinInject<SettingsViewModel>()
     val settings by viewModel.settings.collectAsState()
+    val userId by viewModel.userId.collectAsState()
+    val scope = rememberCoroutineScope()
+
+    // アカウント作成ボトムシートの状態
+    var showAccountCreationBottomSheet by remember { mutableStateOf(false) }
+    val accountCreationSheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
 
     Scaffold(
         topBar = {
@@ -75,6 +90,51 @@ fun SettingsScreen() {
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // インコ情報カード
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = CardBackgroundColor),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(20.dp)
+                ) {
+                    Text(
+                        text = "インコじょうほう",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = Secondary,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // インコID表示
+                    Column {
+                        Text(
+                            text = "インコID",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Secondary,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = userId ?: "みしゅとく",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Secondary.copy(alpha = 0.7f),
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                        Text(
+                            text = "リマインネットでのあなたのインコのしきべつばんごうです",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Secondary.copy(alpha = 0.6f)
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
             // リマインネット設定
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -118,7 +178,14 @@ fun SettingsScreen() {
 
                         Switch(
                             checked = settings.isRemindNetSharingEnabled,
-                            onCheckedChange = { viewModel.updateRemindNetSharingEnabled(it) },
+                            onCheckedChange = { enabled ->
+                                if (enabled && userId == null) {
+                                    // アカウントが未作成の場合はアカウント作成ボトムシートを表示
+                                    showAccountCreationBottomSheet = true
+                                } else {
+                                    viewModel.updateRemindNetSharingEnabled(enabled)
+                                }
+                            },
                             colors = SwitchDefaults.colors(
                                 checkedThumbColor = Color.White,
                                 checkedTrackColor = Primary,
@@ -259,6 +326,27 @@ fun SettingsScreen() {
                 color = Secondary.copy(alpha = 0.8f),
                 modifier = Modifier.padding(horizontal = 8.dp)
             )
+
+            // アカウント作成ボトムシート
+            if (showAccountCreationBottomSheet) {
+                AccountCreationBottomSheet(
+                    onDismiss = {
+                        scope.launch {
+                            accountCreationSheetState.hide()
+                            showAccountCreationBottomSheet = false
+                        }
+                    },
+                    onCreateAccount = {
+                        // アカウント作成処理を実行
+                        viewModel.createAccount()
+                        scope.launch {
+                            accountCreationSheetState.hide()
+                            showAccountCreationBottomSheet = false
+                        }
+                    },
+                    sheetState = accountCreationSheetState
+                )
+            }
         }
     }
 }
