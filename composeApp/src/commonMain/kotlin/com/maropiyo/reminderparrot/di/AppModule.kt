@@ -39,7 +39,9 @@ import org.koin.dsl.module
 val appModule =
     module {
         // ViewModel
-        single<ReminderListViewModel> { ReminderListViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
+        single<ReminderListViewModel> {
+            ReminderListViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get())
+        }
         single<ParrotViewModel> { ParrotViewModel(get()) }
         single<RemindNetViewModel> { RemindNetViewModel(get()) }
         single<SettingsViewModel> { SettingsViewModel(get(), get()) }

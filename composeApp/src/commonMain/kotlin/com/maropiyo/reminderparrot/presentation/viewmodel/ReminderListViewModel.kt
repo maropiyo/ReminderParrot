@@ -3,6 +3,7 @@ package com.maropiyo.reminderparrot.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.maropiyo.reminderparrot.domain.usecase.AddParrotExperienceUseCase
+import com.maropiyo.reminderparrot.domain.usecase.CancelForgetNotificationUseCase
 import com.maropiyo.reminderparrot.domain.usecase.CreateReminderUseCase
 import com.maropiyo.reminderparrot.domain.usecase.DeleteExpiredRemindersUseCase
 import com.maropiyo.reminderparrot.domain.usecase.DeleteReminderUseCase
@@ -29,6 +30,7 @@ import kotlinx.datetime.Clock
  * @property deleteReminderUseCase リマインダー削除ユースケース
  * @property deleteExpiredRemindersUseCase 期限切れリマインダー削除ユースケース
  * @property addParrotExperienceUseCase インコの経験値追加ユースケース
+ * @property cancelForgetNotificationUseCase 忘却通知キャンセルユースケース
  */
 class ReminderListViewModel(
     private val getRemindersUseCase: GetRemindersUseCase,
@@ -37,6 +39,7 @@ class ReminderListViewModel(
     private val deleteReminderUseCase: DeleteReminderUseCase,
     private val deleteExpiredRemindersUseCase: DeleteExpiredRemindersUseCase,
     private val addParrotExperienceUseCase: AddParrotExperienceUseCase,
+    private val cancelForgetNotificationUseCase: CancelForgetNotificationUseCase,
     private val createRemindNetPostUseCase: CreateRemindNetPostUseCase,
     private val getUserSettingsUseCase: GetUserSettingsUseCase
 ) : ViewModel() {
@@ -116,6 +119,10 @@ class ReminderListViewModel(
 
                 // アニメーションの完了を待ってから削除
                 delay(400) // アニメーション時間（100ms + 300ms）
+
+                // 通知をキャンセル
+                cancelForgetNotificationUseCase(reminderId)
+
                 deleteReminderUseCase(reminderId)
                     .onSuccess {
                         _state.update { currentState ->
@@ -174,6 +181,9 @@ class ReminderListViewModel(
      */
     fun deleteReminder(reminderId: String) {
         viewModelScope.launch {
+            // 通知をキャンセル
+            cancelForgetNotificationUseCase(reminderId)
+
             deleteReminderUseCase(reminderId)
                 .onSuccess {
                     _state.update { currentState ->
@@ -198,6 +208,10 @@ class ReminderListViewModel(
             // 期限切れリマインダーを削除
             deleteExpiredRemindersUseCase.execute()
 
+            // 期限切れリマインダーのすべての通知をキャンセル
+            // 個別のIDが分からないため、全ての通知をキャンセルする
+            cancelForgetNotificationUseCase.cancelAll()
+
             getRemindersUseCase()
                 .onSuccess { reminders ->
                     _state.update { it.copy(reminders = reminders, isLoading = false) }
@@ -220,7 +234,8 @@ class ReminderListViewModel(
                 deleteExpiredRemindersUseCase.execute()
                     .onSuccess { deletedCount ->
                         if (deletedCount > 0) {
-                            // 削除されたリマインダーがある場合はリストを更新
+                            // 削除されたリマインダーがある場合は通知をキャンセルしてリストを更新
+                            cancelForgetNotificationUseCase.cancelAll()
                             loadReminders()
                         } else {
                             // 削除がない場合でも、時間表示の更新のためにStateを更新
