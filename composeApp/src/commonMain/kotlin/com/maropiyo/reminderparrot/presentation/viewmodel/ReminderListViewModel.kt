@@ -243,26 +243,15 @@ class ReminderListViewModel(
 
     /**
      * 定期的な更新を開始する
-     * 1分ごとに期限切れリマインダーの削除とUIの更新を行う
+     * 1分ごとにUIの更新を行う
      */
     private fun startPeriodicUpdate() {
         periodicUpdateJob = viewModelScope.launch {
             while (true) {
                 delay(60_000) // 1分待機
 
-                // 期限切れリマインダーを削除
-                deleteExpiredRemindersUseCase.execute()
-                    .onSuccess { deletedCount ->
-                        if (deletedCount > 0) {
-                            // 削除されたリマインダーがある場合はリストを更新
-                            // 期限切れリマインダーの通知は個別にキャンセルされるため、
-                            // 全ての通知をキャンセルする必要はない
-                            loadReminders()
-                        } else {
-                            // 削除がない場合でも、時間表示の更新のためにStateを更新
-                            _state.update { it.copy(lastUpdated = Clock.System.now().toEpochMilliseconds()) }
-                        }
-                    }
+                // 時間表示の更新のためにStateを更新
+                _state.update { it.copy(lastUpdated = Clock.System.now().toEpochMilliseconds()) }
             }
         }
     }
