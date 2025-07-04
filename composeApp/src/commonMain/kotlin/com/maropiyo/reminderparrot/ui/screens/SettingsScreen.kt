@@ -118,7 +118,7 @@ fun SettingsScreen() {
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // インコ情報カード
+            // リマインコじょうほうカード
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
@@ -129,7 +129,7 @@ fun SettingsScreen() {
                     modifier = Modifier.padding(20.dp)
                 ) {
                     Text(
-                        text = "リマインコについて",
+                        text = "リマインコじょうほう",
                         style = MaterialTheme.typography.titleMedium,
                         color = Secondary,
                         fontWeight = FontWeight.Bold
@@ -140,7 +140,7 @@ fun SettingsScreen() {
                     // リマインコの名前設定
                     Column {
                         Text(
-                            text = "リマインコのなまえ",
+                            text = "なまえ",
                             style = MaterialTheme.typography.bodyMedium,
                             color = Secondary,
                             fontWeight = FontWeight.Medium
@@ -184,10 +184,10 @@ fun SettingsScreen() {
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // インコID表示
+                    // ID表示
                     Column {
                         Text(
-                            text = "リマインコID",
+                            text = "ID",
                             style = MaterialTheme.typography.bodyMedium,
                             color = Secondary,
                             fontWeight = FontWeight.Medium
@@ -382,53 +382,33 @@ fun SettingsScreen() {
                                 }
                             }
                         }
-                    }
-                }
-            }
 
-            Spacer(modifier = Modifier.height(24.dp))
+                        // ログアウトボタン（アカウント作成済みの場合のみ表示）
+                        if (userId != null) {
+                            Spacer(modifier = Modifier.height(24.dp))
 
-            // ログアウトボタン（デバッグビルド且つアカウント作成済みの場合のみ表示）
-            if (BuildConfig.isDebug && userId != null) {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = CardBackgroundColor),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.padding(20.dp)
-                    ) {
-                        Text(
-                            text = "デバッグきのう",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = Secondary,
-                            fontWeight = FontWeight.Bold
-                        )
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        Button(
-                            onClick = {
-                                viewModel.logout()
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Secondary.copy(alpha = 0.1f),
-                                contentColor = Secondary
-                            ),
-                            shape = RoundedCornerShape(16.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.ExitToApp,
-                                contentDescription = "ログアウト",
-                                modifier = Modifier.padding(end = 8.dp)
-                            )
-                            Text(
-                                text = "ログアウト",
-                                style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = FontWeight.Medium
-                            )
+                            Button(
+                                onClick = {
+                                    viewModel.logout()
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Secondary.copy(alpha = 0.1f),
+                                    contentColor = Secondary
+                                ),
+                                shape = RoundedCornerShape(16.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.ExitToApp,
+                                    contentDescription = "ログアウト",
+                                    modifier = Modifier.padding(end = 8.dp)
+                                )
+                                Text(
+                                    text = "ログアウト",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
                         }
                     }
                 }
