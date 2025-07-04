@@ -10,7 +10,9 @@ local.properties
 captures
 .externalNativeBuild
 .cxx
-*.xcconfig/*
+# iOS 秘密設定ファイル
+iosApp/Configuration/Config-Private.xcconfig
+iosApp/Configuration/Config.xcconfig
 *.xcodeproj/*
 !*.xcodeproj/project.pbxproj
 !*.xcodeproj/xcshareddata/
