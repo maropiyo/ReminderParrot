@@ -199,4 +199,23 @@ class SettingsViewModel(
     fun clearAccountCreationError() {
         _accountCreationError.value = null
     }
+
+    /**
+     * ログアウトする
+     */
+    fun logout() {
+        viewModelScope.launch {
+            try {
+                authService.logout()
+                println("SettingsViewModel: ログアウト成功")
+
+                // 状態をクリア
+                _userId.value = null
+                _displayName.value = null
+                _accountCreationError.value = null
+            } catch (e: Exception) {
+                println("SettingsViewModel: ログアウトエラー: ${e.message}")
+            }
+        }
+    }
 }

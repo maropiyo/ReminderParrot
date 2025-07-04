@@ -34,4 +34,10 @@ interface AuthService {
      * * @param displayName 新しい表示名
      */
     suspend fun updateDisplayName(displayName: String)
+
+    /**
+     * ログアウトする
+     * 現在のセッションを終了し、認証状態をクリアする
+     */
+    suspend fun logout()
 }

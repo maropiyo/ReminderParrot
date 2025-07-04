@@ -56,4 +56,13 @@ class AuthServiceImpl(
             }
         }
     }
+
+    override suspend fun logout() = authMutex.withLock {
+        try {
+            supabaseClient.auth.signOut()
+        } catch (e: Exception) {
+            // ログアウトに失敗してもエラーを投げずに処理を継続
+            println("AuthServiceImpl: ログアウトエラー - $e")
+        }
+    }
 }
