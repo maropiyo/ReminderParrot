@@ -2,7 +2,7 @@ package com.maropiyo.reminderparrot.domain.usecase.remindnet
 
 import com.maropiyo.reminderparrot.domain.entity.RemindNetPost
 import com.maropiyo.reminderparrot.domain.repository.RemindNetRepository
-import com.maropiyo.reminderparrot.domain.service.UserIdService
+import com.maropiyo.reminderparrot.domain.service.AuthService
 import kotlinx.datetime.Instant
 
 /**
@@ -10,7 +10,7 @@ import kotlinx.datetime.Instant
  */
 class CreateRemindNetPostUseCase(
     private val remindNetRepository: RemindNetRepository,
-    private val userIdService: UserIdService
+    private val authService: AuthService
 ) {
     suspend operator fun invoke(
         reminderId: String,
@@ -18,8 +18,8 @@ class CreateRemindNetPostUseCase(
         forgetAt: Instant,
         userName: String? = null
     ): Result<RemindNetPost> {
-        // デバイス固有のユーザーIDを自動取得
-        val userId = userIdService.getUserId()
+        // SupabaseAuthで匿名認証ユーザーIDを取得
+        val userId = authService.getUserId()
 
         return remindNetRepository.createPost(reminderId, reminderText, forgetAt, userId, userName)
     }

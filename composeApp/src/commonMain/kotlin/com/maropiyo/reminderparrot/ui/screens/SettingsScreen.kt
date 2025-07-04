@@ -1,5 +1,6 @@
 package com.maropiyo.reminderparrot.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,9 +12,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
@@ -23,21 +31,30 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.maropiyo.reminderparrot.presentation.viewmodel.SettingsViewModel
+import com.maropiyo.reminderparrot.ui.components.AccountCreationBottomSheet
 import com.maropiyo.reminderparrot.ui.theme.Background
 import com.maropiyo.reminderparrot.ui.theme.CardBackgroundColor
 import com.maropiyo.reminderparrot.ui.theme.Primary
 import com.maropiyo.reminderparrot.ui.theme.Secondary
 import com.maropiyo.reminderparrot.ui.theme.White
 import com.maropiyo.reminderparrot.util.BuildConfig
+import com.maropiyo.reminderparrot.util.ParrotNameGenerator
+import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 /**
@@ -48,6 +65,32 @@ import org.koin.compose.koinInject
 fun SettingsScreen() {
     val viewModel = koinInject<SettingsViewModel>()
     val settings by viewModel.settings.collectAsState()
+    val userId by viewModel.userId.collectAsState()
+    val displayName by viewModel.displayName.collectAsState()
+    val accountCreationError by viewModel.accountCreationError.collectAsState()
+    val scope = rememberCoroutineScope()
+
+    // タブ切り替え時に最新情報を取得
+    LaunchedEffect(Unit) {
+        viewModel.refreshAll()
+    }
+
+    // アカウント作成ボトムシートの状態
+    var showAccountCreationBottomSheet by remember { mutableStateOf(false) }
+    val accountCreationSheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
+
+    // アカウント作成成功時にボトムシートを閉じる
+    LaunchedEffect(userId) {
+        if (userId != null && showAccountCreationBottomSheet) {
+            scope.launch {
+                accountCreationSheetState.hide()
+                showAccountCreationBottomSheet = false
+                viewModel.clearAccountCreationError()
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -75,6 +118,92 @@ fun SettingsScreen() {
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // リマインコじょうほうカード
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = CardBackgroundColor),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(20.dp)
+                ) {
+                    Text(
+                        text = "リマインコじょうほう",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = Secondary,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // リマインコの名前設定
+                    Column {
+                        Text(
+                            text = "なまえ",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Secondary,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = displayName?.takeIf { it.isNotBlank() } ?: "ひよっこインコ",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = Secondary,
+                                fontWeight = FontWeight.Medium,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .background(
+                                        color = Secondary.copy(alpha = 0.1f),
+                                        shape = RoundedCornerShape(16.dp)
+                                    )
+                                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                            )
+
+                            IconButton(
+                                onClick = {
+                                    val newName = ParrotNameGenerator.generateRandomName()
+                                    viewModel.updateParrotName(newName)
+                                },
+                                modifier = Modifier
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Refresh,
+                                    contentDescription = "なまえをかえる",
+                                    tint = Secondary
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // ID表示
+                    Column {
+                        Text(
+                            text = "ID",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Secondary,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = userId ?: "-",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Secondary.copy(alpha = 0.7f)
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
             // リマインネット設定
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -118,7 +247,14 @@ fun SettingsScreen() {
 
                         Switch(
                             checked = settings.isRemindNetSharingEnabled,
-                            onCheckedChange = { viewModel.updateRemindNetSharingEnabled(it) },
+                            onCheckedChange = { enabled ->
+                                if (enabled && userId == null) {
+                                    // アカウントが未作成の場合はアカウント作成ボトムシートを表示
+                                    showAccountCreationBottomSheet = true
+                                } else {
+                                    viewModel.updateRemindNetSharingEnabled(enabled)
+                                }
+                            },
                             colors = SwitchDefaults.colors(
                                 checkedThumbColor = Color.White,
                                 checkedTrackColor = Primary,
@@ -246,19 +382,58 @@ fun SettingsScreen() {
                                 }
                             }
                         }
+
+                        // ログアウトボタン（アカウント作成済みの場合のみ表示）
+                        if (userId != null) {
+                            Spacer(modifier = Modifier.height(24.dp))
+
+                            Button(
+                                onClick = {
+                                    viewModel.logout()
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Secondary.copy(alpha = 0.1f),
+                                    contentColor = Secondary
+                                ),
+                                shape = RoundedCornerShape(16.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.ExitToApp,
+                                    contentDescription = "ログアウト",
+                                    modifier = Modifier.padding(end = 8.dp)
+                                )
+                                Text(
+                                    text = "ログアウト",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
                     }
                 }
+
+                Spacer(modifier = Modifier.height(24.dp))
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // 説明テキスト
-            Text(
-                text = "こうかいをオンにすると、あたらしいことばがリマインネットにじどうでとうこうされるよ！",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Secondary.copy(alpha = 0.8f),
-                modifier = Modifier.padding(horizontal = 8.dp)
-            )
+            // アカウント作成ボトムシート
+            if (showAccountCreationBottomSheet) {
+                AccountCreationBottomSheet(
+                    onDismiss = {
+                        scope.launch {
+                            accountCreationSheetState.hide()
+                            showAccountCreationBottomSheet = false
+                            viewModel.clearAccountCreationError()
+                        }
+                    },
+                    onCreateAccount = {
+                        // アカウント作成処理を実行
+                        viewModel.createAccount()
+                    },
+                    sheetState = accountCreationSheetState,
+                    errorMessage = accountCreationError
+                )
+            }
         }
     }
 }

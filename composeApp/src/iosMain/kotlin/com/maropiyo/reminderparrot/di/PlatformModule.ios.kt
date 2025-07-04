@@ -1,10 +1,8 @@
 package com.maropiyo.reminderparrot.di
 
 import com.maropiyo.reminderparrot.data.service.IOSNotificationService
-import com.maropiyo.reminderparrot.data.service.IOSUserIdService
 import com.maropiyo.reminderparrot.data.service.IOSUserSettingsService
 import com.maropiyo.reminderparrot.domain.service.NotificationService
-import com.maropiyo.reminderparrot.domain.service.UserIdService
 import com.maropiyo.reminderparrot.domain.service.UserSettingsService
 import org.koin.dsl.module
 
@@ -13,6 +11,5 @@ import org.koin.dsl.module
  */
 val platformModule = module {
     single<NotificationService> { IOSNotificationService() }
-    single<UserIdService> { IOSUserIdService(get()) }
     single<UserSettingsService> { IOSUserSettingsService() }
 }

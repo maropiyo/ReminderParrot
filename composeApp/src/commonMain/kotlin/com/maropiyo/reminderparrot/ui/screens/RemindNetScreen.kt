@@ -28,11 +28,15 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,12 +46,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.maropiyo.reminderparrot.domain.entity.RemindNetPost
 import com.maropiyo.reminderparrot.presentation.viewmodel.RemindNetViewModel
+import com.maropiyo.reminderparrot.ui.components.AccountCreationBottomSheet
 import com.maropiyo.reminderparrot.ui.theme.Background
 import com.maropiyo.reminderparrot.ui.theme.ParrotYellow
 import com.maropiyo.reminderparrot.ui.theme.Primary
 import com.maropiyo.reminderparrot.ui.theme.Secondary
 import com.maropiyo.reminderparrot.ui.theme.Shapes
 import com.maropiyo.reminderparrot.ui.theme.White
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 import reminderparrot.composeapp.generated.resources.Res
@@ -60,7 +66,17 @@ import reminderparrot.composeapp.generated.resources.reminko_face
 @Composable
 fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
     val state by remindNetViewModel.state.collectAsState()
+    val needsAccountCreation by remindNetViewModel.needsAccountCreation.collectAsState()
+    val accountCreationError by remindNetViewModel.accountCreationError.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    // アカウント作成ボトムシートの状態
+    var showAccountCreationBottomSheet by remember { mutableStateOf(false) }
+    val accountCreationSheetState =
+        rememberModalBottomSheetState(
+            skipPartiallyExpanded = true
+        )
 
     // 画面に遷移した時に投稿を再取得
     LaunchedEffect(Unit) {
@@ -72,6 +88,19 @@ fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
         state.error?.let { error ->
             snackbarHostState.showSnackbar(error)
             remindNetViewModel.clearError()
+        }
+    }
+
+    // アカウント作成が必要な場合はボトムシートを表示
+    LaunchedEffect(needsAccountCreation) {
+        if (needsAccountCreation) {
+            showAccountCreationBottomSheet = true
+        } else {
+            // アカウント作成成功時にボトムシートを閉じる
+            if (showAccountCreationBottomSheet) {
+                accountCreationSheetState.hide()
+                showAccountCreationBottomSheet = false
+            }
         }
     }
 
@@ -129,16 +158,14 @@ fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "まだなにもないよ",
+                            text = if (needsAccountCreation) {
+                                "リマインネットに参加していません"
+                            } else {
+                                "だれかいませんか？"
+                            },
                             style = MaterialTheme.typography.titleMedium,
                             color = Secondary,
                             fontWeight = FontWeight.Bold
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "さいしょのリマインダーをおくってみよう！",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Secondary.copy(alpha = 0.7f)
                         )
                     }
                 }
@@ -157,6 +184,25 @@ fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
                     }
                 }
             }
+        }
+
+        // アカウント作成ボトムシート
+        if (showAccountCreationBottomSheet) {
+            AccountCreationBottomSheet(
+                onDismiss = {
+                    scope.launch {
+                        accountCreationSheetState.hide()
+                        showAccountCreationBottomSheet = false
+                        remindNetViewModel.clearAccountCreationError()
+                    }
+                },
+                onCreateAccount = {
+                    // アカウント作成処理を実行
+                    remindNetViewModel.createAccount()
+                },
+                sheetState = accountCreationSheetState,
+                errorMessage = accountCreationError
+            )
         }
     }
 }

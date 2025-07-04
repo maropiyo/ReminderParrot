@@ -24,6 +24,7 @@ import com.maropiyo.reminderparrot.domain.usecase.GetUserSettingsUseCase
 import com.maropiyo.reminderparrot.domain.usecase.RequestNotificationPermissionUseCase
 import com.maropiyo.reminderparrot.domain.usecase.SaveUserSettingsUseCase
 import com.maropiyo.reminderparrot.domain.usecase.ScheduleForgetNotificationUseCase
+import com.maropiyo.reminderparrot.domain.usecase.SignInAnonymouslyUseCase
 import com.maropiyo.reminderparrot.domain.usecase.UpdateReminderUseCase
 import com.maropiyo.reminderparrot.domain.usecase.remindnet.CreateRemindNetPostUseCase
 import com.maropiyo.reminderparrot.domain.usecase.remindnet.GetRemindNetPostsUseCase
@@ -40,11 +41,11 @@ val appModule =
     module {
         // ViewModel
         single<ReminderListViewModel> {
-            ReminderListViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
+            ReminderListViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
         }
         single<ParrotViewModel> { ParrotViewModel(get()) }
-        single<RemindNetViewModel> { RemindNetViewModel(get()) }
-        single<SettingsViewModel> { SettingsViewModel(get(), get()) }
+        single<RemindNetViewModel> { RemindNetViewModel(get(), get()) }
+        single<SettingsViewModel> { SettingsViewModel(get(), get(), get()) }
 
         // UseCase
         single<CreateReminderUseCase> { CreateReminderUseCase(get(), get(), get(), get(), get()) }
@@ -61,6 +62,7 @@ val appModule =
         single<GetRemindNetPostsUseCase> { GetRemindNetPostsUseCase(get()) }
         single<GetUserSettingsUseCase> { GetUserSettingsUseCase(get()) }
         single<SaveUserSettingsUseCase> { SaveUserSettingsUseCase(get()) }
+        single<SignInAnonymouslyUseCase> { SignInAnonymouslyUseCase(get()) }
 
         // Repository
         single<ReminderRepository> { ReminderRepositoryImpl(get(), get()) }
