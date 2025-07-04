@@ -51,4 +51,44 @@ class ReminderRemoteDataSource(
             return Result.failure(e)
         }
     }
+
+    /**
+     * リマインダーを削除する
+     *
+     * @param reminderId 削除するリマインダーのID
+     * @return 削除結果
+     * @throws Exception リマインダーの削除に失敗した場合
+     */
+    suspend fun deleteReminder(reminderId: String): Result<Unit> {
+        return try {
+            supabaseClient.from(TABLE_NAME).delete {
+                filter {
+                    eq("id", reminderId)
+                }
+            }
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * 期限切れリマインダーを削除する
+     *
+     * @param currentTimeMillis 現在時刻（エポックミリ秒）
+     * @return 削除結果
+     * @throws Exception リマインダーの削除に失敗した場合
+     */
+    suspend fun deleteExpiredReminders(currentTimeMillis: Long): Result<Unit> {
+        return try {
+            supabaseClient.from(TABLE_NAME).delete {
+                filter {
+                    lt("forget_at", currentTimeMillis)
+                }
+            }
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

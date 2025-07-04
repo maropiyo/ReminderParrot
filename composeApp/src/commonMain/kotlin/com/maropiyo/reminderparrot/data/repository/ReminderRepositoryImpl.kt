@@ -63,7 +63,17 @@ class ReminderRepositoryImpl(
      * @throws Exception リマインダーの削除に失敗した場合
      */
     override suspend fun deleteReminder(reminderId: String): Result<Unit> = try {
+        // ローカルから削除
         localDataSource.deleteReminder(reminderId)
+
+        // リモートからも削除（エラーが発生してもローカル削除は成功とする）
+        try {
+            remoteDataSource.deleteReminder(reminderId)
+        } catch (e: Exception) {
+            // リモート削除に失敗してもログに記録するのみ
+            // TODO: エラーログの実装
+        }
+
         Result.success(Unit)
     } catch (e: Exception) {
         Result.failure(e)
@@ -76,6 +86,17 @@ class ReminderRepositoryImpl(
      * @return 削除されたリマインダー数
      */
     override suspend fun deleteExpiredReminders(currentTime: Instant): Int {
-        return localDataSource.deleteExpiredReminders(currentTime)
+        // ローカルから削除
+        val deletedCount = localDataSource.deleteExpiredReminders(currentTime)
+
+        // リモートからも削除（エラーが発生してもローカル削除は成功とする）
+        try {
+            remoteDataSource.deleteExpiredReminders(currentTime.toEpochMilliseconds())
+        } catch (e: Exception) {
+            // リモート削除に失敗してもログに記録するのみ
+            // TODO: エラーログの実装
+        }
+
+        return deletedCount
     }
 }
