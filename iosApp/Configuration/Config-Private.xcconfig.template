@@ -1,0 +1,4 @@
+// 秘密設定テンプレート - git管理対象
+// 実際の値は Config-Private.xcconfig に設定してください
+SUPABASE_URL=your_supabase_url_here
+SUPABASE_KEY=your_supabase_anon_key_here
