@@ -1,0 +1,9 @@
+TEAM_ID=H3AGURJU3X
+BUNDLE_ID=com.maropiyo.reminderparrot
+APP_NAME=リマインコ
+SUPABASE_URL=himhcigolmzehbvstjgv.supabase.co
+SUPABASE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhpbWhjaWdvbG16ZWhidnN0amd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxNDM2OTcsImV4cCI6MjA2MjcxOTY5N30.qlvhQmem7FgW_p-9yQJYvZJrMdZkD9lDiowTFUVcLzs
+
+// Debug mode setting for different configurations
+DEBUG_MODE[config=Debug]=YES
+DEBUG_MODE[config=Release]=NO
