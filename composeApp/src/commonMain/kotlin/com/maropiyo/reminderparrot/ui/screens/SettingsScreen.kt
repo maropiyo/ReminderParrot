@@ -191,7 +191,7 @@ fun SettingsScreen() {
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = userId ?: "みしゅとく",
+                            text = userId ?: "-",
                             style = MaterialTheme.typography.bodySmall,
                             color = Secondary.copy(alpha = 0.7f)
                         )
