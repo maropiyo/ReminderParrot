@@ -55,5 +55,7 @@
 	</array>
 	<key>NSUserNotificationsUsageDescription</key>
 	<string>リマインダーを忘れた時に通知をお送りします</string>
+	<key>IS_DEBUG</key>
+	<string>${DEBUG_MODE}</string>
 </dict>
 </plist>
