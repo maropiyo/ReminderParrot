@@ -17,10 +17,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -180,7 +184,12 @@ fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(state.posts, key = { it.id }) { post ->
-                        RemindNetPostCard(post = post)
+                        RemindNetPostCard(
+                            post = post,
+                            onBellClick = { clickedPost ->
+                                remindNetViewModel.sendRemindNotification(clickedPost)
+                            }
+                        )
                     }
                 }
             }
@@ -211,7 +220,11 @@ fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
  * リマインネット投稿カード
  */
 @Composable
-private fun RemindNetPostCard(post: RemindNetPost, modifier: Modifier = Modifier) {
+private fun RemindNetPostCard(
+    post: RemindNetPost,
+    onBellClick: (RemindNetPost) -> Unit,
+    modifier: Modifier = Modifier
+) {
     Card(
         modifier = modifier.fillMaxWidth(),
         colors =
@@ -269,14 +282,35 @@ private fun RemindNetPostCard(post: RemindNetPost, modifier: Modifier = Modifier
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // リマインダーテキスト（メイン）
-            Text(
-                text = post.reminderText,
-                style = MaterialTheme.typography.titleMedium,
-                color = Secondary,
-                fontWeight = FontWeight.Medium,
-                lineHeight = MaterialTheme.typography.titleMedium.lineHeight
-            )
+            // リマインダーテキストとベルマークボタン
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // リマインダーテキスト（メイン）
+                Text(
+                    text = post.reminderText,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Secondary,
+                    fontWeight = FontWeight.Medium,
+                    lineHeight = MaterialTheme.typography.titleMedium.lineHeight,
+                    modifier = Modifier.weight(1f)
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                // ベルマークボタン
+                IconButton(
+                    onClick = { onBellClick(post) },
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Notifications,
+                        contentDescription = "リマインドを送る",
+                        tint = ParrotYellow,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
         }
     }
 }

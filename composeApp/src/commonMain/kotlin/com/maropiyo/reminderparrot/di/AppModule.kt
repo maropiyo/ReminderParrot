@@ -21,9 +21,11 @@ import com.maropiyo.reminderparrot.domain.usecase.DeleteReminderUseCase
 import com.maropiyo.reminderparrot.domain.usecase.GetParrotUseCase
 import com.maropiyo.reminderparrot.domain.usecase.GetRemindersUseCase
 import com.maropiyo.reminderparrot.domain.usecase.GetUserSettingsUseCase
+import com.maropiyo.reminderparrot.domain.usecase.RegisterPushNotificationTokenUseCase
 import com.maropiyo.reminderparrot.domain.usecase.RequestNotificationPermissionUseCase
 import com.maropiyo.reminderparrot.domain.usecase.SaveUserSettingsUseCase
 import com.maropiyo.reminderparrot.domain.usecase.ScheduleForgetNotificationUseCase
+import com.maropiyo.reminderparrot.domain.usecase.SendRemindNotificationUseCase
 import com.maropiyo.reminderparrot.domain.usecase.SignInAnonymouslyUseCase
 import com.maropiyo.reminderparrot.domain.usecase.UpdateReminderUseCase
 import com.maropiyo.reminderparrot.domain.usecase.remindnet.CreateRemindNetPostUseCase
@@ -44,7 +46,7 @@ val appModule =
             ReminderListViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
         }
         single<ParrotViewModel> { ParrotViewModel(get()) }
-        single<RemindNetViewModel> { RemindNetViewModel(get(), get()) }
+        single<RemindNetViewModel> { RemindNetViewModel(get(), get(), get()) }
         single<SettingsViewModel> { SettingsViewModel(get(), get(), get()) }
 
         // UseCase
@@ -60,6 +62,15 @@ val appModule =
         single<RequestNotificationPermissionUseCase> { RequestNotificationPermissionUseCase(get()) }
         single<CreateRemindNetPostUseCase> { CreateRemindNetPostUseCase(get(), get()) }
         single<GetRemindNetPostsUseCase> { GetRemindNetPostsUseCase(get()) }
+        single<SendRemindNotificationUseCase> { SendRemindNotificationUseCase(get(), get()) }
+        single<RegisterPushNotificationTokenUseCase> {
+            RegisterPushNotificationTokenUseCase(
+                get(),
+                get(),
+                get(),
+                get()
+            )
+        }
         single<GetUserSettingsUseCase> { GetUserSettingsUseCase(get()) }
         single<SaveUserSettingsUseCase> { SaveUserSettingsUseCase(get()) }
         single<SignInAnonymouslyUseCase> { SignInAnonymouslyUseCase(get()) }

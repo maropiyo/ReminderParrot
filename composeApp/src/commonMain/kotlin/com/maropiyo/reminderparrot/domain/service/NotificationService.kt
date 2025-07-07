@@ -40,4 +40,18 @@ interface NotificationService {
      * すべての忘却通知をキャンセル
      */
     suspend fun cancelAllForgetNotifications()
+
+    /**
+     * プッシュ通知トークンを取得
+     *
+     * @return プッシュ通知トークン、取得できない場合はnull
+     */
+    suspend fun getPushNotificationToken(): String?
+
+    /**
+     * プッシュ通知トークンをリフレッシュ
+     * * トークンが更新された場合、新しいトークンを返す
+     * @return 新しいトークン、更新されなかった場合はnull
+     */
+    suspend fun refreshPushNotificationToken(): String?
 }

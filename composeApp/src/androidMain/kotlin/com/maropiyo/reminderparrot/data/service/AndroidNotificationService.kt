@@ -13,9 +13,14 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.maropiyo.reminderparrot.MainActivity
+import com.google.android.gms.tasks.Tasks
+import com.google.firebase.messaging.FirebaseMessaging
 import com.maropiyo.reminderparrot.domain.entity.Reminder
 import com.maropiyo.reminderparrot.domain.service.NotificationService
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.datetime.Clock
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 /**
  * Android固有の通知サービス実装
@@ -198,4 +203,59 @@ class AndroidNotificationService(
      * リマインダーIDに基づいてリクエストコードを生成
      */
     private fun getRequestCode(reminderId: String): Int = NOTIFICATION_REQUEST_CODE_BASE + reminderId.hashCode()
+
+    override suspend fun getPushNotificationToken(): String? {
+        return suspendCancellableCoroutine { continuation ->
+            try {
+                FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val token = task.result
+                        println("FCMトークン取得成功: $token")
+                        continuation.resume(token)
+                    } else {
+                        println("FCMトークン取得失敗: ${task.exception}")
+                        continuation.resumeWithException(
+                            task.exception ?: Exception("FCMトークン取得に失敗しました")
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                println("FCMトークン取得エラー: $e")
+                continuation.resumeWithException(e)
+            }
+        }
+    }
+
+    override suspend fun refreshPushNotificationToken(): String? {
+        // FCMトークンを削除してから新しいトークンを取得
+        return suspendCancellableCoroutine { continuation ->
+            try {
+                FirebaseMessaging.getInstance().deleteToken().addOnCompleteListener { deleteTask ->
+                    if (deleteTask.isSuccessful) {
+                        // トークン削除後に新しいトークンを取得
+                        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                val token = task.result
+                                println("FCMトークンリフレッシュ成功: $token")
+                                continuation.resume(token)
+                            } else {
+                                println("FCMトークンリフレッシュ失敗: ${task.exception}")
+                                continuation.resumeWithException(
+                                    task.exception ?: Exception("FCMトークンリフレッシュに失敗しました")
+                                )
+                            }
+                        }
+                    } else {
+                        println("FCMトークン削除失敗: ${deleteTask.exception}")
+                        continuation.resumeWithException(
+                            deleteTask.exception ?: Exception("FCMトークン削除に失敗しました")
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                println("FCMトークンリフレッシュエラー: $e")
+                continuation.resumeWithException(e)
+            }
+        }
+    }
 }

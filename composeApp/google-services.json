@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "499689827687",
+    "project_id": "reminderparrot",
+    "storage_bucket": "reminderparrot.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:499689827687:android:76e95788cf925ed3ced3c2",
+        "android_client_info": {
+          "package_name": "com.maropiyo.reminderparrot"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCA-rIdGiUwIVXDqr653M1EUerI1P8dSxE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

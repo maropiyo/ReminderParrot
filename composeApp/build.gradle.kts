@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.sqlDelight)
+    id("com.google.gms.google-services")
 }
 
 kotlin {
@@ -44,6 +45,7 @@ kotlin {
             implementation(libs.supabase.core)
             implementation(libs.supabase.postgrest)
             implementation(libs.supabase.auth)
+            implementation(libs.supabase.functions)
             implementation(libs.ktor.client.core)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.koin.core)
@@ -72,6 +74,11 @@ kotlin {
             implementation(libs.koin.android)
             implementation(libs.koin.androidx.compose)
             implementation(libs.sql.android.driver)
+            
+            // Firebase
+            implementation("com.google.firebase:firebase-bom:33.7.0")
+            implementation("com.google.firebase:firebase-messaging-ktx")
+            implementation("com.google.firebase:firebase-analytics-ktx")
         }
 
         iosMain.dependencies {
@@ -127,6 +134,9 @@ android {
 dependencies {
     implementation(libs.androidx.material3.android)
     debugImplementation(compose.uiTooling)
+    
+    // Firebase BOM
+    implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
 }
 
 sqldelight {

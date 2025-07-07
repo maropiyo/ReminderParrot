@@ -175,4 +175,18 @@ class IOSNotificationService : NotificationService {
             }
         }
     }
+
+    override suspend fun getPushNotificationToken(): String? {
+        // iOSではAPNsトークンの取得は複雑で、アプリデリゲートで処理する必要がある
+        // Firebase設定が必要なため、仮実装として固定トークンを返す
+        println("iOS: プッシュ通知トークンを取得（仮実装）")
+        return "ios_push_token_placeholder"
+    }
+
+    override suspend fun refreshPushNotificationToken(): String? {
+        // iOSではトークンのリフレッシュは自動的に行われる
+        // Firebase設定後は、実際のトークンリフレッシュ処理を実装
+        println("iOS: プッシュ通知トークンをリフレッシュ（仮実装）")
+        return "ios_push_token_refreshed_placeholder"
+    }
 }

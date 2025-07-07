@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.maropiyo.reminderparrot.domain.entity.RemindNetPost
 import com.maropiyo.reminderparrot.domain.service.AuthService
+import com.maropiyo.reminderparrot.domain.usecase.SendRemindNotificationUseCase
 import com.maropiyo.reminderparrot.domain.usecase.remindnet.GetRemindNetPostsUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,6 +18,7 @@ import kotlinx.coroutines.launch
  */
 class RemindNetViewModel(
     private val getRemindNetPostsUseCase: GetRemindNetPostsUseCase,
+    private val sendRemindNotificationUseCase: SendRemindNotificationUseCase,
     private val authService: AuthService
 ) : ViewModel() {
 
@@ -131,6 +133,31 @@ class RemindNetViewModel(
      */
     fun clearAccountCreationError() {
         _accountCreationError.value = null
+    }
+
+    /**
+     * リマインド通知を送信する
+     */
+    fun sendRemindNotification(post: RemindNetPost) {
+        viewModelScope.launch {
+            sendRemindNotificationUseCase(post)
+                .onSuccess {
+                    // 成功時のメッセージなどは必要に応じて追加
+                    println("リマインド通知を送信しました: ${post.userName}へ")
+                }
+                .onFailure { exception ->
+                    _state.update {
+                        it.copy(
+                            error = when {
+                                exception.message?.contains("自分の投稿") == true ->
+                                    "じぶんのとうこうにはつうちできません"
+                                else ->
+                                    "つうちのそうしんにしっぱいしました"
+                            }
+                        )
+                    }
+                }
+        }
     }
 }
 
