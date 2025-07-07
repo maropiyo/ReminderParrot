@@ -2,6 +2,7 @@ package com.maropiyo.reminderparrot.di
 
 import com.maropiyo.reminderparrot.data.datasource.remote.RemindNetRemoteDataSource
 import com.maropiyo.reminderparrot.data.local.DatabaseInitializer
+import com.maropiyo.reminderparrot.data.local.NotificationHistoryLocalDataSource
 import com.maropiyo.reminderparrot.data.local.ParrotLocalDataSource
 import com.maropiyo.reminderparrot.data.local.ReminderLocalDataSource
 import com.maropiyo.reminderparrot.data.mapper.ParrotMapper
@@ -46,7 +47,7 @@ val appModule =
             ReminderListViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
         }
         single<ParrotViewModel> { ParrotViewModel(get()) }
-        single<RemindNetViewModel> { RemindNetViewModel(get(), get(), get()) }
+        single<RemindNetViewModel> { RemindNetViewModel(get(), get(), get(), get()) }
         single<SettingsViewModel> { SettingsViewModel(get(), get(), get()) }
 
         // UseCase
@@ -62,7 +63,7 @@ val appModule =
         single<RequestNotificationPermissionUseCase> { RequestNotificationPermissionUseCase(get()) }
         single<CreateRemindNetPostUseCase> { CreateRemindNetPostUseCase(get(), get()) }
         single<GetRemindNetPostsUseCase> { GetRemindNetPostsUseCase(get()) }
-        single<SendRemindNotificationUseCase> { SendRemindNotificationUseCase(get(), get()) }
+        single<SendRemindNotificationUseCase> { SendRemindNotificationUseCase(get(), get(), get()) }
         single<RegisterPushNotificationTokenUseCase> {
             RegisterPushNotificationTokenUseCase(
                 get(),
@@ -87,6 +88,7 @@ val appModule =
         // LocalDataSource
         single<ReminderLocalDataSource> { ReminderLocalDataSource(get(), get()) }
         single<ParrotLocalDataSource> { ParrotLocalDataSource(get(), get()) }
+        single<NotificationHistoryLocalDataSource> { NotificationHistoryLocalDataSource(get()) }
 
         // Database
         single<DatabaseInitializer> { DatabaseInitializer(get()) }

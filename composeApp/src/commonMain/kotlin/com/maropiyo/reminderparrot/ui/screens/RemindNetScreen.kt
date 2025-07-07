@@ -2,6 +2,8 @@ package com.maropiyo.reminderparrot.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,13 +20,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -188,7 +190,9 @@ fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
                             post = post,
                             onBellClick = { clickedPost ->
                                 remindNetViewModel.sendRemindNotification(clickedPost)
-                            }
+                            },
+                            isAlreadySent = state.sentPostIds.contains(post.id),
+                            isMyPost = state.myPostIds.contains(post.id)
                         )
                     }
                 }
@@ -223,6 +227,8 @@ fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
 private fun RemindNetPostCard(
     post: RemindNetPost,
     onBellClick: (RemindNetPost) -> Unit,
+    isAlreadySent: Boolean,
+    isMyPost: Boolean,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -298,19 +304,46 @@ private fun RemindNetPostCard(
 
                 Spacer(modifier = Modifier.width(8.dp))
 
-                // ベルマークボタン
-                IconButton(
-                    onClick = { onBellClick(post) },
-                    modifier = Modifier.size(40.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Notifications,
-                        contentDescription = "リマインドを送る",
-                        tint = ParrotYellow,
-                        modifier = Modifier.size(24.dp)
+                // ベルマークボタン（自分の投稿以外のみ表示）
+                if (!isMyPost) {
+                    CircularBellButton(
+                        onClick = { onBellClick(post) },
+                        isAlreadySent = isAlreadySent,
+                        modifier = Modifier.size(32.dp)
                     )
                 }
             }
         }
+    }
+}
+
+/**
+ * 円形のベルボタン
+ * リマインダーカードのチェックマークデザインと統一
+ * 送信済みの場合はチェックマークを表示して非活性化
+ */
+@Composable
+private fun CircularBellButton(onClick: () -> Unit, isAlreadySent: Boolean, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .clip(CircleShape)
+            .border(
+                width = 2.dp,
+                color = if (isAlreadySent) Secondary else ParrotYellow,
+                shape = CircleShape
+            )
+            .background(
+                color = if (isAlreadySent) Secondary else White,
+                shape = CircleShape
+            )
+            .clickable(enabled = !isAlreadySent) { onClick() },
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = if (isAlreadySent) Icons.Default.Check else Icons.Default.Notifications,
+            contentDescription = if (isAlreadySent) "送信済み" else "リマインドを送る",
+            tint = if (isAlreadySent) White else ParrotYellow,
+            modifier = Modifier.size(18.dp)
+        )
     }
 }
