@@ -3,6 +3,7 @@ package com.maropiyo.reminderparrot.data.service
 import com.maropiyo.reminderparrot.domain.entity.Reminder
 import com.maropiyo.reminderparrot.domain.service.NotificationService
 import kotlin.coroutines.resume
+import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.datetime.Clock
 import platform.UserNotifications.UNAuthorizationOptionAlert
@@ -17,6 +18,7 @@ import platform.UserNotifications.UNUserNotificationCenter
 /**
  * iOS固有の通知サービス実装
  */
+@OptIn(ExperimentalForeignApi::class)
 class IOSNotificationService : NotificationService {
 
     private val notificationCenter = UNUserNotificationCenter.currentNotificationCenter()
@@ -177,16 +179,22 @@ class IOSNotificationService : NotificationService {
     }
 
     override suspend fun getPushNotificationToken(): String? {
-        // iOSではAPNsトークンの取得は複雑で、アプリデリゲートで処理する必要がある
-        // Firebase設定が必要なため、仮実装として固定トークンを返す
-        println("iOS: プッシュ通知トークンを取得（仮実装）")
-        return "ios_push_token_placeholder"
+        return try {
+            // FirebaseManagerBridgeを使用してトークンを取得
+            FirebaseManagerBridge.getFCMToken()
+        } catch (e: Exception) {
+            println("iOS: FCMトークン取得エラー: ${e.message}")
+            null
+        }
     }
 
     override suspend fun refreshPushNotificationToken(): String? {
-        // iOSではトークンのリフレッシュは自動的に行われる
-        // Firebase設定後は、実際のトークンリフレッシュ処理を実装
-        println("iOS: プッシュ通知トークンをリフレッシュ（仮実装）")
-        return "ios_push_token_refreshed_placeholder"
+        return try {
+            // FirebaseManagerBridgeを使用してトークンをリフレッシュ
+            FirebaseManagerBridge.refreshFCMToken()
+        } catch (e: Exception) {
+            println("iOS: FCMトークンリフレッシュエラー: ${e.message}")
+            null
+        }
     }
 }
