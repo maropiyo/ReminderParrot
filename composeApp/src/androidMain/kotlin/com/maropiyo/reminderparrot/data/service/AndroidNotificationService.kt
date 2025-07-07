@@ -12,15 +12,14 @@ import android.os.Build
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.maropiyo.reminderparrot.MainActivity
-import com.google.android.gms.tasks.Tasks
 import com.google.firebase.messaging.FirebaseMessaging
+import com.maropiyo.reminderparrot.MainActivity
 import com.maropiyo.reminderparrot.domain.entity.Reminder
 import com.maropiyo.reminderparrot.domain.service.NotificationService
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.datetime.Clock
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.datetime.Clock
 
 /**
  * Android固有の通知サービス実装

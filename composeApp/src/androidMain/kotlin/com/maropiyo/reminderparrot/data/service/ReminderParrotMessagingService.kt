@@ -36,13 +36,13 @@ class ReminderParrotMessagingService : FirebaseMessagingService() {
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
-        
+
         println("FCMメッセージ受信: ${remoteMessage.data}")
-        
+
         // 通知データを取得
         val title = remoteMessage.notification?.title ?: remoteMessage.data["title"] ?: "リマインコ"
         val body = remoteMessage.notification?.body ?: remoteMessage.data["body"] ?: ""
-        
+
         // 通知を表示
         showNotification(title, body)
     }
@@ -54,7 +54,7 @@ class ReminderParrotMessagingService : FirebaseMessagingService() {
         val intent = Intent(this, MainActivity::class.java).apply {
             addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         }
-        
+
         val pendingIntent = PendingIntent.getActivity(
             this,
             0,

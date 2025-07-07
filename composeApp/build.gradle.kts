@@ -74,7 +74,7 @@ kotlin {
             implementation(libs.koin.android)
             implementation(libs.koin.androidx.compose)
             implementation(libs.sql.android.driver)
-            
+
             // Firebase
             implementation("com.google.firebase:firebase-bom:33.7.0")
             implementation("com.google.firebase:firebase-messaging-ktx")
@@ -134,7 +134,7 @@ android {
 dependencies {
     implementation(libs.androidx.material3.android)
     debugImplementation(compose.uiTooling)
-    
+
     // Firebase BOM
     implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
 }
