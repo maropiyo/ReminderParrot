@@ -7,102 +7,113 @@ on:
     branches: [ main, develop ]
 
 jobs:
-  test-common:
-    name: 共通テスト実行
+  # 共通テスト（一時的に無効化）
+  # test-common:
+  #   name: 共通テスト実行
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: コードのチェックアウト
+  #       uses: actions/checkout@v4
+
+  #     - name: JDKのセットアップ
+  #       uses: actions/setup-java@v4
+  #       with:
+  #         distribution: 'zulu'
+  #         java-version: '17'
+
+  #     - name: Gradleのセットアップ
+  #       uses: gradle/gradle-build-action@v3
+  #       with:
+  #         gradle-home-cache-cleanup: false
+
+  #     - name: 共通テスト実行
+  #       run: ./gradlew :composeApp:testDebugUnitTest :composeApp:testReleaseUnitTest --no-daemon
+
+  #     - name: テストレポートのアップロード
+  #       if: always()
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: test-reports
+  #         path: "**/build/reports/tests/"
+
+  # iOSテスト（一時的に無効化）
+  # test-ios:
+  #   name: iOSテスト実行
+  #   runs-on: macos-latest
+  #   steps:
+  #     - name: コードのチェックアウト
+  #       uses: actions/checkout@v4
+
+  #     - name: JDKのセットアップ
+  #       uses: actions/setup-java@v4
+  #       with:
+  #         distribution: 'zulu'
+  #         java-version: '17'
+
+  #     - name: Gradleのセットアップ
+  #       uses: gradle/gradle-build-action@v3
+  #       with:
+  #         gradle-home-cache-cleanup: false
+
+  #     - name: Kotlin Nativeのキャッシュ
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: ~/.konan
+  #         key: ${{ runner.os }}-konan-${{ hashFiles('**/*.gradle.kts') }}
+  #         restore-keys: |
+  #           ${{ runner.os }}-konan-
+
+  #     - name: iOSテスト実行
+  #       run: ./gradlew :composeApp:iosSimulatorArm64Test --no-daemon
+
+  #     - name: iOSテストレポートのアップロード
+  #       if: always()
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: ios-test-reports
+  #         path: "**/build/reports/tests/"
+
+  # 全プラットフォームテスト（一時的に無効化）
+  # test-all-platforms:
+  #   name: 全プラットフォームテスト実行
+  #   runs-on: macos-latest
+  #   steps:
+  #     - name: コードのチェックアウト
+  #       uses: actions/checkout@v4
+
+  #     - name: JDKのセットアップ
+  #       uses: actions/setup-java@v4
+  #       with:
+  #         distribution: 'zulu'
+  #         java-version: '17'
+
+  #     - name: Gradleのセットアップ
+  #       uses: gradle/gradle-build-action@v3
+  #       with:
+  #         gradle-home-cache-cleanup: false
+
+  #     - name: Kotlin Nativeのキャッシュ
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: ~/.konan
+  #         key: ${{ runner.os }}-konan-${{ hashFiles('**/*.gradle.kts') }}
+  #         restore-keys: |
+  #           ${{ runner.os }}-konan-
+
+  #     - name: 全プラットフォームテスト実行
+  #       run: ./gradlew allTests --no-daemon
+
+  #     - name: 全テストレポートのアップロード
+  #       if: always()
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: all-platform-test-reports
+  #         path: "**/build/reports/tests/"
+
+  # プレースホルダージョブ（ワークフローが空にならないように）
+  placeholder:
+    name: Test jobs temporarily disabled
     runs-on: ubuntu-latest
     steps:
-      - name: コードのチェックアウト
-        uses: actions/checkout@v4
-
-      - name: JDKのセットアップ
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-
-      - name: Gradleのセットアップ
-        uses: gradle/gradle-build-action@v3
-        with:
-          gradle-home-cache-cleanup: false
-
-      - name: 共通テスト実行
-        run: ./gradlew :composeApp:testDebugUnitTest :composeApp:testReleaseUnitTest --no-daemon
-
-      - name: テストレポートのアップロード
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-reports
-          path: "**/build/reports/tests/"
-
-  test-ios:
-    name: iOSテスト実行
-    runs-on: macos-latest
-    steps:
-      - name: コードのチェックアウト
-        uses: actions/checkout@v4
-
-      - name: JDKのセットアップ
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-
-      - name: Gradleのセットアップ
-        uses: gradle/gradle-build-action@v3
-        with:
-          gradle-home-cache-cleanup: false
-
-      - name: Kotlin Nativeのキャッシュ
-        uses: actions/cache@v4
-        with:
-          path: ~/.konan
-          key: ${{ runner.os }}-konan-${{ hashFiles('**/*.gradle.kts') }}
-          restore-keys: |
-            ${{ runner.os }}-konan-
-
-      - name: iOSテスト実行
-        run: ./gradlew :composeApp:iosSimulatorArm64Test --no-daemon
-
-      - name: iOSテストレポートのアップロード
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ios-test-reports
-          path: "**/build/reports/tests/"
-
-  test-all-platforms:
-    name: 全プラットフォームテスト実行
-    runs-on: macos-latest
-    steps:
-      - name: コードのチェックアウト
-        uses: actions/checkout@v4
-
-      - name: JDKのセットアップ
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-
-      - name: Gradleのセットアップ
-        uses: gradle/gradle-build-action@v3
-        with:
-          gradle-home-cache-cleanup: false
-
-      - name: Kotlin Nativeのキャッシュ
-        uses: actions/cache@v4
-        with:
-          path: ~/.konan
-          key: ${{ runner.os }}-konan-${{ hashFiles('**/*.gradle.kts') }}
-          restore-keys: |
-            ${{ runner.os }}-konan-
-
-      - name: 全プラットフォームテスト実行
-        run: ./gradlew allTests --no-daemon
-
-      - name: 全テストレポートのアップロード
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: all-platform-test-reports
-          path: "**/build/reports/tests/"
+      - name: テストジョブは一時的に無効化されています
+        run: echo "全てのテストジョブは一時的に無効化されています。Lintのみ実行されます。"

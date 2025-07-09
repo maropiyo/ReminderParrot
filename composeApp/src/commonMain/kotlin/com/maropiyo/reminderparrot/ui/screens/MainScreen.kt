@@ -15,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.maropiyo.reminderparrot.data.local.DatabaseInitializer
+import com.maropiyo.reminderparrot.domain.usecase.RegisterPushNotificationTokenUseCase
 import com.maropiyo.reminderparrot.domain.usecase.RequestNotificationPermissionUseCase
 import com.maropiyo.reminderparrot.ui.navigation.BottomNavigation
 import com.maropiyo.reminderparrot.ui.navigation.NavigationItem
@@ -33,6 +34,9 @@ fun MainScreen() {
     // 通知権限要求
     val requestNotificationPermission = koinInject<RequestNotificationPermissionUseCase>()
 
+    // プッシュ通知トークン登録
+    val registerPushNotificationToken = koinInject<RegisterPushNotificationTokenUseCase>()
+
     // データベース初期化
     val databaseInitializer = koinInject<DatabaseInitializer>()
 
@@ -43,6 +47,8 @@ fun MainScreen() {
             databaseInitializer.initialize()
             // その後通知権限を要求
             requestNotificationPermission()
+            // プッシュ通知トークンを登録
+            registerPushNotificationToken()
         }
     }
 

@@ -58,6 +58,14 @@ class CancelForgetNotificationUseCaseTest {
             }
             allNotificationsCancelled = true
         }
+
+        override suspend fun getPushNotificationToken(): String? {
+            return "test-token"
+        }
+
+        override suspend fun refreshPushNotificationToken(): String? {
+            return "refreshed-test-token"
+        }
     }
 
     private val testNotificationService = TestNotificationService()

@@ -2,8 +2,10 @@ package com.maropiyo.reminderparrot.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.maropiyo.reminderparrot.data.local.NotificationHistoryLocalDataSource
 import com.maropiyo.reminderparrot.domain.entity.RemindNetPost
 import com.maropiyo.reminderparrot.domain.service.AuthService
+import com.maropiyo.reminderparrot.domain.usecase.SendRemindNotificationUseCase
 import com.maropiyo.reminderparrot.domain.usecase.remindnet.GetRemindNetPostsUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +19,9 @@ import kotlinx.coroutines.launch
  */
 class RemindNetViewModel(
     private val getRemindNetPostsUseCase: GetRemindNetPostsUseCase,
-    private val authService: AuthService
+    private val sendRemindNotificationUseCase: SendRemindNotificationUseCase,
+    private val authService: AuthService,
+    private val notificationHistoryLocalDataSource: NotificationHistoryLocalDataSource
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(RemindNetState())
@@ -50,11 +54,31 @@ class RemindNetViewModel(
                     }
                 }
                 .collect { posts ->
+                    // 送信済み状態と自分の投稿も併せて取得
+                    val currentUserId = authService.getCurrentUserId()
+                    val sentPostIds = if (currentUserId != null) {
+                        posts.filter { post ->
+                            notificationHistoryLocalDataSource.hasAlreadySent(post.id, currentUserId)
+                        }.map { it.id }.toSet()
+                    } else {
+                        emptySet()
+                    }
+
+                    val myPostIds = if (currentUserId != null) {
+                        posts.filter { post ->
+                            post.userId == currentUserId
+                        }.map { it.id }.toSet()
+                    } else {
+                        emptySet()
+                    }
+
                     _state.update {
                         it.copy(
                             posts = posts,
                             isLoading = false,
-                            error = null
+                            error = null,
+                            sentPostIds = sentPostIds,
+                            myPostIds = myPostIds
                         )
                     }
                 }
@@ -132,6 +156,54 @@ class RemindNetViewModel(
     fun clearAccountCreationError() {
         _accountCreationError.value = null
     }
+
+    /**
+     * リマインド通知を送信する
+     */
+    fun sendRemindNotification(post: RemindNetPost) {
+        viewModelScope.launch {
+            sendRemindNotificationUseCase(post)
+                .onSuccess {
+                    // 送信成功時は送信済み状態を更新
+                    _state.update { currentState ->
+                        currentState.copy(
+                            sentPostIds = currentState.sentPostIds + post.id
+                        )
+                    }
+                    println("リマインド通知を送信しました: ${post.userName}へ")
+                }
+                .onFailure { exception ->
+                    _state.update {
+                        it.copy(
+                            error = when {
+                                exception.message?.contains("自分の投稿") == true ->
+                                    "じぶんのとうこうにはつうちできません"
+                                exception.message?.contains("既に通知を送信済み") == true ->
+                                    "このとうこうにはもうつうちをおくったよ"
+                                else ->
+                                    "つうちのそうしんにしっぱいしました"
+                            }
+                        )
+                    }
+                }
+        }
+    }
+
+    /**
+     * 特定の投稿に送信済みかどうかを確認
+     */
+    suspend fun hasAlreadySent(postId: String): Boolean {
+        val currentUserId = authService.getCurrentUserId() ?: return false
+        return notificationHistoryLocalDataSource.hasAlreadySent(postId, currentUserId)
+    }
+
+    /**
+     * 投稿が自分のものかどうかを確認
+     */
+    suspend fun isMyPost(post: RemindNetPost): Boolean {
+        val currentUserId = authService.getCurrentUserId() ?: return false
+        return post.userId == currentUserId
+    }
 }
 
 /**
@@ -140,5 +212,7 @@ class RemindNetViewModel(
 data class RemindNetState(
     val posts: List<RemindNetPost> = emptyList(),
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val sentPostIds: Set<String> = emptySet(),
+    val myPostIds: Set<String> = emptySet()
 )

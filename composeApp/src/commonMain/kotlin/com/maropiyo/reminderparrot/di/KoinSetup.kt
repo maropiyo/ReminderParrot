@@ -6,6 +6,7 @@ import com.maropiyo.reminderparrot.data.service.AuthServiceImpl
 import com.maropiyo.reminderparrot.domain.service.AuthService
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.createSupabaseClient
+import io.github.jan.supabase.functions.Functions
 import io.github.jan.supabase.postgrest.Postgrest
 import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
@@ -42,6 +43,7 @@ private fun createSupabaseModule(supabaseConfig: SupabaseConfig): Module = modul
         ) {
             install(Postgrest)
             install(Auth)
+            install(Functions)
         }
     }
 

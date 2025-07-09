@@ -61,6 +61,14 @@ class ScheduleForgetNotificationUseCaseTest {
         override suspend fun cancelAllForgetNotifications() {
             // テスト用の実装
         }
+
+        override suspend fun getPushNotificationToken(): String? {
+            return "test-token"
+        }
+
+        override suspend fun refreshPushNotificationToken(): String? {
+            return "refreshed-test-token"
+        }
     }
 
     private val testNotificationService = TestNotificationService()

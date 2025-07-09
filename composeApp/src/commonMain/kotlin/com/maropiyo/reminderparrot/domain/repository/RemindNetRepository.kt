@@ -1,5 +1,7 @@
 package com.maropiyo.reminderparrot.domain.repository
 
+import com.maropiyo.reminderparrot.domain.entity.Platform
+import com.maropiyo.reminderparrot.domain.entity.RemindNetNotification
 import com.maropiyo.reminderparrot.domain.entity.RemindNetPost
 import kotlinx.coroutines.flow.Flow
 
@@ -27,4 +29,14 @@ interface RemindNetRepository {
      * 投稿にいいねをする
      */
     suspend fun likePost(postId: String): Result<Unit>
+
+    /**
+     * リマインド通知を送信する
+     */
+    suspend fun sendRemindNotification(notification: RemindNetNotification): Result<Unit>
+
+    /**
+     * プッシュ通知トークンを登録する
+     */
+    suspend fun registerPushNotificationToken(userId: String, token: String, platform: Platform): Result<Unit>
 }

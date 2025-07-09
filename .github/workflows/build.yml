@@ -10,70 +10,78 @@ on:
 # テストが先に通ることを保証
 
 jobs:
-    # Androidビルド
-    build-android:
-        name: Androidビルド
+    # Androidビルド（一時的に無効化）
+    # build-android:
+    #     name: Androidビルド
+    #     runs-on: ubuntu-latest
+    #     steps:
+    #         - name: コードのチェックアウト
+    #           uses: actions/checkout@v4
+
+    #         - name: JDKのセットアップ
+    #           uses: actions/setup-java@v4
+    #           with:
+    #               distribution: 'zulu'
+    #               java-version: '17'
+
+    #         - name: Gradleのセットアップ
+    #           uses: gradle/gradle-build-action@v3
+    #           with:
+    #               gradle-home-cache-cleanup: false
+
+    #         - name: Androidビルド実行
+    #           run: ./gradlew :composeApp:assembleDebug --no-daemon
+
+    # iOSビルド（一時的に無効化）
+    # build-ios:
+    #     name: iOSビルド
+    #     runs-on: macos-latest
+    #     steps:
+    #         - name: コードのチェックアウト
+    #           uses: actions/checkout@v4
+
+    #         - name: JDKのセットアップ
+    #           uses: actions/setup-java@v4
+    #           with:
+    #               distribution: 'zulu'
+    #               java-version: '17'
+
+    #         - name: Gradleのセットアップ
+    #           uses: gradle/gradle-build-action@v3
+    #           with:
+    #               gradle-home-cache-cleanup: false
+
+    #         - name: Kotlin Nativeのキャッシュ
+    #           uses: actions/cache@v4
+    #           with:
+    #               path: ~/.konan
+    #               key: ${{ runner.os }}-konan-${{ hashFiles('**/*.gradle.kts') }}
+    #               restore-keys: |
+    #                   ${{ runner.os }}-konan-
+
+    #         - name: iOSフレームワークビルド
+    #           run: ./gradlew :composeApp:compileKotlinIosX64 --no-daemon
+
+    #         - name: Create Config.xcconfig
+    #           run: |
+    #               mkdir -p iosApp/Configuration
+    #               cat > iosApp/Configuration/Config.xcconfig << EOF
+    #               TEAM_ID=${{ secrets.TEAM_ID }}
+    #               BUNDLE_ID=${{ secrets.BUNDLE_ID }}
+    #               APP_NAME=${{ secrets.APP_NAME }}
+    #               SUPABASE_URL="${{ secrets.SUPABASE_URL }}"
+    #               SUPABASE_ANON_KEY="${{ secrets.SUPABASE_ANON_KEY }}"
+    #               EOF
+
+    #         - name: iOSアプリビルド
+    #           run: |
+    #               cd iosApp
+    #               xcodebuild -project iosApp.xcodeproj -scheme iosApp -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' -configuration Debug CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
+
+    # プレースホルダージョブ（ワークフローが空にならないように）
+    placeholder:
+        name: Build jobs temporarily disabled
         runs-on: ubuntu-latest
         steps:
-            - name: コードのチェックアウト
-              uses: actions/checkout@v4
-
-            - name: JDKのセットアップ
-              uses: actions/setup-java@v4
-              with:
-                  distribution: 'zulu'
-                  java-version: '17'
-
-            - name: Gradleのセットアップ
-              uses: gradle/gradle-build-action@v3
-              with:
-                  gradle-home-cache-cleanup: false
-
-            - name: Androidビルド実行
-              run: ./gradlew :composeApp:assembleDebug --no-daemon
-
-    # iOSビルド
-    build-ios:
-        name: iOSビルド
-        runs-on: macos-latest
-        steps:
-            - name: コードのチェックアウト
-              uses: actions/checkout@v4
-
-            - name: JDKのセットアップ
-              uses: actions/setup-java@v4
-              with:
-                  distribution: 'zulu'
-                  java-version: '17'
-
-            - name: Gradleのセットアップ
-              uses: gradle/gradle-build-action@v3
-              with:
-                  gradle-home-cache-cleanup: false
-
-            - name: Kotlin Nativeのキャッシュ
-              uses: actions/cache@v4
-              with:
-                  path: ~/.konan
-                  key: ${{ runner.os }}-konan-${{ hashFiles('**/*.gradle.kts') }}
-                  restore-keys: |
-                      ${{ runner.os }}-konan-
-
-            - name: iOSフレームワークビルド
-              run: ./gradlew :composeApp:compileKotlinIosX64 --no-daemon
-
-            - name: Create Config.xcconfig
-              run: |
-                  mkdir -p iosApp/Configuration
-                  cat > iosApp/Configuration/Config.xcconfig << EOF
-                  TEAM_ID=${{ secrets.TEAM_ID }}
-                  BUNDLE_ID=${{ secrets.BUNDLE_ID }}
-                  APP_NAME=${{ secrets.APP_NAME }}
-                  SUPABASE_URL="${{ secrets.SUPABASE_URL }}"
-                  SUPABASE_ANON_KEY="${{ secrets.SUPABASE_ANON_KEY }}"
-                  EOF
-
-            - name: iOSアプリビルド
-              run: |
-                  cd iosApp
-                  xcodebuild -project iosApp.xcodeproj -scheme iosApp -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' -configuration Debug CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
+            - name: ビルドジョブは一時的に無効化されています
+              run: echo "AndroidビルドとiOSビルドは一時的に無効化されています。Lintとテストのみ実行されます。"

@@ -56,3 +56,28 @@ updateParrot:
 UPDATE Parrot
 SET level = ?, current_experience = ?, max_experience = ?, memorized_words = ?, memory_time_hours = ?
 WHERE id = 1;
+
+-- 送信履歴テーブル（1投稿につき1ユーザー1回まで）
+CREATE TABLE IF NOT EXISTS NotificationHistory (
+    id TEXT PRIMARY KEY,
+    post_id TEXT NOT NULL,
+    sender_user_id TEXT NOT NULL,
+    sent_at INTEGER NOT NULL,
+    UNIQUE(post_id, sender_user_id)
+);
+
+-- 送信履歴の追加
+insertNotificationHistory:
+INSERT INTO NotificationHistory(id, post_id, sender_user_id, sent_at)
+VALUES(?, ?, ?, ?);
+
+-- 送信履歴の確認（送信済みかチェック）
+checkNotificationHistory:
+SELECT COUNT(*)
+FROM NotificationHistory
+WHERE post_id = ? AND sender_user_id = ?;
+
+-- 送信履歴の削除（特定投稿）
+deleteNotificationHistoryForPost:
+DELETE FROM NotificationHistory
+WHERE post_id = ?;

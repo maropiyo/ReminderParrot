@@ -1,6 +1,8 @@
 package com.maropiyo.reminderparrot.data.repository
 
 import com.maropiyo.reminderparrot.data.datasource.remote.RemindNetRemoteDataSource
+import com.maropiyo.reminderparrot.domain.entity.Platform
+import com.maropiyo.reminderparrot.domain.entity.RemindNetNotification
 import com.maropiyo.reminderparrot.domain.entity.RemindNetPost
 import com.maropiyo.reminderparrot.domain.repository.RemindNetRepository
 import kotlinx.coroutines.flow.Flow
@@ -29,5 +31,17 @@ class RemindNetRepositoryImpl(
 
     override suspend fun likePost(postId: String): Result<Unit> {
         return remoteDataSource.likePost(postId)
+    }
+
+    override suspend fun sendRemindNotification(notification: RemindNetNotification): Result<Unit> {
+        return remoteDataSource.sendRemindNotification(notification)
+    }
+
+    override suspend fun registerPushNotificationToken(
+        userId: String,
+        token: String,
+        platform: Platform
+    ): Result<Unit> {
+        return remoteDataSource.registerPushNotificationToken(userId, token, platform)
     }
 }

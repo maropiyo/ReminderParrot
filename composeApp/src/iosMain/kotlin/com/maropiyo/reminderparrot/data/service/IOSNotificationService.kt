@@ -3,6 +3,7 @@ package com.maropiyo.reminderparrot.data.service
 import com.maropiyo.reminderparrot.domain.entity.Reminder
 import com.maropiyo.reminderparrot.domain.service.NotificationService
 import kotlin.coroutines.resume
+import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.datetime.Clock
 import platform.UserNotifications.UNAuthorizationOptionAlert
@@ -17,6 +18,7 @@ import platform.UserNotifications.UNUserNotificationCenter
 /**
  * iOS固有の通知サービス実装
  */
+@OptIn(ExperimentalForeignApi::class)
 class IOSNotificationService : NotificationService {
 
     private val notificationCenter = UNUserNotificationCenter.currentNotificationCenter()
@@ -173,6 +175,26 @@ class IOSNotificationService : NotificationService {
             notificationCenter.addNotificationRequest(request) { error ->
                 continuation.resume(Unit)
             }
+        }
+    }
+
+    override suspend fun getPushNotificationToken(): String? {
+        return try {
+            // FirebaseManagerBridgeを使用してトークンを取得
+            FirebaseManagerBridge.getFCMToken()
+        } catch (e: Exception) {
+            println("iOS: FCMトークン取得エラー: ${e.message}")
+            null
+        }
+    }
+
+    override suspend fun refreshPushNotificationToken(): String? {
+        return try {
+            // FirebaseManagerBridgeを使用してトークンをリフレッシュ
+            FirebaseManagerBridge.refreshFCMToken()
+        } catch (e: Exception) {
+            println("iOS: FCMトークンリフレッシュエラー: ${e.message}")
+            null
         }
     }
 }

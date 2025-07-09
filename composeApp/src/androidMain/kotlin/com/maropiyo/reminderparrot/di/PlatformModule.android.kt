@@ -4,6 +4,7 @@ import com.maropiyo.reminderparrot.data.service.AndroidNotificationService
 import com.maropiyo.reminderparrot.data.service.AndroidUserSettingsService
 import com.maropiyo.reminderparrot.domain.service.NotificationService
 import com.maropiyo.reminderparrot.domain.service.UserSettingsService
+import com.maropiyo.reminderparrot.util.PlatformUtil
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
@@ -13,4 +14,5 @@ import org.koin.dsl.module
 val platformModule = module {
     single<NotificationService> { AndroidNotificationService(androidContext()) }
     single<UserSettingsService> { AndroidUserSettingsService(androidContext()) }
+    single<PlatformUtil> { PlatformUtil() }
 }
