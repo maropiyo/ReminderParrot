@@ -1,7 +1,7 @@
 package com.maropiyo.reminderparrot.data.repository
 
-import com.maropiyo.reminderparrot.data.local.ReminderLocalDataSource
-import com.maropiyo.reminderparrot.data.remote.ReminderRemoteDataSource
+import com.maropiyo.reminderparrot.data.datasource.local.ReminderLocalDataSource
+import com.maropiyo.reminderparrot.data.datasource.remote.ReminderRemoteDataSource
 import com.maropiyo.reminderparrot.domain.entity.Reminder
 import com.maropiyo.reminderparrot.domain.repository.ReminderRepository
 import kotlinx.datetime.Instant

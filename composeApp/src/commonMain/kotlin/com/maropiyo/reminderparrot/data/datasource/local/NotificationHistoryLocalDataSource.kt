@@ -1,4 +1,4 @@
-package com.maropiyo.reminderparrot.data.local
+package com.maropiyo.reminderparrot.data.datasource.local
 
 import com.maropiyo.reminderparrot.db.ReminderParrotDatabase
 import com.maropiyo.reminderparrot.domain.entity.NotificationHistory

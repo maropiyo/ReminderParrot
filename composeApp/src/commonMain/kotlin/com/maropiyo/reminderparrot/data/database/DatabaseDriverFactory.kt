@@ -1,4 +1,4 @@
-package com.maropiyo.reminderparrot.data.local.db
+package com.maropiyo.reminderparrot.data.database
 
 import app.cash.sqldelight.db.SqlDriver
 

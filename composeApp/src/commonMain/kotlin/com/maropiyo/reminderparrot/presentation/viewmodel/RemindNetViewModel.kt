@@ -2,7 +2,7 @@ package com.maropiyo.reminderparrot.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.maropiyo.reminderparrot.data.local.NotificationHistoryLocalDataSource
+import com.maropiyo.reminderparrot.data.datasource.local.NotificationHistoryLocalDataSource
 import com.maropiyo.reminderparrot.domain.entity.RemindNetPost
 import com.maropiyo.reminderparrot.domain.service.AuthService
 import com.maropiyo.reminderparrot.domain.usecase.SendRemindNotificationUseCase

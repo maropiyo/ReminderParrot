@@ -1,6 +1,6 @@
 package com.maropiyo.reminderparrot.data.repository
 
-import com.maropiyo.reminderparrot.data.local.ParrotLocalDataSource
+import com.maropiyo.reminderparrot.data.datasource.local.ParrotLocalDataSource
 import com.maropiyo.reminderparrot.domain.entity.Parrot
 import com.maropiyo.reminderparrot.domain.repository.ParrotRepository
 
