@@ -1,0 +1,77 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  # 共通・Androidテスト
+  test-android:
+    name: Android・共通テスト実行
+    runs-on: ubuntu-latest
+    steps:
+      - name: コードのチェックアウト
+        uses: actions/checkout@v4
+
+      - name: JDKのセットアップ
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Gradleのセットアップ
+        uses: gradle/gradle-build-action@v3
+        with:
+          gradle-home-cache-cleanup: false
+
+      - name: Gradle properties設定（iOS警告を抑制）
+        run: echo "kotlin.native.ignoreDisabledTargets=true" >> gradle.properties
+
+      - name: Android単体テスト実行
+        run: ./gradlew :composeApp:testDebugUnitTest :composeApp:testReleaseUnitTest --no-daemon
+
+      - name: テストレポートのアップロード
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-test-reports
+          path: "**/build/reports/tests/"
+
+  # iOSテスト（macOS環境でのみ実行可能）
+  test-ios:
+    name: iOSテスト実行
+    runs-on: macos-latest
+    steps:
+      - name: コードのチェックアウト
+        uses: actions/checkout@v4
+
+      - name: JDKのセットアップ
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Gradleのセットアップ
+        uses: gradle/gradle-build-action@v3
+        with:
+          gradle-home-cache-cleanup: false
+
+      - name: Kotlin Nativeのキャッシュ
+        uses: actions/cache@v4
+        with:
+          path: ~/.konan
+          key: ${{ runner.os }}-konan-${{ hashFiles('**/*.gradle.kts') }}
+          restore-keys: |
+            ${{ runner.os }}-konan-
+
+      - name: iOSテスト実行
+        run: ./gradlew :composeApp:iosSimulatorArm64Test --no-daemon
+
+      - name: iOSテストレポートのアップロード
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-test-reports
+          path: "**/build/reports/tests/"

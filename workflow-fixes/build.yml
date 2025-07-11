@@ -1,0 +1,93 @@
+# ワークフロー名
+name: Build
+
+on:
+    push:
+        branches: [ main, develop ]
+    pull_request:
+        branches: [ main, develop ]
+
+# テストが先に通ることを保証
+
+jobs:
+    # Androidビルド
+    build-android:
+        name: Androidビルド
+        runs-on: ubuntu-latest
+        steps:
+            - name: コードのチェックアウト
+              uses: actions/checkout@v4
+
+            - name: JDKのセットアップ
+              uses: actions/setup-java@v4
+              with:
+                  distribution: 'zulu'
+                  java-version: '17'
+
+            - name: Gradleのセットアップ
+              uses: gradle/gradle-build-action@v3
+              with:
+                  gradle-home-cache-cleanup: false
+
+            - name: Gradle properties設定（iOS警告を抑制）
+              run: echo "kotlin.native.ignoreDisabledTargets=true" >> gradle.properties
+
+            - name: Androidビルド実行
+              run: ./gradlew :composeApp:assembleDebug --no-daemon
+
+            - name: Android単体テスト実行
+              run: ./gradlew :composeApp:testDebugUnitTest --no-daemon
+
+            - name: テストレポートのアップロード
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: android-test-reports
+                  path: "**/build/reports/tests/"
+
+    # iOSフレームワークコンパイル（macOS環境）
+    build-ios:
+        name: iOSフレームワークビルド
+        runs-on: macos-latest
+        steps:
+            - name: コードのチェックアウト
+              uses: actions/checkout@v4
+
+            - name: JDKのセットアップ
+              uses: actions/setup-java@v4
+              with:
+                  distribution: 'zulu'
+                  java-version: '17'
+
+            - name: Gradleのセットアップ
+              uses: gradle/gradle-build-action@v3
+              with:
+                  gradle-home-cache-cleanup: false
+
+            - name: Kotlin Nativeのキャッシュ
+              uses: actions/cache@v4
+              with:
+                  path: ~/.konan
+                  key: ${{ runner.os }}-konan-${{ hashFiles('**/*.gradle.kts') }}
+                  restore-keys: |
+                      ${{ runner.os }}-konan-
+
+            - name: iOSフレームワークコンパイル（基本チェック）
+              run: ./gradlew :composeApp:compileKotlinIosX64 --no-daemon
+
+            # フルiOSビルドは設定ファイルが必要なため、基本的なコンパイルチェックのみ
+            # - name: Create Config.xcconfig
+            #   run: |
+            #       mkdir -p iosApp/Configuration
+            #       cat > iosApp/Configuration/Config.xcconfig << EOF
+            #       TEAM_ID=${{ secrets.TEAM_ID }}
+            #       BUNDLE_ID=${{ secrets.BUNDLE_ID }}
+            #       APP_NAME=${{ secrets.APP_NAME }}
+            #       SUPABASE_URL="${{ secrets.SUPABASE_URL }}"
+            #       SUPABASE_ANON_KEY="${{ secrets.SUPABASE_ANON_KEY }}"
+            #       EOF
+
+            # - name: iOSアプリビルド
+            #   run: |
+            #       cd iosApp
+            #       xcodebuild -project iosApp.xcodeproj -scheme iosApp -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' -configuration Debug CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
