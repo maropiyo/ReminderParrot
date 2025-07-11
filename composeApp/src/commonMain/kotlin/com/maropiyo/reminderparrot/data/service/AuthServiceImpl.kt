@@ -77,10 +77,20 @@ class AuthServiceImpl(
         val currentUser = supabaseClient.auth.currentUserOrNull()
             ?: throw IllegalStateException("ユーザーが認証されていません")
 
-        supabaseClient.auth.updateUser {
-            data = buildJsonObject {
-                put("display_name", displayName)
+        try {
+            println("AuthServiceImpl: 名前変更開始 - '$displayName' (ユーザーID: ${currentUser.id})")
+            
+            supabaseClient.auth.updateUser {
+                data = buildJsonObject {
+                    put("display_name", displayName)
+                }
             }
+            
+            println("AuthServiceImpl: 名前変更成功 - '$displayName'")
+        } catch (e: Exception) {
+            println("AuthServiceImpl: 名前変更エラー - ${e.message}")
+            println("AuthServiceImpl: エラー詳細 - $e")
+            throw e
         }
     }
 

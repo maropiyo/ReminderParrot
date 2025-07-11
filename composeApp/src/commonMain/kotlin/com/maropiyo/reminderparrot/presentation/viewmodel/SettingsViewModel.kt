@@ -33,6 +33,18 @@ class SettingsViewModel(
     private val _accountCreationError = MutableStateFlow<String?>(null)
     val accountCreationError: StateFlow<String?> = _accountCreationError.asStateFlow()
 
+    private val _isUpdatingParrotName = MutableStateFlow(false)
+    val isUpdatingParrotName: StateFlow<Boolean> = _isUpdatingParrotName.asStateFlow()
+
+    private val _nameUpdateError = MutableStateFlow<String?>(null)
+    val nameUpdateError: StateFlow<String?> = _nameUpdateError.asStateFlow()
+
+    private val _isNameUpdateCooldown = MutableStateFlow(false)
+    val isNameUpdateCooldown: StateFlow<Boolean> = _isNameUpdateCooldown.asStateFlow()
+
+    private var lastNameUpdateTime = 0L
+    private val NAME_UPDATE_COOLDOWN_MS = 5000L // 5秒のクールダウン
+
     init {
         loadSettings()
         loadUserId()
@@ -66,12 +78,17 @@ class SettingsViewModel(
     private fun loadDisplayName() {
         viewModelScope.launch {
             try {
-                // 認証を確実に完了させてからDisplayNameを取得
-                authService.getUserId() // 匿名認証を自動実行
-                val name = authService.getDisplayName()
-                _displayName.value = name
+                // 既存のアカウントがある場合のみ表示名を取得
+                val currentUserId = authService.getCurrentUserId()
+                if (currentUserId != null) {
+                    val name = authService.getDisplayName()
+                    _displayName.value = name
+                } else {
+                    _displayName.value = null
+                }
             } catch (e: Exception) {
                 // エラーは無視してnullのまま
+                _displayName.value = null
             }
         }
     }
@@ -80,12 +97,49 @@ class SettingsViewModel(
      * インコの名前を更新
      */
     fun updateParrotName(name: String) {
+        // 既に更新中の場合は処理しない
+        if (_isUpdatingParrotName.value) return
+
+        // クールダウン期間中は処理しない
+        val currentTime = System.currentTimeMillis()
+        if (currentTime - lastNameUpdateTime < NAME_UPDATE_COOLDOWN_MS) {
+            val remainingSeconds = ((NAME_UPDATE_COOLDOWN_MS - (currentTime - lastNameUpdateTime)) / 1000L).toInt() + 1
+            _nameUpdateError.value = "${remainingSeconds}びょうまってからもういちどおためしください。"
+            return
+        }
+
         viewModelScope.launch {
             try {
+                _isUpdatingParrotName.value = true
+                println("SettingsViewModel: 名前更新開始 - '$name'")
                 authService.updateDisplayName(name)
                 _displayName.value = name
+                lastNameUpdateTime = currentTime
+                
+                // クールダウン期間開始
+                _isNameUpdateCooldown.value = true
+                startCooldownTimer()
+                
+                println("SettingsViewModel: 名前更新完了 - '$name'")
             } catch (e: Exception) {
-                // 表示名の更新エラーは無視
+                println("SettingsViewModel: 名前更新エラー - ${e.message}")
+                println("SettingsViewModel: エラー詳細 - $e")
+                
+                // エラーメッセージを設定
+                val errorMessage = when {
+                    e.message?.contains("over_request_rate_limit") == true ->
+                        "なまえのへんこうがおおすぎます。\nしばらくまってからもういちどおためしください。"
+                    e.message?.contains("network") == true ->
+                        "インターネットにせつぞくできません。\nもういちどおためしください。"
+                    else ->
+                        "なまえのへんこうにしっぱいしました。\nもういちどおためしください。"
+                }
+                _nameUpdateError.value = errorMessage
+                
+                // エラーが発生した場合は表示名を元に戻す
+                loadDisplayName()
+            } finally {
+                _isUpdatingParrotName.value = false
             }
         }
     }
@@ -124,8 +178,8 @@ class SettingsViewModel(
     private fun loadUserId() {
         viewModelScope.launch {
             try {
-                // 認証を確実に完了させてからユーザーIDを取得
-                val userId = authService.getUserId() // 匿名認証を自動実行
+                // 既存のアカウントがある場合のみユーザーIDを取得（自動作成はしない）
+                val userId = authService.getCurrentUserId()
                 _userId.value = userId
             } catch (e: Exception) {
                 _userId.value = null
@@ -187,6 +241,23 @@ class SettingsViewModel(
      */
     fun clearAccountCreationError() {
         _accountCreationError.value = null
+    }
+
+    /**
+     * 名前更新エラーをクリア
+     */
+    fun clearNameUpdateError() {
+        _nameUpdateError.value = null
+    }
+
+    /**
+     * クールダウンタイマーを開始
+     */
+    private fun startCooldownTimer() {
+        viewModelScope.launch {
+            kotlinx.coroutines.delay(NAME_UPDATE_COOLDOWN_MS)
+            _isNameUpdateCooldown.value = false
+        }
     }
 
     /**

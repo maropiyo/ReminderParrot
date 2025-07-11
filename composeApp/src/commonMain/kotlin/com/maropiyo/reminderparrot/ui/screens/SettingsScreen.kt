@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -19,6 +20,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -26,6 +28,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -68,7 +72,11 @@ fun SettingsScreen() {
     val userId by viewModel.userId.collectAsState()
     val displayName by viewModel.displayName.collectAsState()
     val accountCreationError by viewModel.accountCreationError.collectAsState()
+    val isUpdatingParrotName by viewModel.isUpdatingParrotName.collectAsState()
+    val nameUpdateError by viewModel.nameUpdateError.collectAsState()
+    val isNameUpdateCooldown by viewModel.isNameUpdateCooldown.collectAsState()
     val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     // タブ切り替え時に最新情報を取得
     LaunchedEffect(Unit) {
@@ -92,7 +100,16 @@ fun SettingsScreen() {
         }
     }
 
+    // 名前更新エラーの表示
+    LaunchedEffect(nameUpdateError) {
+        nameUpdateError?.let { error ->
+            snackbarHostState.showSnackbar(error)
+            viewModel.clearNameUpdateError()
+        }
+    }
+
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = {
@@ -118,150 +135,164 @@ fun SettingsScreen() {
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // インコじょうほうカード
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = CardBackgroundColor),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(20.dp)
+            // インコじょうほうカード（アカウント作成済みの場合のみ表示）
+            if (userId != null) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = CardBackgroundColor),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                 ) {
-                    Text(
-                        text = "インコじょうほう",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = Secondary,
-                        fontWeight = FontWeight.Bold
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // インコの名前設定
-                    Column {
-                        Text(
-                            text = "なまえ",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Secondary,
-                            fontWeight = FontWeight.Medium
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = displayName?.takeIf { it.isNotBlank() } ?: "ひよっこインコ",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = Secondary,
-                                fontWeight = FontWeight.Medium,
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .background(
-                                        color = Secondary.copy(alpha = 0.1f),
-                                        shape = RoundedCornerShape(16.dp)
-                                    )
-                                    .padding(horizontal = 16.dp, vertical = 12.dp)
-                            )
-
-                            IconButton(
-                                onClick = {
-                                    val newName = ParrotNameGenerator.generateRandomName()
-                                    viewModel.updateParrotName(newName)
-                                },
-                                modifier = Modifier
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Refresh,
-                                    contentDescription = "なまえをかえる",
-                                    tint = Secondary
-                                )
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // ID表示
-                    Column {
-                        Text(
-                            text = "ID",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Secondary,
-                            fontWeight = FontWeight.Medium
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = userId ?: "-",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Secondary.copy(alpha = 0.7f)
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // リマインネット設定
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = CardBackgroundColor),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(20.dp)
-                ) {
-                    Text(
-                        text = "リマインネット",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = Secondary,
-                        fontWeight = FontWeight.Bold
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // リマインネット投稿設定
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                    Column(
+                        modifier = Modifier.padding(20.dp)
                     ) {
-                        Column(
-                            modifier = Modifier.weight(1f)
-                        ) {
+                        Text(
+                            text = "インコじょうほう",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = Secondary,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // インコの名前設定
+                        Column {
                             Text(
-                                text = "こうかいする",
-                                style = MaterialTheme.typography.bodyLarge,
+                                text = "なまえ",
+                                style = MaterialTheme.typography.bodyMedium,
                                 color = Secondary,
                                 fontWeight = FontWeight.Medium
                             )
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = displayName?.takeIf { it.isNotBlank() } ?: "ひよっこインコ",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = Secondary,
+                                    fontWeight = FontWeight.Medium,
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .background(
+                                            color = Secondary.copy(alpha = 0.1f),
+                                            shape = RoundedCornerShape(16.dp)
+                                        )
+                                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                                )
+
+                                IconButton(
+                                    onClick = {
+                                        if (!isUpdatingParrotName && !isNameUpdateCooldown) {
+                                            val newName = ParrotNameGenerator.generateRandomName()
+                                            viewModel.updateParrotName(newName)
+                                        }
+                                    },
+                                    enabled = !isUpdatingParrotName && !isNameUpdateCooldown,
+                                    modifier = Modifier
+                                ) {
+                                    if (isUpdatingParrotName) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.size(20.dp),
+                                            color = Secondary,
+                                            strokeWidth = 2.dp
+                                        )
+                                    } else {
+                                        Icon(
+                                            imageVector = Icons.Default.Refresh,
+                                            contentDescription = "なまえをかえる",
+                                            tint = if (isNameUpdateCooldown) {
+                                                Secondary.copy(alpha = 0.38f) // 非活性時は38%の透明度
+                                            } else {
+                                                Secondary
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // ID表示
+                        Column {
                             Text(
-                                text = "おしえたことばをみんなにみせる",
+                                text = "ID",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Secondary,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = userId ?: "-",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = Secondary.copy(alpha = 0.7f)
                             )
                         }
+                    }
+                }
+            }
 
-                        Switch(
-                            checked = settings.isRemindNetSharingEnabled,
-                            onCheckedChange = { enabled ->
-                                if (enabled && userId == null) {
-                                    // アカウントが未作成の場合はアカウント作成ボトムシートを表示
-                                    showAccountCreationBottomSheet = true
-                                } else {
-                                    viewModel.updateRemindNetSharingEnabled(enabled)
-                                }
-                            },
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = Color.White,
-                                checkedTrackColor = Primary,
-                                uncheckedThumbColor = Color.White,
-                                uncheckedTrackColor = Secondary.copy(alpha = 0.3f)
-                            )
+            // リマインネット設定（アカウント作成済みの場合のみ表示）
+            if (userId != null) {
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = CardBackgroundColor),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(20.dp)
+                    ) {
+                        Text(
+                            text = "リマインネット",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = Secondary,
+                            fontWeight = FontWeight.Bold
                         )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // リマインネット投稿設定
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text(
+                                    text = "こうかいする",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = Secondary,
+                                    fontWeight = FontWeight.Medium
+                                )
+                                Text(
+                                    text = "おしえたことばをみんなにみせる",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = Secondary.copy(alpha = 0.7f)
+                                )
+                            }
+
+                            Switch(
+                                checked = settings.isRemindNetSharingEnabled,
+                                onCheckedChange = { enabled ->
+                                    viewModel.updateRemindNetSharingEnabled(enabled)
+                                },
+                                colors = SwitchDefaults.colors(
+                                    checkedThumbColor = Color.White,
+                                    checkedTrackColor = Primary,
+                                    uncheckedThumbColor = Color.White,
+                                    uncheckedTrackColor = Secondary.copy(alpha = 0.3f)
+                                )
+                            )
+                        }
                     }
                 }
             }
