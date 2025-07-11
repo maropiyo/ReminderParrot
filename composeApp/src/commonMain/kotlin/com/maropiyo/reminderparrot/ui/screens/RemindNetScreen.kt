@@ -313,7 +313,6 @@ private fun RemindNetPostCard(
                 if (!isMyPost && !isAlreadySent) {
                     CircularBellButton(
                         onClick = { onBellClick(post) },
-                        isAlreadySent = isAlreadySent,
                         modifier = Modifier.size(32.dp)
                     )
                 }
@@ -327,10 +326,9 @@ private fun RemindNetPostCard(
  * 軽やかなアニメーションと影効果でスタイリッシュに
  */
 @Composable
-private fun CircularBellButton(onClick: () -> Unit, isAlreadySent: Boolean, modifier: Modifier = Modifier) {
+private fun CircularBellButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
     // プレス時のスケールアニメーション
     var isPressed by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
 
     val scale by animateFloatAsState(
         targetValue = if (isPressed) 0.9f else 1f,
@@ -338,30 +336,27 @@ private fun CircularBellButton(onClick: () -> Unit, isAlreadySent: Boolean, modi
         label = "scale"
     )
 
-    // カラーアニメーション
-    val backgroundColor by animateColorAsState(
-        targetValue = if (isAlreadySent) Secondary else ParrotYellow,
-        animationSpec = tween(250),
-        label = "background"
-    )
+    // プレス状態を自動的にリセット
+    LaunchedEffect(isPressed) {
+        if (isPressed) {
+            delay(100)
+            isPressed = false
+        }
+    }
 
     Box(
         modifier = modifier
             .scale(scale)
             .shadow(
-                elevation = if (isAlreadySent) 2.dp else 6.dp,
+                elevation = 6.dp,
                 shape = CircleShape,
                 ambientColor = ParrotYellow.copy(alpha = 0.2f)
             )
             .clip(CircleShape)
-            .background(backgroundColor)
-            .clickable(enabled = !isAlreadySent) {
+            .background(ParrotYellow)
+            .clickable {
                 isPressed = true
                 onClick()
-                scope.launch {
-                    delay(100)
-                    isPressed = false
-                }
             },
         contentAlignment = Alignment.Center
     ) {
