@@ -20,7 +20,9 @@ class CreateRemindNetPostUseCase(
     ): Result<RemindNetPost> {
         // SupabaseAuthで匿名認証ユーザーIDを取得
         val userId = authService.getUserId()
+        // パラメータで指定されていない場合はSupabaseAuthから取得
+        val actualUserName = userName ?: authService.getDisplayName()
 
-        return remindNetRepository.createPost(reminderId, reminderText, forgetAt, userId, userName)
+        return remindNetRepository.createPost(reminderId, reminderText, forgetAt, userId, actualUserName)
     }
 }

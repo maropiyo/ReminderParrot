@@ -44,10 +44,7 @@ class SettingsViewModel(
      */
     private fun loadSettings() {
         viewModelScope.launch {
-            // デバッグ用ログ
-            println("SettingsViewModel: loadSettings called")
             val settings = getUserSettingsUseCase()
-            println("  loaded settings: isDebugFastMemoryEnabled = ${settings.isDebugFastMemoryEnabled}")
             _settings.value = settings
         }
     }
@@ -69,10 +66,12 @@ class SettingsViewModel(
     private fun loadDisplayName() {
         viewModelScope.launch {
             try {
+                // 認証を確実に完了させてからDisplayNameを取得
+                authService.getUserId() // 匿名認証を自動実行
                 val name = authService.getDisplayName()
                 _displayName.value = name
             } catch (e: Exception) {
-                println("SettingsViewModel: 表示名の読み込みエラー - $e")
+                // エラーは無視してnullのまま
             }
         }
     }
@@ -86,7 +85,7 @@ class SettingsViewModel(
                 authService.updateDisplayName(name)
                 _displayName.value = name
             } catch (e: Exception) {
-                println("SettingsViewModel: 表示名の更新エラー - $e")
+                // 表示名の更新エラーは無視
             }
         }
     }
@@ -99,16 +98,9 @@ class SettingsViewModel(
         if (!BuildConfig.isDebug) return
 
         viewModelScope.launch {
-            // デバッグ用ログ
-            println("SettingsViewModel: updateDebugFastMemoryEnabled called")
-            println("  current value: ${_settings.value.isDebugFastMemoryEnabled}")
-            println("  new value: $enabled")
-
             val newSettings = _settings.value.copy(isDebugFastMemoryEnabled = enabled)
             saveUserSettingsUseCase(newSettings)
             _settings.value = newSettings
-
-            println("  saved and updated state")
         }
     }
 
@@ -132,10 +124,10 @@ class SettingsViewModel(
     private fun loadUserId() {
         viewModelScope.launch {
             try {
-                val currentUserId = authService.getCurrentUserId()
-                _userId.value = currentUserId
+                // 認証を確実に完了させてからユーザーIDを取得
+                val userId = authService.getUserId() // 匿名認証を自動実行
+                _userId.value = userId
             } catch (e: Exception) {
-                println("SettingsViewModel: ユーザーID取得エラー: ${e.message}")
                 _userId.value = null
             }
         }
@@ -169,19 +161,16 @@ class SettingsViewModel(
                 _accountCreationError.value = null
 
                 // 匿名認証でアカウントを作成
-                val userId = authService.getUserId()
-                println("SettingsViewModel: アカウント作成成功 - UserId: $userId")
+                authService.getUserId()
 
                 // 初期名を設定
                 authService.updateDisplayName("ひよっこインコ")
-                println("SettingsViewModel: 初期名を設定 - ひよっこインコ")
 
                 // ユーザーIDを再読み込み
                 loadUserId()
                 // 表示名を再読み込み
                 loadDisplayName()
             } catch (e: Exception) {
-                println("SettingsViewModel: アカウント作成エラー: ${e.message}")
                 val errorMessage = when {
                     e.message?.contains("anonymous_provider_disabled") == true ->
                         "アカウントのせっていがひつようです。\nかんりしゃにれんらくしてください。"
@@ -207,14 +196,13 @@ class SettingsViewModel(
         viewModelScope.launch {
             try {
                 authService.logout()
-                println("SettingsViewModel: ログアウト成功")
 
                 // 状態をクリア
                 _userId.value = null
                 _displayName.value = null
                 _accountCreationError.value = null
             } catch (e: Exception) {
-                println("SettingsViewModel: ログアウトエラー: ${e.message}")
+                // ログアウトエラーは無視
             }
         }
     }
