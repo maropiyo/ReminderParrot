@@ -1,8 +1,9 @@
 package com.maropiyo.reminderparrot.ui.screens
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,7 +21,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -46,6 +46,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -59,6 +61,7 @@ import com.maropiyo.reminderparrot.ui.theme.Primary
 import com.maropiyo.reminderparrot.ui.theme.Secondary
 import com.maropiyo.reminderparrot.ui.theme.Shapes
 import com.maropiyo.reminderparrot.ui.theme.White
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
@@ -304,11 +307,10 @@ private fun RemindNetPostCard(
 
                 Spacer(modifier = Modifier.width(8.dp))
 
-                // ベルマークボタン（自分の投稿以外のみ表示）
-                if (!isMyPost) {
+                // ベルマークボタン（自分の投稿以外かつ未送信のみ表示）
+                if (!isMyPost && !isAlreadySent) {
                     CircularBellButton(
                         onClick = { onBellClick(post) },
-                        isAlreadySent = isAlreadySent,
                         modifier = Modifier.size(32.dp)
                     )
                 }
@@ -318,31 +320,48 @@ private fun RemindNetPostCard(
 }
 
 /**
- * 円形のベルボタン
- * リマインダーカードのチェックマークデザインと統一
- * 送信済みの場合はチェックマークを表示して非活性化
+ * シンプルで可愛い円形ベルボタン
+ * 軽やかなアニメーションと影効果でスタイリッシュに
  */
 @Composable
-private fun CircularBellButton(onClick: () -> Unit, isAlreadySent: Boolean, modifier: Modifier = Modifier) {
+private fun CircularBellButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    // プレス時のスケールアニメーション
+    var isPressed by remember { mutableStateOf(false) }
+
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.9f else 1f,
+        animationSpec = spring(dampingRatio = 0.6f),
+        label = "scale"
+    )
+
+    // プレス状態を自動的にリセット
+    LaunchedEffect(isPressed) {
+        if (isPressed) {
+            delay(100)
+            isPressed = false
+        }
+    }
+
     Box(
         modifier = modifier
+            .scale(scale)
+            .shadow(
+                elevation = 6.dp,
+                shape = CircleShape,
+                ambientColor = ParrotYellow.copy(alpha = 0.2f)
+            )
             .clip(CircleShape)
-            .border(
-                width = 2.dp,
-                color = if (isAlreadySent) Secondary else ParrotYellow,
-                shape = CircleShape
-            )
-            .background(
-                color = if (isAlreadySent) Secondary else White,
-                shape = CircleShape
-            )
-            .clickable(enabled = !isAlreadySent) { onClick() },
+            .background(ParrotYellow)
+            .clickable {
+                isPressed = true
+                onClick()
+            },
         contentAlignment = Alignment.Center
     ) {
         Icon(
-            imageVector = if (isAlreadySent) Icons.Default.Check else Icons.Default.Notifications,
-            contentDescription = if (isAlreadySent) "送信済み" else "リマインドを送る",
-            tint = if (isAlreadySent) White else ParrotYellow,
+            imageVector = Icons.Default.Notifications,
+            contentDescription = "リマインドを送る",
+            tint = White,
             modifier = Modifier.size(18.dp)
         )
     }
