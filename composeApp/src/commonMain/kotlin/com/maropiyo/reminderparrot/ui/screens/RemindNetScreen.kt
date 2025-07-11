@@ -53,6 +53,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.maropiyo.reminderparrot.domain.entity.RemindNetPost
+import com.maropiyo.reminderparrot.domain.usecase.RegisterPushNotificationTokenUseCase
 import com.maropiyo.reminderparrot.presentation.viewmodel.RemindNetViewModel
 import com.maropiyo.reminderparrot.ui.components.AccountCreationBottomSheet
 import com.maropiyo.reminderparrot.ui.theme.Background
@@ -79,6 +80,9 @@ fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
     val accountCreationError by remindNetViewModel.accountCreationError.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+
+    // プッシュ通知トークン登録
+    val registerPushNotificationToken = koinInject<RegisterPushNotificationTokenUseCase>()
 
     // アカウント作成ボトムシートの状態
     var showAccountCreationBottomSheet by remember { mutableStateOf(false) }
@@ -109,6 +113,11 @@ fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
             if (showAccountCreationBottomSheet) {
                 accountCreationSheetState.hide()
                 showAccountCreationBottomSheet = false
+
+                // アカウント作成後にプッシュ通知トークンを登録
+                scope.launch {
+                    registerPushNotificationToken()
+                }
             }
         }
     }
