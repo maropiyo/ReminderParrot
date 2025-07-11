@@ -37,6 +37,9 @@ fun MainScreen() {
     // プッシュ通知トークン登録
     val registerPushNotificationToken = koinInject<RegisterPushNotificationTokenUseCase>()
 
+    // 認証サービス
+    val authService = koinInject<com.maropiyo.reminderparrot.domain.service.AuthService>()
+
     // データベース初期化
     val databaseInitializer = koinInject<DatabaseInitializer>()
 
@@ -47,8 +50,12 @@ fun MainScreen() {
             databaseInitializer.initialize()
             // その後通知権限を要求
             requestNotificationPermission()
-            // プッシュ通知トークンを登録
-            registerPushNotificationToken()
+
+            // ユーザー認証が完了している場合のみプッシュ通知トークンを登録
+            val currentUserId = authService.getCurrentUserId()
+            if (currentUserId != null) {
+                registerPushNotificationToken()
+            }
         }
     }
 

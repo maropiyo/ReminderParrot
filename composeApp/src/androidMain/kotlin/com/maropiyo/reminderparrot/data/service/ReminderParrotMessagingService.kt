@@ -11,11 +11,21 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.maropiyo.reminderparrot.MainActivity
 import com.maropiyo.reminderparrot.R
+import com.maropiyo.reminderparrot.domain.entity.Platform
+import com.maropiyo.reminderparrot.domain.repository.RemindNetRepository
+import com.maropiyo.reminderparrot.domain.service.AuthService
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 
 /**
  * FCMプッシュ通知を受信するサービス
  */
 class ReminderParrotMessagingService : FirebaseMessagingService() {
+
+    private val authService: AuthService by inject()
+    private val remindNetRepository: RemindNetRepository by inject()
 
     companion object {
         private const val CHANNEL_ID = "remindnet_notification_channel"
@@ -31,7 +41,29 @@ class ReminderParrotMessagingService : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
         super.onNewToken(token)
         println("FCM新しいトークン: $token")
-        // TODO: 新しいトークンをSupabaseに送信
+
+        // 新しいトークンをSupabaseに送信
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val userId = authService.getCurrentUserId()
+                if (userId != null) {
+                    val result = remindNetRepository.registerPushNotificationToken(
+                        userId = userId,
+                        token = token,
+                        platform = Platform.ANDROID
+                    )
+                    if (result.isSuccess) {
+                        println("FCMトークン登録成功")
+                    } else {
+                        println("FCMトークン登録失敗: ${result.exceptionOrNull()}")
+                    }
+                } else {
+                    println("ユーザーが未認証のためFCMトークンを登録できません")
+                }
+            } catch (e: Exception) {
+                println("FCMトークン登録エラー: $e")
+            }
+        }
     }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
