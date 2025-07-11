@@ -96,7 +96,7 @@ fun EditReminderBottomSheet(
                 isUpdateEnabled = reminderText.isNotBlank() && reminderText != reminder.text
             )
 
-            // リマインコの画像
+            // インコの画像
             Image(
                 painter = painterResource(Res.drawable.reminko_raising_hand),
                 contentDescription = "Parrot",

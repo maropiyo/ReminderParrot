@@ -77,7 +77,7 @@ class SettingsViewModel(
     }
 
     /**
-     * リマインコの名前を更新
+     * インコの名前を更新
      */
     fun updateParrotName(name: String) {
         viewModelScope.launch {

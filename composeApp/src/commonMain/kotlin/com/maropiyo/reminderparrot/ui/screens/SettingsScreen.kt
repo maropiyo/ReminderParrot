@@ -118,7 +118,7 @@ fun SettingsScreen() {
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // リマインコじょうほうカード
+            // インコじょうほうカード
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
@@ -129,7 +129,7 @@ fun SettingsScreen() {
                     modifier = Modifier.padding(20.dp)
                 ) {
                     Text(
-                        text = "リマインコじょうほう",
+                        text = "インコじょうほう",
                         style = MaterialTheme.typography.titleMedium,
                         color = Secondary,
                         fontWeight = FontWeight.Bold
@@ -137,7 +137,7 @@ fun SettingsScreen() {
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // リマインコの名前設定
+                    // インコの名前設定
                     Column {
                         Text(
                             text = "なまえ",
