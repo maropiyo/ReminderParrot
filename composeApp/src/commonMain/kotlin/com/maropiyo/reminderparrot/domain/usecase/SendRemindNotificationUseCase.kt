@@ -1,6 +1,6 @@
 package com.maropiyo.reminderparrot.domain.usecase
 
-import com.maropiyo.reminderparrot.data.local.NotificationHistoryLocalDataSource
+import com.maropiyo.reminderparrot.data.datasource.local.NotificationHistoryLocalDataSource
 import com.maropiyo.reminderparrot.domain.entity.RemindNetNotification
 import com.maropiyo.reminderparrot.domain.entity.RemindNetPost
 import com.maropiyo.reminderparrot.domain.repository.RemindNetRepository

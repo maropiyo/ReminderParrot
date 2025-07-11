@@ -1,4 +1,4 @@
-package com.maropiyo.reminderparrot.data.remote
+package com.maropiyo.reminderparrot.data.datasource.remote
 
 import com.maropiyo.reminderparrot.data.mapper.ReminderMapper
 import com.maropiyo.reminderparrot.data.model.ReminderDto

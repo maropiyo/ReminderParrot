@@ -1,7 +1,7 @@
 package com.maropiyo.reminderparrot.di
 
 import com.maropiyo.reminderparrot.config.SupabaseConfig
-import com.maropiyo.reminderparrot.data.remote.ReminderRemoteDataSource
+import com.maropiyo.reminderparrot.data.datasource.remote.ReminderRemoteDataSource
 import com.maropiyo.reminderparrot.data.service.AuthServiceImpl
 import com.maropiyo.reminderparrot.domain.service.AuthService
 import io.github.jan.supabase.auth.Auth

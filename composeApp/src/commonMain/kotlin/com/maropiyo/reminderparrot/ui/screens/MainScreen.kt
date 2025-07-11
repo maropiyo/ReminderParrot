@@ -14,7 +14,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.maropiyo.reminderparrot.data.local.DatabaseInitializer
+import com.maropiyo.reminderparrot.data.database.DatabaseInitializer
 import com.maropiyo.reminderparrot.domain.usecase.RegisterPushNotificationTokenUseCase
 import com.maropiyo.reminderparrot.domain.usecase.RequestNotificationPermissionUseCase
 import com.maropiyo.reminderparrot.ui.navigation.BottomNavigation

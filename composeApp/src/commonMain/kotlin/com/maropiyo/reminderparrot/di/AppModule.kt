@@ -1,10 +1,10 @@
 package com.maropiyo.reminderparrot.di
 
+import com.maropiyo.reminderparrot.data.database.DatabaseInitializer
+import com.maropiyo.reminderparrot.data.datasource.local.NotificationHistoryLocalDataSource
+import com.maropiyo.reminderparrot.data.datasource.local.ParrotLocalDataSource
+import com.maropiyo.reminderparrot.data.datasource.local.ReminderLocalDataSource
 import com.maropiyo.reminderparrot.data.datasource.remote.RemindNetRemoteDataSource
-import com.maropiyo.reminderparrot.data.local.DatabaseInitializer
-import com.maropiyo.reminderparrot.data.local.NotificationHistoryLocalDataSource
-import com.maropiyo.reminderparrot.data.local.ParrotLocalDataSource
-import com.maropiyo.reminderparrot.data.local.ReminderLocalDataSource
 import com.maropiyo.reminderparrot.data.mapper.ParrotMapper
 import com.maropiyo.reminderparrot.data.mapper.ReminderMapper
 import com.maropiyo.reminderparrot.data.repository.ParrotRepositoryImpl

@@ -1,5 +1,6 @@
-package com.maropiyo.reminderparrot.data.local
+package com.maropiyo.reminderparrot.data.database
 
+import com.maropiyo.reminderparrot.data.datasource.local.ParrotLocalDataSource
 import com.maropiyo.reminderparrot.domain.entity.Parrot
 
 /**
