@@ -5,6 +5,7 @@ import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 
@@ -42,8 +43,34 @@ class AuthServiceImpl(
     }
 
     override suspend fun getDisplayName(): String? {
+        // 最新のユーザー情報を取得するために、セッションを更新
+        try {
+            supabaseClient.auth.refreshCurrentSession()
+        } catch (e: Exception) {
+            // セッション更新失敗は無視して継続
+        }
+
         val currentUser = supabaseClient.auth.currentUserOrNull()
-        return currentUser?.userMetadata?.get("display_name") as? String
+
+        // JsonObjectからdisplay_nameを取得
+        return try {
+            val userMetadata = currentUser?.userMetadata
+            if (userMetadata != null) {
+                // JsonObjectからJsonPrimitiveを取得し、文字列として変換
+                val displayNameElement = userMetadata["display_name"]
+
+                // JsonPrimitiveの場合は文字列として取得
+                if (displayNameElement is JsonPrimitive && displayNameElement.isString) {
+                    displayNameElement.content
+                } else {
+                    null
+                }
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            null
+        }
     }
 
     override suspend fun updateDisplayName(displayName: String) {
