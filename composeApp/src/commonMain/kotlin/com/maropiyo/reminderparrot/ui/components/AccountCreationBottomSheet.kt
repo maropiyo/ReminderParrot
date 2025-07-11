@@ -70,10 +70,10 @@ fun AccountCreationBottomSheet(
                     .padding(top = 104.dp)
             )
 
-            // リマインコの画像
+            // インコの画像
             Image(
                 painter = painterResource(Res.drawable.reminko_raising_hand),
-                contentDescription = "リマインコ",
+                contentDescription = "インコ",
                 modifier = Modifier
                     .size(128.dp)
                     .align(Alignment.TopCenter),
@@ -117,7 +117,7 @@ private fun AccountCreationCard(
 
             // 説明テキスト
             Text(
-                text = "リマインネットはリマインコどうしで\nことばをきょうゆうするきのうだよ！",
+                text = "リマインネットはインコどうしで\nことばをきょうゆうするきのうだよ！",
                 color = Secondary.copy(alpha = 0.8f),
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,

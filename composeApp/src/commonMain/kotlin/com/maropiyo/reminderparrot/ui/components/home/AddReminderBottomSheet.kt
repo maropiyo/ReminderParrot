@@ -89,7 +89,7 @@ fun AddReminderBottomSheet(
                 currentReminderCount = currentReminderCount
             )
 
-            // リマインコの画像
+            // インコの画像
             Image(
                 painter = painterResource(Res.drawable.reminko_raising_hand),
                 contentDescription = "Parrot",

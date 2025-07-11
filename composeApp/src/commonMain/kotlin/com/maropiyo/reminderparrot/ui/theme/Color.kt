@@ -2,7 +2,7 @@ package com.maropiyo.reminderparrot.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// リマインコの色
+// インコの色
 val ParrotYellow = Color(0xFFFFD900)
 val ParrotOrange = Color(0xFFFF8000)
 val ParrotWhite = Color(0xFFFFFFFF)

@@ -253,10 +253,10 @@ private fun RemindNetPostCard(
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // リマインコアイコン
+                // インコアイコン
                 Image(
                     painter = painterResource(Res.drawable.reminko_face),
-                    contentDescription = "リマインコ",
+                    contentDescription = "インコ",
                     modifier =
                     Modifier
                         .size(32.dp)
