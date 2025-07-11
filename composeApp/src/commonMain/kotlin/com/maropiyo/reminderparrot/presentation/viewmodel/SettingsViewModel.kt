@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 
 /**
  * 設定画面のViewModel
@@ -101,7 +102,7 @@ class SettingsViewModel(
         if (_isUpdatingParrotName.value) return
 
         // クールダウン期間中は処理しない
-        val currentTime = System.currentTimeMillis()
+        val currentTime = Clock.System.now().toEpochMilliseconds()
         if (currentTime - lastNameUpdateTime < NAME_UPDATE_COOLDOWN_MS) {
             val remainingSeconds = ((NAME_UPDATE_COOLDOWN_MS - (currentTime - lastNameUpdateTime)) / 1000L).toInt() + 1
             _nameUpdateError.value = "${remainingSeconds}びょうまってからもういちどおためしください。"
