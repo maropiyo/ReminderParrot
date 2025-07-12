@@ -17,11 +17,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -38,6 +44,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -81,6 +88,22 @@ fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
+    // リスト表示用のスクロール状態
+    val listState = rememberLazyListState()
+
+    // ユーザーの手動スクロール状態を管理
+    var isUserScrolling by remember { mutableStateOf(false) }
+    var lastPostCount by remember { mutableStateOf(0) }
+    var newPostNotificationCount by remember { mutableStateOf(0) }
+    var showNewPostNotification by remember { mutableStateOf(false) }
+
+    // ユーザーがスクロール中かどうかを判定
+    val isAtTop by remember {
+        derivedStateOf {
+            listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset == 0
+        }
+    }
+
     // プッシュ通知トークン登録
     val registerPushNotificationToken = koinInject<RegisterPushNotificationTokenUseCase>()
 
@@ -94,6 +117,58 @@ fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
     // 画面に遷移した時に投稿を再取得
     LaunchedEffect(Unit) {
         remindNetViewModel.onScreenEntered()
+    }
+
+    // ユーザーがスクロール位置を変更したことを検出
+    LaunchedEffect(listState.isScrollInProgress) {
+        if (listState.isScrollInProgress && !isAtTop) {
+            isUserScrolling = true
+        }
+    }
+
+    // 一定時間後にユーザースクロール状態をリセット
+    LaunchedEffect(isUserScrolling) {
+        if (isUserScrolling) {
+            kotlinx.coroutines.delay(3000) // 3秒後にリセット
+            if (isAtTop) {
+                isUserScrolling = false
+            }
+        }
+    }
+
+    // ユーザーが手動で一番上にスクロールした時に通知ボタンを非表示
+    LaunchedEffect(isAtTop) {
+        if (isAtTop && showNewPostNotification) {
+            showNewPostNotification = false
+            newPostNotificationCount = 0
+        }
+    }
+
+    // 投稿リストに新しい投稿が追加された時のスクロール制御
+    LaunchedEffect(state.posts.size) {
+        val currentPostCount = state.posts.size
+
+        if (lastPostCount > 0 && currentPostCount > lastPostCount) {
+            val newPostCount = currentPostCount - lastPostCount
+
+            when {
+                // ユーザーがスクロール中の場合は自動スクロールしない
+                isUserScrolling -> {
+                    // 何もしない（ユーザーの読書体験を尊重）
+                }
+                // 大量の新規投稿（10件以上）の場合は通知のみ
+                newPostCount >= 10 -> {
+                    newPostNotificationCount = newPostCount
+                    showNewPostNotification = true
+                }
+                // 少数の新規投稿の場合は自動スクロール
+                currentPostCount > 0 -> {
+                    listState.animateScrollToItem(0)
+                }
+            }
+        }
+
+        lastPostCount = currentPostCount
     }
 
     // エラー表示
@@ -190,6 +265,7 @@ fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
             } else {
                 // 投稿リスト
                 LazyColumn(
+                    state = listState,
                     modifier =
                     Modifier
                         .fillMaxSize()
@@ -207,6 +283,28 @@ fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
                             isMyPost = state.myPostIds.contains(post.id)
                         )
                     }
+                }
+            }
+
+            // 新規投稿通知フローティングボタン
+            if (showNewPostNotification) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .padding(top = 16.dp),
+                    contentAlignment = Alignment.TopCenter
+                ) {
+                    NewPostNotificationButton(
+                        count = newPostNotificationCount,
+                        onClick = {
+                            scope.launch {
+                                listState.animateScrollToItem(0)
+                                showNewPostNotification = false
+                                newPostNotificationCount = 0
+                            }
+                        }
+                    )
                 }
             }
         }
@@ -229,6 +327,40 @@ fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
                 errorMessage = accountCreationError
             )
         }
+    }
+}
+
+/**
+ * 新規投稿通知フローティングボタン
+ */
+@Composable
+private fun NewPostNotificationButton(count: Int, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Button(
+        onClick = onClick,
+        modifier = modifier
+            .wrapContentSize()
+            .shadow(
+                elevation = 8.dp,
+                shape = RoundedCornerShape(24.dp)
+            ),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Primary,
+            contentColor = White
+        ),
+        shape = RoundedCornerShape(24.dp),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        Icon(
+            imageVector = Icons.Default.KeyboardArrowUp,
+            contentDescription = "新しい投稿を見る",
+            modifier = Modifier.size(18.dp)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = "${count}件の新しい投稿",
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Medium
+        )
     }
 }
 
