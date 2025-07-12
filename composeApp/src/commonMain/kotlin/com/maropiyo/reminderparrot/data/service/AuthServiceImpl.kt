@@ -79,13 +79,13 @@ class AuthServiceImpl(
 
         try {
             println("AuthServiceImpl: 名前変更開始 - '$displayName' (ユーザーID: ${currentUser.id})")
-            
+
             supabaseClient.auth.updateUser {
                 data = buildJsonObject {
                     put("display_name", displayName)
                 }
             }
-            
+
             println("AuthServiceImpl: 名前変更成功 - '$displayName'")
         } catch (e: Exception) {
             println("AuthServiceImpl: 名前変更エラー - ${e.message}")

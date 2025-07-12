@@ -116,16 +116,16 @@ class SettingsViewModel(
                 authService.updateDisplayName(name)
                 _displayName.value = name
                 lastNameUpdateTime = currentTime
-                
+
                 // クールダウン期間開始
                 _isNameUpdateCooldown.value = true
                 startCooldownTimer()
-                
+
                 println("SettingsViewModel: 名前更新完了 - '$name'")
             } catch (e: Exception) {
                 println("SettingsViewModel: 名前更新エラー - ${e.message}")
                 println("SettingsViewModel: エラー詳細 - $e")
-                
+
                 // エラーメッセージを設定
                 val errorMessage = when {
                     e.message?.contains("over_request_rate_limit") == true ->
@@ -136,7 +136,7 @@ class SettingsViewModel(
                         "なまえのへんこうにしっぱいしました。\nもういちどおためしください。"
                 }
                 _nameUpdateError.value = errorMessage
-                
+
                 // エラーが発生した場合は表示名を元に戻す
                 loadDisplayName()
             } finally {
