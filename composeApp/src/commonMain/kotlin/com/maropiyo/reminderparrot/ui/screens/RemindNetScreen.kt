@@ -39,6 +39,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -85,6 +86,17 @@ fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
     // リスト表示用のスクロール状態
     val listState = rememberLazyListState()
 
+    // ユーザーの手動スクロール状態を管理
+    var isUserScrolling by remember { mutableStateOf(false) }
+    var lastPostCount by remember { mutableStateOf(0) }
+
+    // ユーザーがスクロール中かどうかを判定
+    val isAtTop by remember {
+        derivedStateOf {
+            listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset == 0
+        }
+    }
+
     // プッシュ通知トークン登録
     val registerPushNotificationToken = koinInject<RegisterPushNotificationTokenUseCase>()
 
@@ -100,11 +112,47 @@ fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
         remindNetViewModel.onScreenEntered()
     }
 
-    // 投稿リストに新しい投稿が追加された時に一番上にスクロール
-    LaunchedEffect(state.posts.size) {
-        if (state.posts.isNotEmpty()) {
-            listState.animateScrollToItem(0)
+    // ユーザーがスクロール位置を変更したことを検出
+    LaunchedEffect(listState.isScrollInProgress) {
+        if (listState.isScrollInProgress && !isAtTop) {
+            isUserScrolling = true
         }
+    }
+
+    // 一定時間後にユーザースクロール状態をリセット
+    LaunchedEffect(isUserScrolling) {
+        if (isUserScrolling) {
+            kotlinx.coroutines.delay(3000) // 3秒後にリセット
+            if (isAtTop) {
+                isUserScrolling = false
+            }
+        }
+    }
+
+    // 投稿リストに新しい投稿が追加された時のスクロール制御
+    LaunchedEffect(state.posts.size) {
+        val currentPostCount = state.posts.size
+
+        if (lastPostCount > 0 && currentPostCount > lastPostCount) {
+            val newPostCount = currentPostCount - lastPostCount
+
+            when {
+                // ユーザーがスクロール中の場合は自動スクロールしない
+                isUserScrolling -> {
+                    // 何もしない（ユーザーの読書体験を尊重）
+                }
+                // 大量の新規投稿（10件以上）の場合は通知のみ
+                newPostCount >= 10 -> {
+                    snackbarHostState.showSnackbar("${newPostCount}件の新しい投稿があります")
+                }
+                // 少数の新規投稿の場合は自動スクロール
+                currentPostCount > 0 -> {
+                    listState.animateScrollToItem(0)
+                }
+            }
+        }
+
+        lastPostCount = currentPostCount
     }
 
     // エラー表示
