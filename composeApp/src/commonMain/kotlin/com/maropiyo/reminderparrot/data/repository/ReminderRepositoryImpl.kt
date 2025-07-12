@@ -1,7 +1,6 @@
 package com.maropiyo.reminderparrot.data.repository
 
 import com.maropiyo.reminderparrot.data.datasource.local.ReminderLocalDataSource
-import com.maropiyo.reminderparrot.data.datasource.remote.ReminderRemoteDataSource
 import com.maropiyo.reminderparrot.domain.entity.Reminder
 import com.maropiyo.reminderparrot.domain.repository.ReminderRepository
 import kotlinx.datetime.Instant
@@ -10,11 +9,9 @@ import kotlinx.datetime.Instant
  * リマインダーリポジトリの実装
  *
  * @param localDataSource ローカルデータソース
- * @property remoteDataSource リモートデータソース
  */
 class ReminderRepositoryImpl(
-    private val localDataSource: ReminderLocalDataSource,
-    private val remoteDataSource: ReminderRemoteDataSource
+    private val localDataSource: ReminderLocalDataSource
 ) : ReminderRepository {
     /**
      * リマインダーを作成する

@@ -77,7 +77,7 @@ val appModule =
         single<SignInAnonymouslyUseCase> { SignInAnonymouslyUseCase(get()) }
 
         // Repository
-        single<ReminderRepository> { ReminderRepositoryImpl(get(), get()) }
+        single<ReminderRepository> { ReminderRepositoryImpl(get()) }
         single<ParrotRepository> { ParrotRepositoryImpl(get()) }
         single<RemindNetRepository> { RemindNetRepositoryImpl(get()) }
 
