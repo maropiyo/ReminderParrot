@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Notifications
@@ -81,6 +82,9 @@ fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
+    // リスト表示用のスクロール状態
+    val listState = rememberLazyListState()
+
     // プッシュ通知トークン登録
     val registerPushNotificationToken = koinInject<RegisterPushNotificationTokenUseCase>()
 
@@ -94,6 +98,13 @@ fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
     // 画面に遷移した時に投稿を再取得
     LaunchedEffect(Unit) {
         remindNetViewModel.onScreenEntered()
+    }
+
+    // 投稿リストが更新された時に一番上にスクロール
+    LaunchedEffect(state.posts) {
+        if (state.posts.isNotEmpty()) {
+            listState.animateScrollToItem(0)
+        }
     }
 
     // エラー表示
@@ -190,6 +201,7 @@ fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
             } else {
                 // 投稿リスト
                 LazyColumn(
+                    state = listState,
                     modifier =
                     Modifier
                         .fillMaxSize()
