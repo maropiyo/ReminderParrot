@@ -66,18 +66,10 @@ class ReminderRepositoryImplTest {
     }
 
     /**
-     * テスト用のリモートデータソースのテストダブル
-     */
-    private class TestReminderRemoteDataSource {
-        // テスト用の実装（現在は何もしない）
-    }
-
-    /**
      * テスト用のリポジトリ実装
      */
     private class TestReminderRepositoryImpl(
-        private val localDataSource: TestReminderLocalDataSource,
-        private val remoteDataSource: TestReminderRemoteDataSource
+        private val localDataSource: TestReminderLocalDataSource
     ) {
         suspend fun createReminder(reminder: Reminder): Result<Reminder> {
             return try {
@@ -108,8 +100,7 @@ class ReminderRepositoryImplTest {
     }
 
     private val testLocalDataSource = TestReminderLocalDataSource()
-    private val testRemoteDataSource = TestReminderRemoteDataSource()
-    private val repository = TestReminderRepositoryImpl(testLocalDataSource, testRemoteDataSource)
+    private val repository = TestReminderRepositoryImpl(testLocalDataSource)
 
     /**
      * リマインダー作成が成功する場合のテスト
