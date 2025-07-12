@@ -100,8 +100,8 @@ fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
         remindNetViewModel.onScreenEntered()
     }
 
-    // 投稿リストが更新された時に一番上にスクロール
-    LaunchedEffect(state.posts) {
+    // 投稿リストに新しい投稿が追加された時に一番上にスクロール
+    LaunchedEffect(state.posts.size) {
         if (state.posts.isNotEmpty()) {
             listState.animateScrollToItem(0)
         }
