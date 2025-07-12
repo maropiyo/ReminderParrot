@@ -19,3 +19,6 @@ iosApp/Configuration/Config.xcconfig
 !*.xcodeproj/project.xcworkspace/
 !*.xcworkspace/contents.xcworkspacedata
 **/xcshareddata/WorkspaceSettings.xcsettings
+
+# Claude Code local settings
+.claude/settings.local.json
