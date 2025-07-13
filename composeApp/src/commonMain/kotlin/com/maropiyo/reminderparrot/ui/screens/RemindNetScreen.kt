@@ -97,7 +97,6 @@ fun RemindNetScreen(
     val accountCreationError by remindNetViewModel.accountCreationError.collectAsState()
     val parrotState by parrotViewModel.state.collectAsState()
     val displayName by remindNetViewModel.displayName.collectAsState()
-    val isLoadingDisplayName by remindNetViewModel.isLoadingDisplayName.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
@@ -241,7 +240,6 @@ fun RemindNetScreen(
                     SimpleParrotInfoDisplay(
                         parrot = parrotState.parrot!!,
                         displayName = displayName?.takeIf { it.isNotBlank() } ?: "ひよっこインコ",
-                        isLoadingDisplayName = isLoadingDisplayName,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -838,7 +836,6 @@ private fun PostDetailCard(
 private fun SimpleParrotInfoDisplay(
     parrot: com.maropiyo.reminderparrot.domain.entity.Parrot,
     displayName: String,
-    isLoadingDisplayName: Boolean,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -867,30 +864,12 @@ private fun SimpleParrotInfoDisplay(
                 contentScale = ContentScale.Crop
             )
 
-            // 名前とレベル表示
+            // レベルと名前表示
             Column(
-                verticalArrangement = Arrangement.spacedBy(2.dp)
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                if (isLoadingDisplayName) {
-                    Box(
-                        modifier = Modifier
-                            .width(80.dp)
-                            .height(16.dp)
-                            .background(
-                                Secondary.copy(alpha = 0.2f),
-                                RoundedCornerShape(8.dp)
-                            )
-                    )
-                } else {
-                    Text(
-                        text = displayName,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium,
-                        color = Secondary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
+                // レベルと名前を横並び
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -910,32 +889,18 @@ private fun SimpleParrotInfoDisplay(
                             color = Primary
                         )
                     }
-                }
-            }
-
-            // 経験値ゲージ
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
                     Text(
-                        text = "けいけんち",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Secondary.copy(alpha = 0.7f)
-                    )
-                    Text(
-                        text = "${parrot.currentExperience}/${parrot.maxExperience}",
-                        style = MaterialTheme.typography.labelSmall,
+                        text = displayName,
+                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium,
-                        color = Secondary.copy(alpha = 0.8f)
+                        color = Secondary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
                     )
                 }
 
+                // 経験値ゲージ
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
