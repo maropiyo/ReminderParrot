@@ -31,6 +31,11 @@ interface RemindNetRepository {
     suspend fun likePost(postId: String): Result<Unit>
 
     /**
+     * 投稿を削除する
+     */
+    suspend fun deletePost(postId: String, userId: String): Result<Unit>
+
+    /**
      * リマインド通知を送信する
      */
     suspend fun sendRemindNotification(notification: RemindNetNotification): Result<Unit>

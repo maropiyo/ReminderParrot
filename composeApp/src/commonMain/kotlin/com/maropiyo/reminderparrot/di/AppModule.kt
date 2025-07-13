@@ -30,6 +30,7 @@ import com.maropiyo.reminderparrot.domain.usecase.SendRemindNotificationUseCase
 import com.maropiyo.reminderparrot.domain.usecase.SignInAnonymouslyUseCase
 import com.maropiyo.reminderparrot.domain.usecase.UpdateReminderUseCase
 import com.maropiyo.reminderparrot.domain.usecase.remindnet.CreateRemindNetPostUseCase
+import com.maropiyo.reminderparrot.domain.usecase.remindnet.DeleteRemindNetPostUseCase
 import com.maropiyo.reminderparrot.domain.usecase.remindnet.GetRemindNetPostsUseCase
 import com.maropiyo.reminderparrot.presentation.viewmodel.ParrotViewModel
 import com.maropiyo.reminderparrot.presentation.viewmodel.RemindNetViewModel
@@ -47,7 +48,7 @@ val appModule =
             ReminderListViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
         }
         single<ParrotViewModel> { ParrotViewModel(get()) }
-        single<RemindNetViewModel> { RemindNetViewModel(get(), get(), get(), get()) }
+        single<RemindNetViewModel> { RemindNetViewModel(get(), get(), get(), get(), get()) }
         single<SettingsViewModel> { SettingsViewModel(get(), get(), get()) }
 
         // UseCase
@@ -62,6 +63,7 @@ val appModule =
         single<CancelForgetNotificationUseCase> { CancelForgetNotificationUseCase(get()) }
         single<RequestNotificationPermissionUseCase> { RequestNotificationPermissionUseCase(get()) }
         single<CreateRemindNetPostUseCase> { CreateRemindNetPostUseCase(get(), get()) }
+        single<DeleteRemindNetPostUseCase> { DeleteRemindNetPostUseCase(get()) }
         single<GetRemindNetPostsUseCase> { GetRemindNetPostsUseCase(get()) }
         single<SendRemindNotificationUseCase> { SendRemindNotificationUseCase(get(), get(), get()) }
         single<RegisterPushNotificationTokenUseCase> {
