@@ -99,6 +99,24 @@ class RemindNetRemoteDataSource(
     }
 
     /**
+     * 投稿を削除する（物理削除）
+     */
+    suspend fun deletePost(postId: String, userId: String): Result<Unit> = try {
+        supabaseClient
+            .from("remind_net_posts")
+            .delete {
+                filter {
+                    eq("id", postId)
+                    eq("user_id", userId)
+                }
+            }
+
+        Result.success(Unit)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    /**
      * リマインド通知を送信する
      */
     suspend fun sendRemindNotification(notification: RemindNetNotification): Result<Unit> = try {

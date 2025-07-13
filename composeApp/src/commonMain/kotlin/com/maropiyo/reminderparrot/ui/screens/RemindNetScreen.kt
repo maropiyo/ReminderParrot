@@ -26,6 +26,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -66,6 +67,7 @@ import com.maropiyo.reminderparrot.domain.usecase.RegisterPushNotificationTokenU
 import com.maropiyo.reminderparrot.presentation.viewmodel.RemindNetViewModel
 import com.maropiyo.reminderparrot.ui.components.AccountCreationBottomSheet
 import com.maropiyo.reminderparrot.ui.theme.Background
+import com.maropiyo.reminderparrot.ui.theme.Error
 import com.maropiyo.reminderparrot.ui.theme.ParrotYellow
 import com.maropiyo.reminderparrot.ui.theme.Primary
 import com.maropiyo.reminderparrot.ui.theme.Secondary
@@ -362,6 +364,18 @@ fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
                         selectedPost = null
                     }
                 },
+                onDeleteClick = { clickedPost ->
+                    println("RemindNetScreen: 削除ボタンクリック - postId: ${clickedPost.id}")
+                    remindNetViewModel.deletePost(clickedPost.id) {
+                        println("RemindNetScreen: 削除成功コールバック実行")
+                        // 削除成功時にボトムシートを閉じる
+                        scope.launch {
+                            postDetailSheetState.hide()
+                            showPostDetailBottomSheet = false
+                            selectedPost = null
+                        }
+                    }
+                },
                 sheetState = postDetailSheetState,
                 isAlreadySent = selectedPost?.let { state.sentPostIds.contains(it.id) } ?: false,
                 isMyPost = selectedPost?.let { state.myPostIds.contains(it.id) } ?: false
@@ -562,6 +576,7 @@ private fun RemindNetPostDetailBottomSheet(
     post: RemindNetPost,
     onDismiss: () -> Unit,
     onBellClick: (RemindNetPost) -> Unit,
+    onDeleteClick: (RemindNetPost) -> Unit,
     sheetState: androidx.compose.material3.SheetState,
     isAlreadySent: Boolean,
     isMyPost: Boolean
@@ -582,6 +597,7 @@ private fun RemindNetPostDetailBottomSheet(
             PostDetailCard(
                 post = post,
                 onBellClick = onBellClick,
+                onDeleteClick = onDeleteClick,
                 isAlreadySent = isAlreadySent,
                 isMyPost = isMyPost,
                 modifier =
@@ -611,6 +627,7 @@ private fun RemindNetPostDetailBottomSheet(
 private fun PostDetailCard(
     post: RemindNetPost,
     onBellClick: (RemindNetPost) -> Unit,
+    onDeleteClick: (RemindNetPost) -> Unit,
     isAlreadySent: Boolean,
     isMyPost: Boolean,
     modifier: Modifier = Modifier
@@ -743,13 +760,51 @@ private fun PostDetailCard(
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
             } else if (isMyPost) {
-                Text(
-                    text = "あなたの投稿です",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = Secondary.copy(alpha = 0.6f),
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    // スマートな投稿者表示
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = null,
+                            tint = Secondary,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "あなたの投稿",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Secondary,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+
+                    // 編集ボトムシートスタイルの削除ボタン
+                    ElevatedButton(
+                        onClick = { onDeleteClick(post) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp),
+                        shape = Shapes.large,
+                        colors = ButtonDefaults.elevatedButtonColors(
+                            containerColor = Error,
+                            contentColor = White
+                        )
+                    ) {
+                        Text(
+                            text = "わすれる",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
             }
         }
     }

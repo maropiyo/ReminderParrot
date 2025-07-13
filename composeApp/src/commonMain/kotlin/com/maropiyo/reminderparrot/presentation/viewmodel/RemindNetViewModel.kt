@@ -6,6 +6,7 @@ import com.maropiyo.reminderparrot.data.datasource.local.NotificationHistoryLoca
 import com.maropiyo.reminderparrot.domain.entity.RemindNetPost
 import com.maropiyo.reminderparrot.domain.service.AuthService
 import com.maropiyo.reminderparrot.domain.usecase.SendRemindNotificationUseCase
+import com.maropiyo.reminderparrot.domain.usecase.remindnet.DeleteRemindNetPostUseCase
 import com.maropiyo.reminderparrot.domain.usecase.remindnet.GetRemindNetPostsUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,7 +22,8 @@ class RemindNetViewModel(
     private val getRemindNetPostsUseCase: GetRemindNetPostsUseCase,
     private val sendRemindNotificationUseCase: SendRemindNotificationUseCase,
     private val authService: AuthService,
-    private val notificationHistoryLocalDataSource: NotificationHistoryLocalDataSource
+    private val notificationHistoryLocalDataSource: NotificationHistoryLocalDataSource,
+    private val deleteRemindNetPostUseCase: DeleteRemindNetPostUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(RemindNetState())
@@ -203,6 +205,37 @@ class RemindNetViewModel(
     suspend fun isMyPost(post: RemindNetPost): Boolean {
         val currentUserId = authService.getCurrentUserId() ?: return false
         return post.userId == currentUserId
+    }
+
+    /**
+     * 投稿を削除する
+     */
+    fun deletePost(postId: String, onSuccess: () -> Unit = {}) {
+        viewModelScope.launch {
+            val currentUserId = authService.getCurrentUserId()
+
+            if (currentUserId == null) {
+                _state.update {
+                    it.copy(error = "ユーザーにんしょうがひつようです")
+                }
+                return@launch
+            }
+
+            deleteRemindNetPostUseCase(postId, currentUserId)
+                .onSuccess {
+                    // 削除成功時は少し待機してから投稿リストを再読み込み
+                    kotlinx.coroutines.delay(500) // 0.5秒待機
+                    loadPosts()
+                    onSuccess()
+                }
+                .onFailure { exception ->
+                    _state.update {
+                        it.copy(
+                            error = "とうこうのさくじょにしっぱいしました"
+                        )
+                    }
+                }
+        }
     }
 }
 
