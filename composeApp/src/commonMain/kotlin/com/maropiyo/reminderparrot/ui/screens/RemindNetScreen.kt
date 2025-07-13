@@ -31,6 +31,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -709,14 +710,14 @@ private fun PostDetailCard(
 
             // ベルボタン（自分の投稿以外かつ未送信のみ表示）
             if (!isMyPost && !isAlreadySent) {
-                Button(
+                ElevatedButton(
                     onClick = { onBellClick(post) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         .height(50.dp),
                     shape = Shapes.large,
-                    colors = ButtonDefaults.buttonColors(
+                    colors = ButtonDefaults.elevatedButtonColors(
                         containerColor = ParrotYellow,
                         contentColor = White
                     )
