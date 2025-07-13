@@ -38,9 +38,11 @@ class RemindNetViewModel(
     private val _displayName = MutableStateFlow<String?>(null)
     val displayName: StateFlow<String?> = _displayName.asStateFlow()
 
+    private val _isLoadingDisplayName = MutableStateFlow(false)
+    val isLoadingDisplayName: StateFlow<Boolean> = _isLoadingDisplayName.asStateFlow()
+
     init {
         checkAccountAndLoadPosts()
-        loadDisplayName()
     }
 
     /**
@@ -106,9 +108,13 @@ class RemindNetViewModel(
             val currentUserId = authService.getCurrentUserId()
             if (currentUserId == null) {
                 _needsAccountCreation.value = true
+                // アカウントがない場合は表示名もクリア
+                _displayName.value = null
             } else {
                 _needsAccountCreation.value = false
                 loadPosts()
+                // アカウントが確認できた後に表示名を読み込み
+                loadDisplayName()
             }
         }
     }
@@ -251,6 +257,7 @@ class RemindNetViewModel(
      */
     private fun loadDisplayName() {
         viewModelScope.launch {
+            _isLoadingDisplayName.value = true
             try {
                 val currentUserId = authService.getCurrentUserId()
                 if (currentUserId != null) {
@@ -261,6 +268,8 @@ class RemindNetViewModel(
                 }
             } catch (e: Exception) {
                 _displayName.value = null
+            } finally {
+                _isLoadingDisplayName.value = false
             }
         }
     }

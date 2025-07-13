@@ -97,6 +97,7 @@ fun RemindNetScreen(
     val accountCreationError by remindNetViewModel.accountCreationError.collectAsState()
     val parrotState by parrotViewModel.state.collectAsState()
     val displayName by remindNetViewModel.displayName.collectAsState()
+    val isLoadingDisplayName by remindNetViewModel.isLoadingDisplayName.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
@@ -235,11 +236,12 @@ fun RemindNetScreen(
                         containerColor = White
                     )
                 )
-                // インコ情報表示
-                if (parrotState.parrot != null) {
+                // インコ情報表示（アカウントがある場合のみ）
+                if (parrotState.parrot != null && !needsAccountCreation) {
                     SimpleParrotInfoDisplay(
                         parrot = parrotState.parrot!!,
                         displayName = displayName?.takeIf { it.isNotBlank() } ?: "ひよっこインコ",
+                        isLoadingDisplayName = isLoadingDisplayName,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -836,6 +838,7 @@ private fun PostDetailCard(
 private fun SimpleParrotInfoDisplay(
     parrot: com.maropiyo.reminderparrot.domain.entity.Parrot,
     displayName: String,
+    isLoadingDisplayName: Boolean,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -868,14 +871,26 @@ private fun SimpleParrotInfoDisplay(
             Column(
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
-                Text(
-                    text = displayName,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium,
-                    color = Secondary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+                if (isLoadingDisplayName) {
+                    Box(
+                        modifier = Modifier
+                            .width(80.dp)
+                            .height(16.dp)
+                            .background(
+                                Secondary.copy(alpha = 0.2f),
+                                RoundedCornerShape(8.dp)
+                            )
+                    )
+                } else {
+                    Text(
+                        text = displayName,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium,
+                        color = Secondary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
