@@ -13,6 +13,7 @@ import com.maropiyo.reminderparrot.domain.usecase.GetUserSettingsUseCase
 import com.maropiyo.reminderparrot.domain.usecase.ScheduleForgetNotificationUseCase
 import com.maropiyo.reminderparrot.domain.usecase.UpdateReminderUseCase
 import com.maropiyo.reminderparrot.domain.usecase.remindnet.CreateRemindNetPostUseCase
+import com.maropiyo.reminderparrot.domain.usecase.remindnet.DeleteRemindNetPostUseCase
 import com.maropiyo.reminderparrot.presentation.state.ReminderListState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -45,6 +46,7 @@ class ReminderListViewModel(
     private val cancelForgetNotificationUseCase: CancelForgetNotificationUseCase,
     private val scheduleForgetNotificationUseCase: ScheduleForgetNotificationUseCase,
     private val createRemindNetPostUseCase: CreateRemindNetPostUseCase,
+    private val deleteRemindNetPostUseCase: DeleteRemindNetPostUseCase,
     private val getUserSettingsUseCase: GetUserSettingsUseCase,
     private val authService: AuthService
 ) : ViewModel() {
@@ -137,6 +139,9 @@ class ReminderListViewModel(
 
                 deleteReminderUseCase(reminderId)
                     .onSuccess {
+                        // 対応するリマインネット投稿も削除
+                        deleteRemindNetPostIfExists(reminderId)
+
                         _state.update { currentState ->
                             val filteredReminders = currentState.reminders.filter { it.id != reminderId }
                             currentState.copy(reminders = filteredReminders)
@@ -207,6 +212,9 @@ class ReminderListViewModel(
 
             deleteReminderUseCase(reminderId)
                 .onSuccess {
+                    // 対応するリマインネット投稿も削除
+                    deleteRemindNetPostIfExists(reminderId)
+
                     _state.update { currentState ->
                         val updatedReminders = currentState.reminders.filter { it.id != reminderId }
                         currentState.copy(reminders = updatedReminders)
@@ -214,6 +222,27 @@ class ReminderListViewModel(
                 }.onFailure { exception ->
                     _state.update { it.copy(error = exception.message) }
                 }
+        }
+    }
+
+    /**
+     * リマインネット投稿が存在する場合に削除する
+     * エラーが発生してもリマインダー削除処理は継続する
+     *
+     * @param reminderId リマインダーのID（RemindNet投稿のIDと同じ）
+     */
+    private suspend fun deleteRemindNetPostIfExists(reminderId: String) {
+        try {
+            val currentUserId = authService.getCurrentUserId()
+            if (currentUserId != null) {
+                deleteRemindNetPostUseCase(reminderId, currentUserId)
+                    .onFailure { // エラーが発生してもログのみ出力し、処理は継続
+                        println("RemindNet投稿削除に失敗: ${it.message}")
+                    }
+            }
+        } catch (e: Exception) {
+            // 例外が発生してもリマインダー削除処理は継続
+            println("RemindNet投稿削除でエラー: ${e.message}")
         }
     }
 
