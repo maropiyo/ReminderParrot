@@ -701,16 +701,27 @@ private fun PostDetailCard(
             Spacer(Modifier.height(20.dp))
 
             // リマインダーテキスト
-            Text(
-                text = post.reminderText,
-                style = MaterialTheme.typography.titleLarge,
-                color = Secondary,
-                fontWeight = FontWeight.Bold,
-                lineHeight = MaterialTheme.typography.titleLarge.lineHeight,
+            Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-            )
+                    .padding(horizontal = 16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Secondary.copy(alpha = 0.08f) // 薄いグレー背景で読み取り専用感を演出
+                ),
+                shape = Shapes.large,
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp) // 影を削除
+            ) {
+                Text(
+                    text = post.reminderText,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Secondary,
+                    fontWeight = FontWeight.Bold,
+                    lineHeight = MaterialTheme.typography.titleMedium.lineHeight,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp)
+                )
+            }
 
             Spacer(Modifier.height(24.dp))
 
