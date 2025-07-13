@@ -67,6 +67,16 @@ class ReminderRepositoryImpl(
     }
 
     /**
+     * 期限切れリマインダーのIDリストを取得する
+     *
+     * @param currentTime 現在時刻
+     * @return 期限切れリマインダーのIDリスト
+     */
+    override suspend fun getExpiredReminderIds(currentTime: Instant): List<String> {
+        return localDataSource.getExpiredReminderIds(currentTime)
+    }
+
+    /**
      * 期限切れリマインダーを削除する
      *
      * @param currentTime 現在時刻

@@ -39,6 +39,14 @@ interface ReminderRepository {
     suspend fun deleteReminder(reminderId: String): Result<Unit>
 
     /**
+     * 期限切れリマインダーのIDリストを取得する
+     *
+     * @param currentTime 現在時刻
+     * @return 期限切れリマインダーのIDリスト
+     */
+    suspend fun getExpiredReminderIds(currentTime: Instant): List<String>
+
+    /**
      * 期限切れリマインダーを削除する
      *
      * @param currentTime 現在時刻

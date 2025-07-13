@@ -45,7 +45,7 @@ val appModule =
     module {
         // ViewModel
         single<ReminderListViewModel> {
-            ReminderListViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
+            ReminderListViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
         }
         single<ParrotViewModel> { ParrotViewModel(get()) }
         single<RemindNetViewModel> { RemindNetViewModel(get(), get(), get(), get(), get()) }
@@ -56,7 +56,7 @@ val appModule =
         single<GetRemindersUseCase> { GetRemindersUseCase(get()) }
         single<UpdateReminderUseCase> { UpdateReminderUseCase(get()) }
         single<DeleteReminderUseCase> { DeleteReminderUseCase(get()) }
-        single<DeleteExpiredRemindersUseCase> { DeleteExpiredRemindersUseCase(get()) }
+        single<DeleteExpiredRemindersUseCase> { DeleteExpiredRemindersUseCase(get(), get(), get()) }
         single<GetParrotUseCase> { GetParrotUseCase(get()) }
         single<AddParrotExperienceUseCase> { AddParrotExperienceUseCase(get()) }
         single<ScheduleForgetNotificationUseCase> { ScheduleForgetNotificationUseCase(get()) }

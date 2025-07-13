@@ -706,17 +706,17 @@ private fun PostDetailCard(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = White
+                    containerColor = Secondary.copy(alpha = 0.08f) // 薄いグレー背景で読み取り専用感を演出
                 ),
                 shape = Shapes.large,
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp) // 影を削除
             ) {
                 Text(
                     text = post.reminderText,
-                    style = MaterialTheme.typography.titleLarge,
+                    style = MaterialTheme.typography.titleMedium,
                     color = Secondary,
-                    fontWeight = FontWeight.Medium,
-                    lineHeight = MaterialTheme.typography.titleLarge.lineHeight,
+                    fontWeight = FontWeight.Bold,
+                    lineHeight = MaterialTheme.typography.titleMedium.lineHeight,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(20.dp)

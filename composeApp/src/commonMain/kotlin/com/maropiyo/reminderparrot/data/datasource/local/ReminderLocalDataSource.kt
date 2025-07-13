@@ -61,6 +61,20 @@ class ReminderLocalDataSource(
     }
 
     /**
+     * 期限切れリマインダーのIDリストを取得する
+     *
+     * @param currentTime 現在時刻
+     * @return 期限切れリマインダーのIDリスト
+     */
+    fun getExpiredReminderIds(currentTime: Instant): List<String> {
+        return database.reminderParrotDatabaseQueries
+            .selectAllReminders()
+            .executeAsList()
+            .filter { it.forget_at <= currentTime.toEpochMilliseconds() }
+            .map { it.id }
+    }
+
+    /**
      * 期限切れリマインダーを削除する
      *
      * @param currentTime 現在時刻
