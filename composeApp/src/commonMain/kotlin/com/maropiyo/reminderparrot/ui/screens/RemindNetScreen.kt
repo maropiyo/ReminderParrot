@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -64,6 +65,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.maropiyo.reminderparrot.domain.entity.RemindNetPost
 import com.maropiyo.reminderparrot.domain.usecase.RegisterPushNotificationTokenUseCase
+import com.maropiyo.reminderparrot.presentation.viewmodel.ParrotViewModel
 import com.maropiyo.reminderparrot.presentation.viewmodel.RemindNetViewModel
 import com.maropiyo.reminderparrot.ui.components.AccountCreationBottomSheet
 import com.maropiyo.reminderparrot.ui.theme.Background
@@ -86,10 +88,15 @@ import reminderparrot.composeapp.generated.resources.reminko_raising_hand
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
+fun RemindNetScreen(
+    remindNetViewModel: RemindNetViewModel = koinInject(),
+    parrotViewModel: ParrotViewModel = koinInject()
+) {
     val state by remindNetViewModel.state.collectAsState()
     val needsAccountCreation by remindNetViewModel.needsAccountCreation.collectAsState()
     val accountCreationError by remindNetViewModel.accountCreationError.collectAsState()
+    val parrotState by parrotViewModel.state.collectAsState()
+    val displayName by remindNetViewModel.displayName.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
@@ -213,20 +220,32 @@ fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "リマインネット",
-                        color = Secondary,
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
+            Column {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = "リマインネット",
+                            color = Secondary,
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                    },
+                    colors =
+                    TopAppBarDefaults.topAppBarColors(
+                        containerColor = White
                     )
-                },
-                colors =
-                TopAppBarDefaults.topAppBarColors(
-                    containerColor = White
                 )
-            )
+                // インコ情報表示
+                if (parrotState.parrot != null) {
+                    SimpleParrotInfoDisplay(
+                        parrot = parrotState.parrot!!,
+                        displayName = displayName?.takeIf { it.isNotBlank() } ?: "ひよっこインコ",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
+                }
+            }
         },
         containerColor = Background
     ) { paddingValues ->
@@ -804,6 +823,134 @@ private fun PostDetailCard(
                             fontWeight = FontWeight.Bold
                         )
                     }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * 簡易インコ情報表示コンポーネント
+ */
+@Composable
+private fun SimpleParrotInfoDisplay(
+    parrot: com.maropiyo.reminderparrot.domain.entity.Parrot,
+    displayName: String,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier,
+        colors = CardDefaults.cardColors(
+            containerColor = White
+        ),
+        shape = RoundedCornerShape(20.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // インコアイコン
+            Image(
+                painter = painterResource(Res.drawable.reminko_face),
+                contentDescription = "リマインコ",
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(ParrotYellow, CircleShape),
+                contentScale = ContentScale.Crop
+            )
+
+            // 名前とレベル表示
+            Column(
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Text(
+                    text = displayName,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium,
+                    color = Secondary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .background(
+                                Primary.copy(alpha = 0.15f),
+                                RoundedCornerShape(12.dp)
+                            )
+                            .padding(horizontal = 8.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = "Lv.${parrot.level}",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = Primary
+                        )
+                    }
+                }
+            }
+
+            // 経験値ゲージ
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "けいけんち",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Secondary.copy(alpha = 0.7f)
+                    )
+                    Text(
+                        text = "${parrot.currentExperience}/${parrot.maxExperience}",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Medium,
+                        color = Secondary.copy(alpha = 0.8f)
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(8.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Secondary.copy(alpha = 0.1f))
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .fillMaxWidth(
+                                fraction = if (parrot.maxExperience > 0) {
+                                    (parrot.currentExperience.toFloat() / parrot.maxExperience.toFloat()).coerceIn(
+                                        0f,
+                                        1f
+                                    )
+                                } else {
+                                    0f
+                                }
+                            )
+                            .background(
+                                brush = androidx.compose.ui.graphics.Brush.horizontalGradient(
+                                    colors = listOf(
+                                        ParrotYellow.copy(alpha = 0.8f),
+                                        ParrotYellow
+                                    )
+                                ),
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                    )
                 }
             }
         }

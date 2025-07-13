@@ -61,6 +61,10 @@ class GetRemindersUseCaseTest {
             return Result.success(Unit)
         }
 
+        override suspend fun getExpiredReminderIds(currentTime: Instant): List<String> {
+            return emptyList()
+        }
+
         override suspend fun deleteExpiredReminders(currentTime: Instant): Int {
             return 0
         }
