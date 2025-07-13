@@ -2,42 +2,65 @@
   "permissions": {
     "defaultMode": "acceptEdits",
     "allow": [
+      "Bash(git:*)",
+      "Bash(./gradlew:*)",
+      "Bash(adb:*)",
+      "Bash(xcrun:*)",
+      "Bash(xcodebuild:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(rg:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(echo:*)",
+      "Bash(mkdir:*)",
+      "Bash(cp:*)",
+      "Bash(mv:*)",
+      "Bash(open:*)",
+      "Bash(brew:*)",
+      "Bash(npm:*)",
+      "Bash(node:*)",
+      "Bash(npx:*)",
+      "mcp__supabase__*"
     ],
     "deny": [
       "Bash(sudo:*)",
-      "Bash(rm:*)",
-      "Bash(rm -rf:*)",
-      "Bash(git push:*)",
-      "Bash(git commit:*)",
-      "Bash(git reset:*)",
-      "Bash(git rebase:*)",
+      "Bash(rm -rf /:*)",
+      "Bash(rm -rf ~:*)",
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git reset --hard origin:*)",
+      "Bash(git clean -fdx:*)",
       "Read(.env.*)",
-      "Read(id_rsa)",
-      "Read(id_ed25519)",
+      "Read(**/id_rsa*)",
+      "Read(**/id_ed25519*)",
       "Read(**/*token*)",
       "Read(**/*key*)",
+      "Read(**/*secret*)",
       "Write(.env*)",
       "Write(**/secrets/**)",
-      "Bash(curl:*)",
-      "Bash(wget:*)",
+      "Bash(curl *://*/rm:*)",
+      "Bash(wget *://*/rm:*)",
       "Bash(nc:*)",
-      "Bash(npm uninstall:*)",
-      "Bash(npm remove:*)",
       "Bash(psql:*)",
       "Bash(mysql:*)",
-      "Bash(mongod:*)",
-      "mcp__supabase__execute_sql"
+      "Bash(mongod:*)"
     ]
   },
   "environment": {
-    "KOTLIN_MULTIPLATFORM": "true"
+    "KOTLIN_MULTIPLATFORM": "true",
+    "ANDROID_HOME": "${ANDROID_HOME}",
+    "ANDROID_SDK_ROOT": "${ANDROID_SDK_ROOT}",
+    "JAVA_HOME": "${JAVA_HOME}",
+    "GRADLE_OPTS": "-Xmx4g -XX:+UseParallelGC",
+    "PROJECT_TYPE": "kotlin_multiplatform_mobile"
   },
   "aliases": {
     "build-android": "./gradlew :composeApp:assembleDebug",
     "build-ios": "./gradlew :composeApp:compileKotlinIosX64",
     "lint": "./gradlew ktlintCheck",
     "format": "./gradlew ktlintFormat",
-    "test": "./gradlew test",
+    "test": "./gradlew allTests",
     "clean": "./gradlew clean",
     "quality-check": "./gradlew ktlintCheck && ./gradlew :composeApp:lintDebug"
   },
@@ -57,7 +80,7 @@
       "./gradlew clean",
       "./gradlew ktlintCheck",
       "./gradlew :composeApp:lintDebug",
-      "./gradlew test"
+      "./gradlew allTests"
     ]
   },
   "file_patterns": {
@@ -81,38 +104,14 @@
     "backend": "supabase",
     "async": "coroutines_flow"
   },
-  "mcpServers": {
-    "android-emulator": {
-      "command": "node",
-      "args": ["/path/to/mcp-server-android"],
-      "env": {
-        "ANDROID_HOME": "${ANDROID_HOME}",
-        "EMULATOR_NAME": "Pixel_7_API_34"
-      }
-    },
-    "ios-simulator": {
-      "command": "node",
-      "args": ["/path/to/mcp-server-ios"],
-      "env": {
-        "SIMULATOR_NAME": "iPhone 15 Pro"
-      }
-    },
-    "gradle": {
-      "command": "node",
-      "args": ["/path/to/mcp-server-gradle"],
-      "env": {
-        "GRADLE_HOME": "${GRADLE_HOME}"
-      }
-    }
-  },
   "customCommands": {
     "/test-reminder": {
-      "description": "Run all reminder-related tests",
-      "command": "./gradlew test --tests '*Reminder*'"
+      "description": "Run all reminder-related tests", 
+      "command": "./gradlew allTests --tests '*Reminder*'"
     },
     "/build-all": {
       "description": "Build both Android and iOS apps",
-      "command": "./gradlew :composeApp:assembleDebug && cd iosApp && xcodebuild -scheme iosApp -configuration Debug"
+      "command": "./gradlew :composeApp:assembleDebug && ./gradlew :composeApp:compileKotlinIosX64"
     },
     "/clean-build": {
       "description": "Clean and rebuild the entire project",
@@ -124,7 +123,7 @@
     },
     "/check": {
       "description": "Run all quality checks",
-      "command": "./gradlew ktlintCheck && ./gradlew :composeApp:lintDebug && ./gradlew test"
+      "command": "./gradlew ktlintCheck && ./gradlew :composeApp:lintDebug && ./gradlew allTests"
     },
     "/find-patterns": {
       "description": "Find existing code patterns in the project",
@@ -159,12 +158,12 @@
   "qualityGates": {
     "preCommit": [
       "./gradlew ktlintCheck",
-      "./gradlew test"
+      "./gradlew allTests"
     ],
     "preMerge": [
       "./gradlew ktlintCheck",
       "./gradlew :composeApp:lintDebug",
-      "./gradlew test",
+      "./gradlew allTests",
       "./gradlew :composeApp:assembleDebug"
     ]
   },
