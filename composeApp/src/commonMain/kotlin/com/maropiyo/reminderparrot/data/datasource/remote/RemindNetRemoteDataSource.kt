@@ -102,13 +102,15 @@ class RemindNetRemoteDataSource(
      * 投稿を削除する（物理削除）
      */
     suspend fun deletePost(postId: String, userId: String): Result<Unit> = try {
-        supabaseClient
+        // selectを追加してSupabaseが削除操作を実際に実行するように強制
+        val result = supabaseClient
             .from("remind_net_posts")
             .delete {
                 filter {
                     eq("id", postId)
                     eq("user_id", userId)
                 }
+                select()
             }
 
         Result.success(Unit)
