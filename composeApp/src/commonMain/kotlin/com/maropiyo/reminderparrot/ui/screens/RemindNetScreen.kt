@@ -34,6 +34,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -75,6 +76,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 import reminderparrot.composeapp.generated.resources.Res
 import reminderparrot.composeapp.generated.resources.reminko_face
+import reminderparrot.composeapp.generated.resources.reminko_raising_hand
 
 /**
  * リマインネット画面
@@ -110,6 +112,14 @@ fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
     // アカウント作成ボトムシートの状態
     var showAccountCreationBottomSheet by remember { mutableStateOf(false) }
     val accountCreationSheetState =
+        rememberModalBottomSheetState(
+            skipPartiallyExpanded = true
+        )
+
+    // 投稿詳細ボトムシートの状態
+    var selectedPost by remember { mutableStateOf<RemindNetPost?>(null) }
+    var showPostDetailBottomSheet by remember { mutableStateOf(false) }
+    val postDetailSheetState =
         rememberModalBottomSheetState(
             skipPartiallyExpanded = true
         )
@@ -279,6 +289,10 @@ fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
                             onBellClick = { clickedPost ->
                                 remindNetViewModel.sendRemindNotification(clickedPost)
                             },
+                            onCardClick = { clickedPost ->
+                                selectedPost = clickedPost
+                                showPostDetailBottomSheet = true
+                            },
                             isAlreadySent = state.sentPostIds.contains(post.id),
                             isMyPost = state.myPostIds.contains(post.id)
                         )
@@ -327,6 +341,31 @@ fun RemindNetScreen(remindNetViewModel: RemindNetViewModel = koinInject()) {
                 errorMessage = accountCreationError
             )
         }
+
+        // 投稿詳細ボトムシート
+        if (showPostDetailBottomSheet && selectedPost != null) {
+            RemindNetPostDetailBottomSheet(
+                post = selectedPost!!,
+                onDismiss = {
+                    scope.launch {
+                        postDetailSheetState.hide()
+                        showPostDetailBottomSheet = false
+                        selectedPost = null
+                    }
+                },
+                onBellClick = { clickedPost ->
+                    remindNetViewModel.sendRemindNotification(clickedPost)
+                    scope.launch {
+                        postDetailSheetState.hide()
+                        showPostDetailBottomSheet = false
+                        selectedPost = null
+                    }
+                },
+                sheetState = postDetailSheetState,
+                isAlreadySent = selectedPost?.let { state.sentPostIds.contains(it.id) } ?: false,
+                isMyPost = selectedPost?.let { state.myPostIds.contains(it.id) } ?: false
+            )
+        }
     }
 }
 
@@ -371,12 +410,15 @@ private fun NewPostNotificationButton(count: Int, onClick: () -> Unit, modifier:
 private fun RemindNetPostCard(
     post: RemindNetPost,
     onBellClick: (RemindNetPost) -> Unit,
+    onCardClick: (RemindNetPost) -> Unit,
     isAlreadySent: Boolean,
     isMyPost: Boolean,
     modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable { onCardClick(post) },
         colors =
         CardDefaults.cardColors(
             containerColor = White
@@ -451,7 +493,9 @@ private fun RemindNetPostCard(
                 // ベルマークボタン（自分の投稿以外かつ未送信のみ表示）
                 if (!isMyPost && !isAlreadySent) {
                     CircularBellButton(
-                        onClick = { onBellClick(post) },
+                        onClick = {
+                            onBellClick(post)
+                        },
                         modifier = Modifier.size(32.dp)
                     )
                 }
@@ -505,5 +549,207 @@ private fun CircularBellButton(onClick: () -> Unit, modifier: Modifier = Modifie
             tint = White,
             modifier = Modifier.size(18.dp)
         )
+    }
+}
+
+/**
+ * リマインネット投稿詳細ボトムシート
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun RemindNetPostDetailBottomSheet(
+    post: RemindNetPost,
+    onDismiss: () -> Unit,
+    onBellClick: (RemindNetPost) -> Unit,
+    sheetState: androidx.compose.material3.SheetState,
+    isAlreadySent: Boolean,
+    isMyPost: Boolean
+) {
+    ModalBottomSheet(
+        dragHandle = null,
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = androidx.compose.ui.graphics.Color.Transparent
+    ) {
+        Box(
+            modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 16.dp)
+        ) {
+            PostDetailCard(
+                post = post,
+                onBellClick = onBellClick,
+                isAlreadySent = isAlreadySent,
+                isMyPost = isMyPost,
+                modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 104.dp)
+            )
+
+            // インコの画像
+            Image(
+                painter = painterResource(Res.drawable.reminko_raising_hand),
+                contentDescription = "Parrot",
+                modifier =
+                Modifier
+                    .size(128.dp)
+                    .align(Alignment.TopCenter),
+                contentScale = ContentScale.Crop
+            )
+        }
+    }
+}
+
+/**
+ * 投稿詳細カード
+ */
+@Composable
+private fun PostDetailCard(
+    post: RemindNetPost,
+    onBellClick: (RemindNetPost) -> Unit,
+    isAlreadySent: Boolean,
+    isMyPost: Boolean,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier,
+        colors =
+        CardDefaults.cardColors(
+            containerColor = Background
+        ),
+        shape = Shapes.extraLarge
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(vertical = 24.dp)
+        ) {
+            // タイトルテキスト
+            Text(
+                text = "どうする？",
+                color = Secondary,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(Modifier.height(24.dp))
+
+            // ユーザー情報
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            ) {
+                // インコアイコン
+                Image(
+                    painter = painterResource(Res.drawable.reminko_face),
+                    contentDescription = "インコ",
+                    modifier =
+                    Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(ParrotYellow, CircleShape),
+                    contentScale = ContentScale.Crop
+                )
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    // ユーザー名
+                    Text(
+                        text = post.userName,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = Secondary
+                    )
+
+                    // 投稿時間
+                    Text(
+                        text = post.timeAgoText,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Secondary.copy(alpha = 0.6f)
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(20.dp))
+
+            // リマインダーテキスト
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = White
+                ),
+                shape = Shapes.large,
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+            ) {
+                Text(
+                    text = post.reminderText,
+                    style = MaterialTheme.typography.titleLarge,
+                    color = Secondary,
+                    fontWeight = FontWeight.Medium,
+                    lineHeight = MaterialTheme.typography.titleLarge.lineHeight,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp)
+                )
+            }
+
+            Spacer(Modifier.height(24.dp))
+
+            // ベルボタン（自分の投稿以外かつ未送信のみ表示）
+            if (!isMyPost && !isAlreadySent) {
+                Button(
+                    onClick = { onBellClick(post) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .height(50.dp),
+                    shape = Shapes.large,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = ParrotYellow,
+                        contentColor = White
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Notifications,
+                        contentDescription = "リマインドを送る",
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "リマインドを送る",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            } else if (isAlreadySent) {
+                Text(
+                    text = "リマインドを送信済み",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Secondary.copy(alpha = 0.6f),
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+            } else if (isMyPost) {
+                Text(
+                    text = "あなたの投稿です",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Secondary.copy(alpha = 0.6f),
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+            }
+        }
     }
 }
