@@ -223,9 +223,13 @@ class RemindNetViewModel(
 
             deleteRemindNetPostUseCase(postId, currentUserId)
                 .onSuccess {
-                    // 削除成功時は少し待機してから投稿リストを再読み込み
-                    kotlinx.coroutines.delay(500) // 0.5秒待機
-                    loadPosts()
+                    // 楽観的UI更新：削除された投稿をリストから即座に除去
+                    _state.update { currentState ->
+                        currentState.copy(
+                            posts = currentState.posts.filter { it.id != postId },
+                            myPostIds = currentState.myPostIds - postId
+                        )
+                    }
                     onSuccess()
                 }
                 .onFailure { exception ->

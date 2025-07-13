@@ -102,8 +102,8 @@ class RemindNetRemoteDataSource(
      * 投稿を削除する（物理削除）
      */
     suspend fun deletePost(postId: String, userId: String): Result<Unit> = try {
-        // selectを追加してSupabaseが削除操作を実際に実行するように強制
-        val result = supabaseClient
+        // 削除された行を取得して削除成功を確認
+        val deletedRows = supabaseClient
             .from("remind_net_posts")
             .delete {
                 filter {
@@ -111,7 +111,12 @@ class RemindNetRemoteDataSource(
                     eq("user_id", userId)
                 }
                 select()
-            }
+            }.decodeList<RemindNetPostResponseDto>()
+
+        // 削除された行がない場合はエラー
+        if (deletedRows.isEmpty()) {
+            return Result.failure(Exception("削除対象の投稿が見つからないか、削除権限がありません"))
+        }
 
         Result.success(Unit)
     } catch (e: Exception) {
