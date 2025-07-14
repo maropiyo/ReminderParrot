@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.maropiyo.reminderparrot.data.datasource.local.NotificationHistoryLocalDataSource
 import com.maropiyo.reminderparrot.domain.entity.RemindNetPost
 import com.maropiyo.reminderparrot.domain.service.AuthService
+import com.maropiyo.reminderparrot.domain.usecase.AddParrotExperienceUseCase
 import com.maropiyo.reminderparrot.domain.usecase.SendRemindNotificationUseCase
 import com.maropiyo.reminderparrot.domain.usecase.remindnet.DeleteRemindNetPostUseCase
 import com.maropiyo.reminderparrot.domain.usecase.remindnet.GetRemindNetPostsUseCase
@@ -23,7 +24,9 @@ class RemindNetViewModel(
     private val sendRemindNotificationUseCase: SendRemindNotificationUseCase,
     private val authService: AuthService,
     private val notificationHistoryLocalDataSource: NotificationHistoryLocalDataSource,
-    private val deleteRemindNetPostUseCase: DeleteRemindNetPostUseCase
+    private val deleteRemindNetPostUseCase: DeleteRemindNetPostUseCase,
+    private val addParrotExperienceUseCase: AddParrotExperienceUseCase,
+    private val parrotViewModel: ParrotViewModel
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(RemindNetState())
@@ -182,6 +185,21 @@ class RemindNetViewModel(
                             sentPostIds = currentState.sentPostIds + post.id
                         )
                     }
+
+                    // リマインド送信成功時に経験値+1
+                    addParrotExperienceUseCase(1)
+                        .onSuccess { updatedParrot ->
+                            println(
+                                "経験値を追加しました: +1 (現在: ${updatedParrot.currentExperience}/${updatedParrot.maxExperience})"
+                            )
+                            // インコの状態表示をリアルタイムで更新
+                            parrotViewModel.loadParrot()
+                        }
+                        .onFailure { exception ->
+                            println("経験値追加に失敗しました: ${exception.message}")
+                            // 経験値追加の失敗はユーザーにエラーを表示しない（リマインド送信は成功している）
+                        }
+
                     println("リマインド通知を送信しました: ${post.userName}へ")
                 }
                 .onFailure { exception ->

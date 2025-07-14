@@ -48,7 +48,7 @@ val appModule =
             ReminderListViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
         }
         single<ParrotViewModel> { ParrotViewModel(get()) }
-        single<RemindNetViewModel> { RemindNetViewModel(get(), get(), get(), get(), get()) }
+        single<RemindNetViewModel> { RemindNetViewModel(get(), get(), get(), get(), get(), get(), get()) }
         single<SettingsViewModel> { SettingsViewModel(get(), get(), get()) }
 
         // UseCase
