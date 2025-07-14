@@ -55,31 +55,18 @@ class ImportRemindNetPostUseCase(
             // ユーザー設定を取得
             val userSettings = getUserSettingsUseCase()
 
-            // デバッグ用ログ
-            println("ImportRemindNetPostUseCase: importing post from ${post.userName}")
-            println("  post text: ${post.reminderText}")
-            println("  isDebugFastMemoryEnabled: ${userSettings.isDebugFastMemoryEnabled}")
-
             val currentTime = Clock.System.now()
             val forgetTime = if (userSettings.isDebugFastMemoryEnabled) {
                 // デバッグモードが有効な場合は設定された秒数後に忘却
-                println(
-                    "ImportRemindNetPostUseCase: Debug mode enabled - using " +
-                        "${userSettings.debugForgetTimeSeconds} seconds"
-                )
                 currentTime + userSettings.debugForgetTimeSeconds.seconds
             } else {
                 // 通常モードの場合はインコの記憶時間を使用
-                println("ImportRemindNetPostUseCase: Normal mode - using parrot memory time")
                 val parrotResult = parrotRepository.getParrot()
                 if (parrotResult.isFailure) {
                     return Result.failure(parrotResult.exceptionOrNull()!!)
                 }
                 val parrot = parrotResult.getOrThrow()
                 // インコの記憶時間に基づいて忘却時刻を計算
-                println(
-                    "ImportRemindNetPostUseCase: Parrot memory time: ${parrot.memoryTimeHours} hours"
-                )
                 currentTime + parrot.memoryTimeHours.hours
             }
 
@@ -97,7 +84,6 @@ class ImportRemindNetPostUseCase(
                 try {
                     // インポート履歴を記録
                     importHistoryLocalDataSource.recordImportHistory(post.id, currentUserId)
-                    println("ImportRemindNetPostUseCase: インポート履歴を記録しました - PostID: ${post.id}")
 
                     // 忘却通知をスケジュール
                     notificationService.scheduleForgetNotification(createResult.getOrThrow())
@@ -105,17 +91,13 @@ class ImportRemindNetPostUseCase(
                     // インポート成功時に経験値+1を獲得
                     addParrotExperienceUseCase(1)
                         .onSuccess { updatedParrot ->
-                            println(
-                                "ImportRemindNetPostUseCase: インポート成功で経験値+1獲得 " +
-                                    "(現在: ${updatedParrot.currentExperience}/${updatedParrot.maxExperience})"
-                            )
+                            // 経験値追加成功
                         }
                         .onFailure { error ->
-                            println("ImportRemindNetPostUseCase: 経験値追加エラー: $error")
+                            // 経験値追加エラー（ログなし）
                         }
                 } catch (e: Exception) {
                     // 通知のスケジューリングに失敗してもリマインダー作成は成功とする
-                    println("ImportRemindNetPostUseCase: 通知スケジューリングエラー: $e")
                 }
             }
 

@@ -105,7 +105,7 @@ val appModule =
         single<ReminderLocalDataSource> { ReminderLocalDataSource(get(), get()) }
         single<ParrotLocalDataSource> { ParrotLocalDataSource(get(), get()) }
         single<NotificationHistoryLocalDataSource> { NotificationHistoryLocalDataSource(get()) }
-        single<ImportHistoryLocalDataSource> { ImportHistoryLocalDataSource(get()) }
+        single<ImportHistoryLocalDataSource> { ImportHistoryLocalDataSource(get(), get()) }
 
         // Database
         single<DatabaseInitializer> { DatabaseInitializer(get()) }

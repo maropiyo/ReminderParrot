@@ -160,13 +160,11 @@ class RemindNetViewModel(
 
                 // 匿名認証でアカウントを作成
                 val userId = authService.getUserId()
-                println("RemindNetViewModel: アカウント作成成功 - UserId: $userId")
 
                 // アカウント作成成功後、投稿を読み込み
                 _needsAccountCreation.value = false
                 loadPosts()
             } catch (e: Exception) {
-                println("RemindNetViewModel: アカウント作成エラー: ${e.message}")
                 val errorMessage = when {
                     e.message?.contains("anonymous_provider_disabled") == true ->
                         "アカウントのせっていがひつようです。\nかんりしゃにれんらくしてください。"
@@ -202,18 +200,12 @@ class RemindNetViewModel(
                     // リマインド送信成功時に経験値+1
                     addParrotExperienceUseCase(1)
                         .onSuccess { updatedParrot ->
-                            println(
-                                "経験値を追加しました: +1 (現在: ${updatedParrot.currentExperience}/${updatedParrot.maxExperience})"
-                            )
                             // インコの状態表示をリアルタイムで更新
                             parrotViewModel.loadParrot()
                         }
                         .onFailure { exception ->
-                            println("経験値追加に失敗しました: ${exception.message}")
                             // 経験値追加の失敗はユーザーにエラーを表示しない（リマインド送信は成功している）
                         }
-
-                    println("リマインド通知を送信しました: ${post.userName}へ")
                 }
                 .onFailure { exception ->
                     _state.update {
@@ -330,8 +322,6 @@ class RemindNetViewModel(
 
             importRemindNetPostUseCase(post)
                 .onSuccess { importedReminder ->
-                    println("リマインネット投稿をインポートしました: ${post.reminderText}")
-                    println("インポートしたリマインダーID: ${importedReminder.id}")
 
                     // インポート済みのpostIdをセットに追加（状態を即座に更新）
                     _state.update { currentState ->
@@ -351,7 +341,6 @@ class RemindNetViewModel(
                     }
                 }
                 .onFailure { exception ->
-                    println("リマインネット投稿のインポートに失敗しました: ${exception.message}")
                     _state.update {
                         it.copy(
                             error = "ことばをおぼえるのにしっぱいしました"

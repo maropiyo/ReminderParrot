@@ -1,6 +1,7 @@
 package com.maropiyo.reminderparrot.data.datasource.local
 
 import com.maropiyo.reminderparrot.db.ReminderParrotDatabase
+import com.maropiyo.reminderparrot.domain.common.UuidGenerator
 import com.maropiyo.reminderparrot.domain.entity.ImportHistory
 import kotlinx.datetime.Clock
 
@@ -9,7 +10,8 @@ import kotlinx.datetime.Clock
  * 1投稿につき1ユーザー1回までインポート可能な制限を管理
  */
 class ImportHistoryLocalDataSource(
-    private val database: ReminderParrotDatabase
+    private val database: ReminderParrotDatabase,
+    private val uuidGenerator: UuidGenerator
 ) {
     /**
      * インポート履歴を記録する
@@ -20,7 +22,7 @@ class ImportHistoryLocalDataSource(
      */
     fun recordImportHistory(postId: String, importerUserId: String): ImportHistory {
         val history = ImportHistory(
-            id = generateId(),
+            id = uuidGenerator.generateId(),
             postId = postId,
             importerUserId = importerUserId,
             importedAt = Clock.System.now()
@@ -57,12 +59,5 @@ class ImportHistoryLocalDataSource(
      */
     fun deleteHistoryForPost(postId: String) {
         database.reminderParrotDatabaseQueries.deleteImportHistoryForPost(postId)
-    }
-
-    /**
-     * 一意のIDを生成する
-     */
-    private fun generateId(): String {
-        return "import_history_${Clock.System.now().toEpochMilliseconds()}_${(0..9999).random()}"
     }
 }
