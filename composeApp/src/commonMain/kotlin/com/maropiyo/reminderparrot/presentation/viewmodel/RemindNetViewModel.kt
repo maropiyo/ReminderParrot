@@ -2,6 +2,7 @@ package com.maropiyo.reminderparrot.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.maropiyo.reminderparrot.data.datasource.local.ImportHistoryLocalDataSource
 import com.maropiyo.reminderparrot.data.datasource.local.NotificationHistoryLocalDataSource
 import com.maropiyo.reminderparrot.domain.entity.RemindNetPost
 import com.maropiyo.reminderparrot.domain.service.AuthService
@@ -28,7 +29,8 @@ class RemindNetViewModel(
     private val deleteRemindNetPostUseCase: DeleteRemindNetPostUseCase,
     private val addParrotExperienceUseCase: AddParrotExperienceUseCase,
     private val parrotViewModel: ParrotViewModel,
-    private val importRemindNetPostUseCase: ImportRemindNetPostUseCase
+    private val importRemindNetPostUseCase: ImportRemindNetPostUseCase,
+    private val importHistoryLocalDataSource: ImportHistoryLocalDataSource
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(RemindNetState())
@@ -85,13 +87,22 @@ class RemindNetViewModel(
                         emptySet()
                     }
 
+                    val importedPostIds = if (currentUserId != null) {
+                        posts.filter { post ->
+                            importHistoryLocalDataSource.hasAlreadyImported(post.id, currentUserId)
+                        }.map { it.id }.toSet()
+                    } else {
+                        emptySet()
+                    }
+
                     _state.update {
                         it.copy(
                             posts = posts,
                             isLoading = false,
                             error = null,
                             sentPostIds = sentPostIds,
-                            myPostIds = myPostIds
+                            myPostIds = myPostIds,
+                            importedPostIds = importedPostIds
                         )
                     }
                 }
@@ -308,10 +319,26 @@ class RemindNetViewModel(
                 return@launch
             }
 
+            // 既にインポート済みの投稿はインポートできない（データベースから確認）
+            val currentUserId = authService.getCurrentUserId()
+            if (currentUserId != null && importHistoryLocalDataSource.hasAlreadyImported(post.id, currentUserId)) {
+                _state.update {
+                    it.copy(error = "すでにおぼえているよ")
+                }
+                return@launch
+            }
+
             importRemindNetPostUseCase(post)
                 .onSuccess { importedReminder ->
                     println("リマインネット投稿をインポートしました: ${post.reminderText}")
                     println("インポートしたリマインダーID: ${importedReminder.id}")
+
+                    // インポート済みのpostIdをセットに追加（状態を即座に更新）
+                    _state.update { currentState ->
+                        currentState.copy(
+                            importedPostIds = currentState.importedPostIds + post.id
+                        )
+                    }
 
                     // インコの状態表示をリアルタイムで更新（経験値+1が追加されている）
                     parrotViewModel.loadParrot()
@@ -343,5 +370,6 @@ data class RemindNetState(
     val isLoading: Boolean = false,
     val error: String? = null,
     val sentPostIds: Set<String> = emptySet(),
-    val myPostIds: Set<String> = emptySet()
+    val myPostIds: Set<String> = emptySet(),
+    val importedPostIds: Set<String> = emptySet()
 )

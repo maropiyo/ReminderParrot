@@ -1,6 +1,7 @@
 package com.maropiyo.reminderparrot.di
 
 import com.maropiyo.reminderparrot.data.database.DatabaseInitializer
+import com.maropiyo.reminderparrot.data.datasource.local.ImportHistoryLocalDataSource
 import com.maropiyo.reminderparrot.data.datasource.local.NotificationHistoryLocalDataSource
 import com.maropiyo.reminderparrot.data.datasource.local.ParrotLocalDataSource
 import com.maropiyo.reminderparrot.data.datasource.local.ReminderLocalDataSource
@@ -49,7 +50,7 @@ val appModule =
             ReminderListViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
         }
         single<ParrotViewModel> { ParrotViewModel(get()) }
-        single<RemindNetViewModel> { RemindNetViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
+        single<RemindNetViewModel> { RemindNetViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
         single<SettingsViewModel> { SettingsViewModel(get(), get(), get()) }
 
         // UseCase
@@ -78,7 +79,18 @@ val appModule =
         single<GetUserSettingsUseCase> { GetUserSettingsUseCase(get()) }
         single<SaveUserSettingsUseCase> { SaveUserSettingsUseCase(get()) }
         single<SignInAnonymouslyUseCase> { SignInAnonymouslyUseCase(get()) }
-        single<ImportRemindNetPostUseCase> { ImportRemindNetPostUseCase(get(), get(), get(), get(), get(), get()) }
+        single<ImportRemindNetPostUseCase> {
+            ImportRemindNetPostUseCase(
+                get(),
+                get(),
+                get(),
+                get(),
+                get(),
+                get(),
+                get(),
+                get()
+            )
+        }
 
         // Repository
         single<ReminderRepository> { ReminderRepositoryImpl(get()) }
@@ -93,6 +105,7 @@ val appModule =
         single<ReminderLocalDataSource> { ReminderLocalDataSource(get(), get()) }
         single<ParrotLocalDataSource> { ParrotLocalDataSource(get(), get()) }
         single<NotificationHistoryLocalDataSource> { NotificationHistoryLocalDataSource(get()) }
+        single<ImportHistoryLocalDataSource> { ImportHistoryLocalDataSource(get()) }
 
         // Database
         single<DatabaseInitializer> { DatabaseInitializer(get()) }

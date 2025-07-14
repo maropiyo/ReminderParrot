@@ -1,10 +1,12 @@
 package com.maropiyo.reminderparrot.domain.usecase
 
+import com.maropiyo.reminderparrot.data.datasource.local.ImportHistoryLocalDataSource
 import com.maropiyo.reminderparrot.domain.common.UuidGenerator
 import com.maropiyo.reminderparrot.domain.entity.RemindNetPost
 import com.maropiyo.reminderparrot.domain.entity.Reminder
 import com.maropiyo.reminderparrot.domain.repository.ParrotRepository
 import com.maropiyo.reminderparrot.domain.repository.ReminderRepository
+import com.maropiyo.reminderparrot.domain.service.AuthService
 import com.maropiyo.reminderparrot.domain.service.NotificationService
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.seconds
@@ -20,6 +22,8 @@ import kotlinx.datetime.Clock
  * @property notificationService 通知サービス
  * @property getUserSettingsUseCase ユーザー設定取得ユースケース
  * @property addParrotExperienceUseCase インコ経験値追加ユースケース
+ * @property authService 認証サービス
+ * @property importHistoryLocalDataSource インポート履歴データソース
  */
 class ImportRemindNetPostUseCase(
     private val reminderRepository: ReminderRepository,
@@ -27,7 +31,9 @@ class ImportRemindNetPostUseCase(
     private val uuidGenerator: UuidGenerator,
     private val notificationService: NotificationService,
     private val getUserSettingsUseCase: GetUserSettingsUseCase,
-    private val addParrotExperienceUseCase: AddParrotExperienceUseCase
+    private val addParrotExperienceUseCase: AddParrotExperienceUseCase,
+    private val authService: AuthService,
+    private val importHistoryLocalDataSource: ImportHistoryLocalDataSource
 ) {
     /**
      * リマインネット投稿をリマインダーとしてインポートする
@@ -37,6 +43,15 @@ class ImportRemindNetPostUseCase(
      */
     suspend operator fun invoke(post: RemindNetPost): Result<Reminder> {
         return try {
+            // 現在のユーザーIDを取得
+            val currentUserId = authService.getCurrentUserId()
+                ?: return Result.failure(IllegalStateException("ユーザーが認証されていません"))
+
+            // 既にインポート済みかチェック
+            if (importHistoryLocalDataSource.hasAlreadyImported(post.id, currentUserId)) {
+                return Result.failure(IllegalStateException("すでにおぼえているよ"))
+            }
+
             // ユーザー設定を取得
             val userSettings = getUserSettingsUseCase()
 
@@ -80,6 +95,10 @@ class ImportRemindNetPostUseCase(
             // リマインダーの作成が成功した場合
             if (createResult.isSuccess) {
                 try {
+                    // インポート履歴を記録
+                    importHistoryLocalDataSource.recordImportHistory(post.id, currentUserId)
+                    println("ImportRemindNetPostUseCase: インポート履歴を記録しました - PostID: ${post.id}")
+
                     // 忘却通知をスケジュール
                     notificationService.scheduleForgetNotification(createResult.getOrThrow())
 
