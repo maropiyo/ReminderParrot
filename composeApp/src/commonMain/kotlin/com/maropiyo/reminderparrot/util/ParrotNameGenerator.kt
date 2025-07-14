@@ -41,7 +41,7 @@ object ParrotNameGenerator {
             "ぬかりない",
             "ぬるい",
             "ゆるい",
-            "しんぱいな",
+            "しんぱいな"
         )
 
     /**
