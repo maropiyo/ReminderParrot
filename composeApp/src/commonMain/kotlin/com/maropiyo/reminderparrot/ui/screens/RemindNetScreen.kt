@@ -300,41 +300,51 @@ fun RemindNetScreen(
                         )
                     }
                 }
-            } else if (state.posts.isEmpty() && !state.isLoading) {
-                // 投稿がない場合
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text =
-                            if (needsAccountCreation) {
-                                "リマインネットに参加していません"
-                            } else {
-                                "だれかいませんか？"
-                            },
-                            style = MaterialTheme.typography.titleMedium,
-                            color = Secondary,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
             } else {
-                // 投稿リスト
-                LazyColumn(
-                    state = listState,
-                    modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 100.dp),
+                Column(
+                    modifier = Modifier.padding(paddingValues)
+                ) {
+                    // タイムライン見出し
+                    Text(
+                        text = "タイムライン",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = Secondary,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
+                    
+                    // 投稿リスト
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier.fillMaxHeight(),
+                        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 100.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    items(state.posts, key = { it.id }) { post ->
-                        RemindNetPostCard(
+                    if (state.posts.isEmpty() && !state.isLoading) {
+                        // 投稿がない場合の空状態表示
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 64.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = if (needsAccountCreation) {
+                                        "リマインネットに参加していません"
+                                    } else {
+                                        "だれかいませんか？"
+                                    },
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = Secondary,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    } else {
+                        // 投稿リスト
+                        items(state.posts, key = { it.id }) { post ->
+                            RemindNetPostCard(
                             post = post,
                             onBellClick = { clickedPost ->
                                 remindNetViewModel.sendRemindNotification(clickedPost)
@@ -353,7 +363,9 @@ fun RemindNetScreen(
                             isMyPost = state.myPostIds.contains(post.id),
                             isAlreadyImported = state.importedPostIds.contains(post.id)
                         )
+                        }
                     }
+                }
                 }
             }
 
