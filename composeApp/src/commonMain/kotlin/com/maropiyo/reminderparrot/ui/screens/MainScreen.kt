@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import com.maropiyo.reminderparrot.data.database.DatabaseInitializer
 import com.maropiyo.reminderparrot.domain.usecase.RegisterPushNotificationTokenUseCase
 import com.maropiyo.reminderparrot.domain.usecase.RequestNotificationPermissionUseCase
+import com.maropiyo.reminderparrot.presentation.viewmodel.ReminderListViewModel
 import com.maropiyo.reminderparrot.ui.navigation.BottomNavigation
 import com.maropiyo.reminderparrot.ui.navigation.NavigationItem
 import kotlinx.coroutines.launch
@@ -42,6 +43,9 @@ fun MainScreen() {
 
     // データベース初期化
     val databaseInitializer = koinInject<DatabaseInitializer>()
+
+    // リマインダーリストViewModel
+    val reminderListViewModel = koinInject<ReminderListViewModel>()
 
     // アプリ起動時にデータベース初期化と通知権限を要求
     LaunchedEffect(Unit) {
@@ -94,7 +98,12 @@ fun MainScreen() {
                 )
             }
             NavigationItem.RemindNet.route -> {
-                RemindNetScreen()
+                RemindNetScreen(
+                    onReminderImported = {
+                        // インポート成功時にリマインダーリストを再読み込み
+                        reminderListViewModel.refresh()
+                    }
+                )
             }
             NavigationItem.Settings.route -> {
                 SettingsScreen()

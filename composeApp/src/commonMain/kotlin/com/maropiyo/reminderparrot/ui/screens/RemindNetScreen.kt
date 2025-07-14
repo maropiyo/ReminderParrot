@@ -62,6 +62,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.maropiyo.reminderparrot.domain.entity.RemindNetPost
@@ -92,7 +93,8 @@ import reminderparrot.composeapp.generated.resources.reminko_raising_hand
 @Composable
 fun RemindNetScreen(
     remindNetViewModel: RemindNetViewModel = koinInject(),
-    parrotViewModel: ParrotViewModel = koinInject()
+    parrotViewModel: ParrotViewModel = koinInject(),
+    onReminderImported: () -> Unit = {}
 ) {
     val state by remindNetViewModel.state.collectAsState()
     val needsAccountCreation by remindNetViewModel.needsAccountCreation.collectAsState()
@@ -401,6 +403,17 @@ fun RemindNetScreen(
                         selectedPost = null
                     }
                 },
+                onImportClick = { clickedPost ->
+                    remindNetViewModel.importPost(clickedPost) {
+                        // インポート成功時のコールバック
+                        onReminderImported()
+                    }
+                    scope.launch {
+                        postDetailSheetState.hide()
+                        showPostDetailBottomSheet = false
+                        selectedPost = null
+                    }
+                },
                 onDeleteClick = { clickedPost ->
                     println("RemindNetScreen: 削除ボタンクリック - postId: ${clickedPost.id}")
                     remindNetViewModel.deletePost(clickedPost.id) {
@@ -620,6 +633,7 @@ private fun RemindNetPostDetailBottomSheet(
     post: RemindNetPost,
     onDismiss: () -> Unit,
     onBellClick: (RemindNetPost) -> Unit,
+    onImportClick: (RemindNetPost) -> Unit,
     onDeleteClick: (RemindNetPost) -> Unit,
     sheetState: androidx.compose.material3.SheetState,
     isAlreadySent: Boolean,
@@ -641,6 +655,7 @@ private fun RemindNetPostDetailBottomSheet(
             PostDetailCard(
                 post = post,
                 onBellClick = onBellClick,
+                onImportClick = onImportClick,
                 onDeleteClick = onDeleteClick,
                 isAlreadySent = isAlreadySent,
                 isMyPost = isMyPost,
@@ -671,6 +686,7 @@ private fun RemindNetPostDetailBottomSheet(
 private fun PostDetailCard(
     post: RemindNetPost,
     onBellClick: (RemindNetPost) -> Unit,
+    onImportClick: (RemindNetPost) -> Unit,
     onDeleteClick: (RemindNetPost) -> Unit,
     isAlreadySent: Boolean,
     isMyPost: Boolean,
@@ -769,41 +785,76 @@ private fun PostDetailCard(
 
             Spacer(Modifier.height(24.dp))
 
-            // ベルボタン（自分の投稿以外かつ未送信のみ表示）
-            if (!isMyPost && !isAlreadySent) {
-                ElevatedButton(
-                    onClick = { onBellClick(post) },
+            // ベルボタンとインポートボタン（自分の投稿以外のみ表示）
+            if (!isMyPost) {
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                        .height(50.dp),
-                    shape = Shapes.large,
-                    colors = ButtonDefaults.elevatedButtonColors(
-                        containerColor = ParrotYellow,
-                        contentColor = White
-                    )
+                        .padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Notifications,
-                        contentDescription = "リマインドを送る",
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "リマインドを送る",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
+                    // リマインドボタン（未送信のみ）
+                    if (!isAlreadySent) {
+                        ElevatedButton(
+                            onClick = { onBellClick(post) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(50.dp),
+                            shape = Shapes.large,
+                            colors = ButtonDefaults.elevatedButtonColors(
+                                containerColor = ParrotYellow,
+                                contentColor = White
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Notifications,
+                                contentDescription = "リマインドを送る",
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "リマインドを送る",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    } else {
+                        Text(
+                            text = "リマインドを送信済み",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = Secondary.copy(alpha = 0.6f),
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+
+                    // インポートボタン（常に表示）
+                    ElevatedButton(
+                        onClick = { onImportClick(post) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp),
+                        shape = Shapes.large,
+                        colors = ButtonDefaults.elevatedButtonColors(
+                            containerColor = Primary,
+                            contentColor = White
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowUp,
+                            contentDescription = "ことばをおぼえる",
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "このことばをおぼえる",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
-            } else if (isAlreadySent) {
-                Text(
-                    text = "リマインドを送信済み",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = Secondary.copy(alpha = 0.6f),
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-            } else if (isMyPost) {
+            } else {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()

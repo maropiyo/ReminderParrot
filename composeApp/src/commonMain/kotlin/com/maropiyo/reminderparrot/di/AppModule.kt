@@ -22,6 +22,7 @@ import com.maropiyo.reminderparrot.domain.usecase.DeleteReminderUseCase
 import com.maropiyo.reminderparrot.domain.usecase.GetParrotUseCase
 import com.maropiyo.reminderparrot.domain.usecase.GetRemindersUseCase
 import com.maropiyo.reminderparrot.domain.usecase.GetUserSettingsUseCase
+import com.maropiyo.reminderparrot.domain.usecase.ImportRemindNetPostUseCase
 import com.maropiyo.reminderparrot.domain.usecase.RegisterPushNotificationTokenUseCase
 import com.maropiyo.reminderparrot.domain.usecase.RequestNotificationPermissionUseCase
 import com.maropiyo.reminderparrot.domain.usecase.SaveUserSettingsUseCase
@@ -48,7 +49,7 @@ val appModule =
             ReminderListViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
         }
         single<ParrotViewModel> { ParrotViewModel(get()) }
-        single<RemindNetViewModel> { RemindNetViewModel(get(), get(), get(), get(), get(), get(), get()) }
+        single<RemindNetViewModel> { RemindNetViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
         single<SettingsViewModel> { SettingsViewModel(get(), get(), get()) }
 
         // UseCase
@@ -77,6 +78,7 @@ val appModule =
         single<GetUserSettingsUseCase> { GetUserSettingsUseCase(get()) }
         single<SaveUserSettingsUseCase> { SaveUserSettingsUseCase(get()) }
         single<SignInAnonymouslyUseCase> { SignInAnonymouslyUseCase(get()) }
+        single<ImportRemindNetPostUseCase> { ImportRemindNetPostUseCase(get(), get(), get(), get(), get(), get()) }
 
         // Repository
         single<ReminderRepository> { ReminderRepositoryImpl(get()) }

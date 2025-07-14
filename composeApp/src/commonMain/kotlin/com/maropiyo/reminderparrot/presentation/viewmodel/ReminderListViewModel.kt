@@ -247,6 +247,13 @@ class ReminderListViewModel(
     }
 
     /**
+     * リマインダーを手動で再読み込みする（公開メソッド）
+     */
+    fun refresh() {
+        loadReminders()
+    }
+
+    /**
      * リマインダーを読み込む
      *
      * リマインダーの取得に成功した場合は、リマインダーリストを更新する

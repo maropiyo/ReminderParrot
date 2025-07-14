@@ -6,6 +6,7 @@ import com.maropiyo.reminderparrot.data.datasource.local.NotificationHistoryLoca
 import com.maropiyo.reminderparrot.domain.entity.RemindNetPost
 import com.maropiyo.reminderparrot.domain.service.AuthService
 import com.maropiyo.reminderparrot.domain.usecase.AddParrotExperienceUseCase
+import com.maropiyo.reminderparrot.domain.usecase.ImportRemindNetPostUseCase
 import com.maropiyo.reminderparrot.domain.usecase.SendRemindNotificationUseCase
 import com.maropiyo.reminderparrot.domain.usecase.remindnet.DeleteRemindNetPostUseCase
 import com.maropiyo.reminderparrot.domain.usecase.remindnet.GetRemindNetPostsUseCase
@@ -26,7 +27,8 @@ class RemindNetViewModel(
     private val notificationHistoryLocalDataSource: NotificationHistoryLocalDataSource,
     private val deleteRemindNetPostUseCase: DeleteRemindNetPostUseCase,
     private val addParrotExperienceUseCase: AddParrotExperienceUseCase,
-    private val parrotViewModel: ParrotViewModel
+    private val parrotViewModel: ParrotViewModel,
+    private val importRemindNetPostUseCase: ImportRemindNetPostUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(RemindNetState())
@@ -289,6 +291,46 @@ class RemindNetViewModel(
             } finally {
                 _isLoadingDisplayName.value = false
             }
+        }
+    }
+
+    /**
+     * リマインネット投稿をリマインダーとしてインポートする
+     * 他のインコの投稿を自分のインコに覚えさせる機能
+     */
+    fun importPost(post: RemindNetPost, onSuccess: () -> Unit = {}) {
+        viewModelScope.launch {
+            // 自分の投稿はインポートできない
+            if (isMyPost(post)) {
+                _state.update {
+                    it.copy(error = "じぶんのとうこうはおぼえられません")
+                }
+                return@launch
+            }
+
+            importRemindNetPostUseCase(post)
+                .onSuccess { importedReminder ->
+                    println("リマインネット投稿をインポートしました: ${post.reminderText}")
+                    println("インポートしたリマインダーID: ${importedReminder.id}")
+
+                    // インコの状態表示をリアルタイムで更新（経験値+1が追加されている）
+                    parrotViewModel.loadParrot()
+
+                    // リマインダーリスト更新のためのコールバック実行
+                    onSuccess()
+
+                    _state.update {
+                        it.copy(error = null)
+                    }
+                }
+                .onFailure { exception ->
+                    println("リマインネット投稿のインポートに失敗しました: ${exception.message}")
+                    _state.update {
+                        it.copy(
+                            error = "ことばをおぼえるのにしっぱいしました"
+                        )
+                    }
+                }
         }
     }
 }

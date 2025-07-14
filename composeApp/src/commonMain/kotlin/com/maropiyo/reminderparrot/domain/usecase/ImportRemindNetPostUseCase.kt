@@ -1,0 +1,108 @@
+package com.maropiyo.reminderparrot.domain.usecase
+
+import com.maropiyo.reminderparrot.domain.common.UuidGenerator
+import com.maropiyo.reminderparrot.domain.entity.RemindNetPost
+import com.maropiyo.reminderparrot.domain.entity.Reminder
+import com.maropiyo.reminderparrot.domain.repository.ParrotRepository
+import com.maropiyo.reminderparrot.domain.repository.ReminderRepository
+import com.maropiyo.reminderparrot.domain.service.NotificationService
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.datetime.Clock
+
+/**
+ * リマインネット投稿をリマインダーとしてインポートするユースケース
+ * 他のインコの投稿を自分のインコに覚えさせる機能
+ *
+ * @property reminderRepository リマインダーリポジトリ
+ * @property parrotRepository パロットリポジトリ
+ * @property uuidGenerator UUIDジェネレーター
+ * @property notificationService 通知サービス
+ * @property getUserSettingsUseCase ユーザー設定取得ユースケース
+ * @property addParrotExperienceUseCase インコ経験値追加ユースケース
+ */
+class ImportRemindNetPostUseCase(
+    private val reminderRepository: ReminderRepository,
+    private val parrotRepository: ParrotRepository,
+    private val uuidGenerator: UuidGenerator,
+    private val notificationService: NotificationService,
+    private val getUserSettingsUseCase: GetUserSettingsUseCase,
+    private val addParrotExperienceUseCase: AddParrotExperienceUseCase
+) {
+    /**
+     * リマインネット投稿をリマインダーとしてインポートする
+     *
+     * @param post インポートするリマインネット投稿
+     * @return インポートしたリマインダー
+     */
+    suspend operator fun invoke(post: RemindNetPost): Result<Reminder> {
+        return try {
+            // ユーザー設定を取得
+            val userSettings = getUserSettingsUseCase()
+
+            // デバッグ用ログ
+            println("ImportRemindNetPostUseCase: importing post from ${post.userName}")
+            println("  post text: ${post.reminderText}")
+            println("  isDebugFastMemoryEnabled: ${userSettings.isDebugFastMemoryEnabled}")
+
+            val currentTime = Clock.System.now()
+            val forgetTime = if (userSettings.isDebugFastMemoryEnabled) {
+                // デバッグモードが有効な場合は設定された秒数後に忘却
+                println(
+                    "ImportRemindNetPostUseCase: Debug mode enabled - using " +
+                        "${userSettings.debugForgetTimeSeconds} seconds"
+                )
+                currentTime + userSettings.debugForgetTimeSeconds.seconds
+            } else {
+                // 通常モードの場合はインコの記憶時間を使用
+                println("ImportRemindNetPostUseCase: Normal mode - using parrot memory time")
+                val parrotResult = parrotRepository.getParrot()
+                if (parrotResult.isFailure) {
+                    return Result.failure(parrotResult.exceptionOrNull()!!)
+                }
+                val parrot = parrotResult.getOrThrow()
+                // インコの記憶時間に基づいて忘却時刻を計算
+                println(
+                    "ImportRemindNetPostUseCase: Parrot memory time: ${parrot.memoryTimeHours} hours"
+                )
+                currentTime + parrot.memoryTimeHours.hours
+            }
+
+            val reminder = Reminder(
+                id = uuidGenerator.generateId(),
+                text = post.reminderText,
+                createdAt = currentTime,
+                forgetAt = forgetTime
+            )
+
+            val createResult = reminderRepository.createReminder(reminder)
+
+            // リマインダーの作成が成功した場合
+            if (createResult.isSuccess) {
+                try {
+                    // 忘却通知をスケジュール
+                    notificationService.scheduleForgetNotification(createResult.getOrThrow())
+
+                    // インポート成功時に経験値+1を獲得
+                    addParrotExperienceUseCase(1)
+                        .onSuccess { updatedParrot ->
+                            println(
+                                "ImportRemindNetPostUseCase: インポート成功で経験値+1獲得 " +
+                                    "(現在: ${updatedParrot.currentExperience}/${updatedParrot.maxExperience})"
+                            )
+                        }
+                        .onFailure { error ->
+                            println("ImportRemindNetPostUseCase: 経験値追加エラー: $error")
+                        }
+                } catch (e: Exception) {
+                    // 通知のスケジューリングに失敗してもリマインダー作成は成功とする
+                    println("ImportRemindNetPostUseCase: 通知スケジューリングエラー: $e")
+                }
+            }
+
+            createResult
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+}
