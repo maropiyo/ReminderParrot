@@ -81,3 +81,28 @@ WHERE post_id = ? AND sender_user_id = ?;
 deleteNotificationHistoryForPost:
 DELETE FROM NotificationHistory
 WHERE post_id = ?;
+
+-- インポート履歴テーブル（1投稿につき1ユーザー1回まで）
+CREATE TABLE IF NOT EXISTS ImportHistory (
+    id TEXT PRIMARY KEY,
+    post_id TEXT NOT NULL,
+    importer_user_id TEXT NOT NULL,
+    imported_at INTEGER NOT NULL,
+    UNIQUE(post_id, importer_user_id)
+);
+
+-- インポート履歴の追加
+insertImportHistory:
+INSERT INTO ImportHistory(id, post_id, importer_user_id, imported_at)
+VALUES(?, ?, ?, ?);
+
+-- インポート履歴の確認（インポート済みかチェック）
+checkImportHistory:
+SELECT COUNT(*)
+FROM ImportHistory
+WHERE post_id = ? AND importer_user_id = ?;
+
+-- インポート履歴の削除（特定投稿）
+deleteImportHistoryForPost:
+DELETE FROM ImportHistory
+WHERE post_id = ?;

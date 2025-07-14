@@ -3,6 +3,7 @@ package com.maropiyo.reminderparrot.ui.screens
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -60,8 +61,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.maropiyo.reminderparrot.domain.entity.RemindNetPost
@@ -70,6 +76,7 @@ import com.maropiyo.reminderparrot.presentation.viewmodel.ParrotViewModel
 import com.maropiyo.reminderparrot.presentation.viewmodel.RemindNetViewModel
 import com.maropiyo.reminderparrot.ui.components.AccountCreationBottomSheet
 import com.maropiyo.reminderparrot.ui.components.home.LevelUpDialog
+import com.maropiyo.reminderparrot.ui.icons.CustomIcons
 import com.maropiyo.reminderparrot.ui.theme.Background
 import com.maropiyo.reminderparrot.ui.theme.Error
 import com.maropiyo.reminderparrot.ui.theme.ParrotYellow
@@ -92,7 +99,8 @@ import reminderparrot.composeapp.generated.resources.reminko_raising_hand
 @Composable
 fun RemindNetScreen(
     remindNetViewModel: RemindNetViewModel = koinInject(),
-    parrotViewModel: ParrotViewModel = koinInject()
+    parrotViewModel: ParrotViewModel = koinInject(),
+    onReminderImported: () -> Unit = {}
 ) {
     val state by remindNetViewModel.state.collectAsState()
     val needsAccountCreation by remindNetViewModel.needsAccountCreation.collectAsState()
@@ -258,7 +266,8 @@ fun RemindNetScreen(
                     SimpleParrotInfoDisplay(
                         parrot = parrotState.parrot!!,
                         displayName = displayName?.takeIf { it.isNotBlank() } ?: "ひよっこインコ",
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 8.dp)
                     )
@@ -301,7 +310,8 @@ fun RemindNetScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = if (needsAccountCreation) {
+                            text =
+                            if (needsAccountCreation) {
                                 "リマインネットに参加していません"
                             } else {
                                 "だれかいませんか？"
@@ -329,12 +339,19 @@ fun RemindNetScreen(
                             onBellClick = { clickedPost ->
                                 remindNetViewModel.sendRemindNotification(clickedPost)
                             },
+                            onImportClick = { clickedPost ->
+                                remindNetViewModel.importPost(clickedPost) {
+                                    // インポート成功時のコールバック
+                                    onReminderImported()
+                                }
+                            },
                             onCardClick = { clickedPost ->
                                 selectedPost = clickedPost
                                 showPostDetailBottomSheet = true
                             },
                             isAlreadySent = state.sentPostIds.contains(post.id),
-                            isMyPost = state.myPostIds.contains(post.id)
+                            isMyPost = state.myPostIds.contains(post.id),
+                            isAlreadyImported = state.importedPostIds.contains(post.id)
                         )
                     }
                 }
@@ -343,7 +360,8 @@ fun RemindNetScreen(
             // 新規投稿通知フローティングボタン
             if (showNewPostNotification) {
                 Box(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxSize()
                         .padding(paddingValues)
                         .padding(top = 16.dp),
@@ -401,6 +419,17 @@ fun RemindNetScreen(
                         selectedPost = null
                     }
                 },
+                onImportClick = { clickedPost ->
+                    remindNetViewModel.importPost(clickedPost) {
+                        // インポート成功時のコールバック
+                        onReminderImported()
+                    }
+                    scope.launch {
+                        postDetailSheetState.hide()
+                        showPostDetailBottomSheet = false
+                        selectedPost = null
+                    }
+                },
                 onDeleteClick = { clickedPost ->
                     println("RemindNetScreen: 削除ボタンクリック - postId: ${clickedPost.id}")
                     remindNetViewModel.deletePost(clickedPost.id) {
@@ -415,7 +444,8 @@ fun RemindNetScreen(
                 },
                 sheetState = postDetailSheetState,
                 isAlreadySent = selectedPost?.let { state.sentPostIds.contains(it.id) } ?: false,
-                isMyPost = selectedPost?.let { state.myPostIds.contains(it.id) } ?: false
+                isMyPost = selectedPost?.let { state.myPostIds.contains(it.id) } ?: false,
+                isAlreadyImported = selectedPost?.let { state.importedPostIds.contains(it.id) } ?: false
             )
         }
 
@@ -435,13 +465,15 @@ fun RemindNetScreen(
 private fun NewPostNotificationButton(count: Int, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Button(
         onClick = onClick,
-        modifier = modifier
+        modifier =
+        modifier
             .wrapContentSize()
             .shadow(
                 elevation = 8.dp,
                 shape = RoundedCornerShape(24.dp)
             ),
-        colors = ButtonDefaults.buttonColors(
+        colors =
+        ButtonDefaults.buttonColors(
             containerColor = Primary,
             contentColor = White
         ),
@@ -469,13 +501,16 @@ private fun NewPostNotificationButton(count: Int, onClick: () -> Unit, modifier:
 private fun RemindNetPostCard(
     post: RemindNetPost,
     onBellClick: (RemindNetPost) -> Unit,
+    onImportClick: (RemindNetPost) -> Unit,
     onCardClick: (RemindNetPost) -> Unit,
     isAlreadySent: Boolean,
     isMyPost: Boolean,
+    isAlreadyImported: Boolean,
     modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = modifier
+        modifier =
+        modifier
             .fillMaxWidth()
             .clickable { onCardClick(post) },
         colors =
@@ -549,14 +584,32 @@ private fun RemindNetPostCard(
 
                 Spacer(modifier = Modifier.width(8.dp))
 
-                // ベルマークボタン（自分の投稿以外かつ未送信のみ表示）
-                if (!isMyPost && !isAlreadySent) {
-                    CircularBellButton(
-                        onClick = {
-                            onBellClick(post)
-                        },
-                        modifier = Modifier.size(32.dp)
-                    )
+                // アクションボタン（自分の投稿以外のみ表示）
+                if (!isMyPost) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // インポートボタン（未インポートのみ表示）
+                        if (!isAlreadyImported) {
+                            CircularImportButton(
+                                onClick = {
+                                    onImportClick(post)
+                                },
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
+
+                        // ベルマークボタン（未送信のみ表示）
+                        if (!isAlreadySent) {
+                            CircularBellButton(
+                                onClick = {
+                                    onBellClick(post)
+                                },
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -587,14 +640,14 @@ private fun CircularBellButton(onClick: () -> Unit, modifier: Modifier = Modifie
     }
 
     Box(
-        modifier = modifier
+        modifier =
+        modifier
             .scale(scale)
             .shadow(
                 elevation = 6.dp,
                 shape = CircleShape,
                 ambientColor = ParrotYellow.copy(alpha = 0.2f)
-            )
-            .clip(CircleShape)
+            ).clip(CircleShape)
             .background(ParrotYellow)
             .clickable {
                 isPressed = true
@@ -612,6 +665,68 @@ private fun CircularBellButton(onClick: () -> Unit, modifier: Modifier = Modifie
 }
 
 /**
+ * 点線円形のインポートボタン
+ * フェッチするような下矢印アイコンとスタイリッシュなデザイン
+ */
+@Composable
+private fun CircularImportButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    // プレス時のスケールアニメーション
+    var isPressed by remember { mutableStateOf(false) }
+
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.9f else 1f,
+        animationSpec = spring(dampingRatio = 0.6f),
+        label = "scale"
+    )
+
+    // プレス状態を自動的にリセット
+    LaunchedEffect(isPressed) {
+        if (isPressed) {
+            delay(100)
+            isPressed = false
+        }
+    }
+
+    Box(
+        modifier =
+        modifier
+            .scale(scale)
+            .clip(CircleShape)
+            .clickable {
+                isPressed = true
+                onClick()
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        // 点線の円を描画
+        Canvas(modifier = Modifier.matchParentSize()) {
+            val strokeWidth = 2.dp.toPx()
+            val radius = (size.minDimension - strokeWidth) / 2
+            val center = Offset(size.width / 2, size.height / 2)
+
+            drawCircle(
+                color = Primary,
+                radius = radius,
+                center = center,
+                style =
+                Stroke(
+                    width = strokeWidth,
+                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 6f), 0f)
+                )
+            )
+        }
+
+        // 下矢印アイコン
+        Icon(
+            imageVector = CustomIcons.ArrowDownward,
+            contentDescription = "ことばをおぼえる",
+            tint = Primary,
+            modifier = Modifier.size(20.dp)
+        )
+    }
+}
+
+/**
  * リマインネット投稿詳細ボトムシート
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -620,10 +735,12 @@ private fun RemindNetPostDetailBottomSheet(
     post: RemindNetPost,
     onDismiss: () -> Unit,
     onBellClick: (RemindNetPost) -> Unit,
+    onImportClick: (RemindNetPost) -> Unit,
     onDeleteClick: (RemindNetPost) -> Unit,
     sheetState: androidx.compose.material3.SheetState,
     isAlreadySent: Boolean,
-    isMyPost: Boolean
+    isMyPost: Boolean,
+    isAlreadyImported: Boolean
 ) {
     ModalBottomSheet(
         dragHandle = null,
@@ -641,9 +758,11 @@ private fun RemindNetPostDetailBottomSheet(
             PostDetailCard(
                 post = post,
                 onBellClick = onBellClick,
+                onImportClick = onImportClick,
                 onDeleteClick = onDeleteClick,
                 isAlreadySent = isAlreadySent,
                 isMyPost = isMyPost,
+                isAlreadyImported = isAlreadyImported,
                 modifier =
                 Modifier
                     .fillMaxWidth()
@@ -671,9 +790,11 @@ private fun RemindNetPostDetailBottomSheet(
 private fun PostDetailCard(
     post: RemindNetPost,
     onBellClick: (RemindNetPost) -> Unit,
+    onImportClick: (RemindNetPost) -> Unit,
     onDeleteClick: (RemindNetPost) -> Unit,
     isAlreadySent: Boolean,
     isMyPost: Boolean,
+    isAlreadyImported: Boolean,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -704,7 +825,8 @@ private fun PostDetailCard(
             // ユーザー情報
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
             ) {
@@ -746,10 +868,12 @@ private fun PostDetailCard(
 
             // リマインダーテキスト
             Card(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
-                colors = CardDefaults.cardColors(
+                colors =
+                CardDefaults.cardColors(
                     containerColor = Secondary.copy(alpha = 0.08f) // 薄いグレー背景で読み取り専用感を演出
                 ),
                 shape = Shapes.large,
@@ -761,7 +885,8 @@ private fun PostDetailCard(
                     color = Secondary,
                     fontWeight = FontWeight.Bold,
                     lineHeight = MaterialTheme.typography.titleMedium.lineHeight,
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
                         .padding(20.dp)
                 )
@@ -769,43 +894,95 @@ private fun PostDetailCard(
 
             Spacer(Modifier.height(24.dp))
 
-            // ベルボタン（自分の投稿以外かつ未送信のみ表示）
-            if (!isMyPost && !isAlreadySent) {
-                ElevatedButton(
-                    onClick = { onBellClick(post) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                        .height(50.dp),
-                    shape = Shapes.large,
-                    colors = ButtonDefaults.elevatedButtonColors(
-                        containerColor = ParrotYellow,
-                        contentColor = White
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Notifications,
-                        contentDescription = "リマインドを送る",
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "リマインドを送る",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            } else if (isAlreadySent) {
-                Text(
-                    text = "リマインドを送信済み",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = Secondary.copy(alpha = 0.6f),
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-            } else if (isMyPost) {
+            // ベルボタンとインポートボタン（自分の投稿以外のみ表示）
+            if (!isMyPost) {
                 Column(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // リマインドボタン（未送信のみ）
+                    if (!isAlreadySent) {
+                        ElevatedButton(
+                            onClick = { onBellClick(post) },
+                            modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .height(50.dp),
+                            shape = Shapes.large,
+                            colors =
+                            ButtonDefaults.elevatedButtonColors(
+                                containerColor = ParrotYellow,
+                                contentColor = White
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Notifications,
+                                contentDescription = "リマインドを送る",
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "リマインドを送る",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    } else {
+                        Text(
+                            text = "リマインドを送信済み",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = Secondary.copy(alpha = 0.6f),
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+
+                    // インポートボタン（未インポートのみ表示）
+                    if (!isAlreadyImported) {
+                        ElevatedButton(
+                            onClick = { onImportClick(post) },
+                            modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .height(50.dp),
+                            shape = Shapes.large,
+                            colors =
+                            ButtonDefaults.elevatedButtonColors(
+                                containerColor = Primary,
+                                contentColor = White
+                            )
+                        ) {
+                            Icon(
+                                imageVector = CustomIcons.ArrowDownward,
+                                contentDescription = "ことばをおぼえる",
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "このことばをおぼえる",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    } else {
+                        Text(
+                            text = "すでにおぼえているよ",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = Secondary.copy(alpha = 0.6f),
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            } else {
+                Column(
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -833,11 +1010,13 @@ private fun PostDetailCard(
                     // 編集ボトムシートスタイルの削除ボタン
                     ElevatedButton(
                         onClick = { onDeleteClick(post) },
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .fillMaxWidth()
                             .height(50.dp),
                         shape = Shapes.large,
-                        colors = ButtonDefaults.elevatedButtonColors(
+                        colors =
+                        ButtonDefaults.elevatedButtonColors(
                             containerColor = Error,
                             contentColor = White
                         )
@@ -865,14 +1044,16 @@ private fun SimpleParrotInfoDisplay(
 ) {
     Card(
         modifier = modifier,
-        colors = CardDefaults.cardColors(
+        colors =
+        CardDefaults.cardColors(
             containerColor = White
         ),
         shape = RoundedCornerShape(20.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
     ) {
         Row(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -882,7 +1063,8 @@ private fun SimpleParrotInfoDisplay(
             Image(
                 painter = painterResource(Res.drawable.reminko_face),
                 contentDescription = "リマインコ",
-                modifier = Modifier
+                modifier =
+                Modifier
                     .size(48.dp)
                     .clip(CircleShape)
                     .background(ParrotYellow, CircleShape),
@@ -900,12 +1082,12 @@ private fun SimpleParrotInfoDisplay(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Box(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .background(
                                 Primary.copy(alpha = 0.15f),
                                 RoundedCornerShape(12.dp)
-                            )
-                            .padding(horizontal = 8.dp, vertical = 2.dp)
+                            ).padding(horizontal = 8.dp, vertical = 2.dp)
                     ) {
                         Text(
                             text = "Lv.${parrot.level}",
@@ -927,7 +1109,8 @@ private fun SimpleParrotInfoDisplay(
 
                 // 経験値ゲージ（アニメーション付き）
                 Box(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
                         .height(8.dp)
                         .clip(RoundedCornerShape(8.dp))
@@ -947,11 +1130,12 @@ private fun SimpleParrotInfoDisplay(
                     var skipAnimation by remember { mutableStateOf(false) }
 
                     // 現在の実際の進捗を計算
-                    val actualProgress = if (parrot.maxExperience > 0) {
-                        (parrot.currentExperience.toFloat() / parrot.maxExperience.toFloat()).coerceIn(0f, 1f)
-                    } else {
-                        0f
-                    }
+                    val actualProgress =
+                        if (parrot.maxExperience > 0) {
+                            (parrot.currentExperience.toFloat() / parrot.maxExperience.toFloat()).coerceIn(0f, 1f)
+                        } else {
+                            0f
+                        }
 
                     // レベルアップを検出
                     LaunchedEffect(parrot.level, parrot.currentExperience) {
@@ -977,7 +1161,8 @@ private fun SimpleParrotInfoDisplay(
                     // アニメーション付き進捗
                     val animatedProgress by animateFloatAsState(
                         targetValue = displayProgress,
-                        animationSpec = if (skipAnimation) {
+                        animationSpec =
+                        if (skipAnimation) {
                             tween(durationMillis = 0) // 即座に変更
                         } else {
                             tween(durationMillis = 800) // 通常のアニメーション
@@ -986,12 +1171,15 @@ private fun SimpleParrotInfoDisplay(
                     )
 
                     Box(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .fillMaxHeight()
                             .fillMaxWidth(fraction = animatedProgress)
                             .background(
-                                brush = androidx.compose.ui.graphics.Brush.horizontalGradient(
-                                    colors = listOf(
+                                brush =
+                                androidx.compose.ui.graphics.Brush.horizontalGradient(
+                                    colors =
+                                    listOf(
                                         ParrotYellow.copy(alpha = 0.8f),
                                         ParrotYellow
                                     )

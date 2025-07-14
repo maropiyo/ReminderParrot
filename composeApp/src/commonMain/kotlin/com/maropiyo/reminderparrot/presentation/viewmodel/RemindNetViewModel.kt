@@ -2,13 +2,16 @@ package com.maropiyo.reminderparrot.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.maropiyo.reminderparrot.data.datasource.local.NotificationHistoryLocalDataSource
 import com.maropiyo.reminderparrot.domain.entity.RemindNetPost
 import com.maropiyo.reminderparrot.domain.service.AuthService
 import com.maropiyo.reminderparrot.domain.usecase.AddParrotExperienceUseCase
+import com.maropiyo.reminderparrot.domain.usecase.CheckImportHistoryUseCase
+import com.maropiyo.reminderparrot.domain.usecase.CheckNotificationHistoryUseCase
+import com.maropiyo.reminderparrot.domain.usecase.ImportRemindNetPostUseCase
 import com.maropiyo.reminderparrot.domain.usecase.SendRemindNotificationUseCase
 import com.maropiyo.reminderparrot.domain.usecase.remindnet.DeleteRemindNetPostUseCase
 import com.maropiyo.reminderparrot.domain.usecase.remindnet.GetRemindNetPostsUseCase
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,10 +26,12 @@ class RemindNetViewModel(
     private val getRemindNetPostsUseCase: GetRemindNetPostsUseCase,
     private val sendRemindNotificationUseCase: SendRemindNotificationUseCase,
     private val authService: AuthService,
-    private val notificationHistoryLocalDataSource: NotificationHistoryLocalDataSource,
+    private val checkNotificationHistoryUseCase: CheckNotificationHistoryUseCase,
     private val deleteRemindNetPostUseCase: DeleteRemindNetPostUseCase,
     private val addParrotExperienceUseCase: AddParrotExperienceUseCase,
-    private val parrotViewModel: ParrotViewModel
+    private val parrotViewModel: ParrotViewModel,
+    private val importRemindNetPostUseCase: ImportRemindNetPostUseCase,
+    private val checkImportHistoryUseCase: CheckImportHistoryUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(RemindNetState())
@@ -67,30 +72,50 @@ class RemindNetViewModel(
                 .collect { posts ->
                     // 送信済み状態と自分の投稿も併せて取得
                     val currentUserId = authService.getCurrentUserId()
-                    val sentPostIds = if (currentUserId != null) {
-                        posts.filter { post ->
-                            notificationHistoryLocalDataSource.hasAlreadySent(post.id, currentUserId)
-                        }.map { it.id }.toSet()
-                    } else {
-                        emptySet()
-                    }
 
-                    val myPostIds = if (currentUserId != null) {
-                        posts.filter { post ->
+                    if (currentUserId != null) {
+                        // データベースクエリを並列で実行してUIスレッドの負荷を軽減
+                        val sentPostIdsDeferred = async {
+                            posts.filter { post ->
+                                checkNotificationHistoryUseCase(post.id, currentUserId)
+                            }.map { it.id }.toSet()
+                        }
+
+                        val importedPostIdsDeferred = async {
+                            posts.filter { post ->
+                                checkImportHistoryUseCase(post.id, currentUserId)
+                            }.map { it.id }.toSet()
+                        }
+
+                        val myPostIds = posts.filter { post ->
                             post.userId == currentUserId
                         }.map { it.id }.toSet()
-                    } else {
-                        emptySet()
-                    }
 
-                    _state.update {
-                        it.copy(
-                            posts = posts,
-                            isLoading = false,
-                            error = null,
-                            sentPostIds = sentPostIds,
-                            myPostIds = myPostIds
-                        )
+                        // 並列処理の結果を待つ
+                        val sentPostIds = sentPostIdsDeferred.await()
+                        val importedPostIds = importedPostIdsDeferred.await()
+
+                        _state.update {
+                            it.copy(
+                                posts = posts,
+                                isLoading = false,
+                                error = null,
+                                sentPostIds = sentPostIds,
+                                myPostIds = myPostIds,
+                                importedPostIds = importedPostIds
+                            )
+                        }
+                    } else {
+                        _state.update {
+                            it.copy(
+                                posts = posts,
+                                isLoading = false,
+                                error = null,
+                                sentPostIds = emptySet(),
+                                myPostIds = emptySet(),
+                                importedPostIds = emptySet()
+                            )
+                        }
                     }
                 }
         }
@@ -147,13 +172,11 @@ class RemindNetViewModel(
 
                 // 匿名認証でアカウントを作成
                 val userId = authService.getUserId()
-                println("RemindNetViewModel: アカウント作成成功 - UserId: $userId")
 
                 // アカウント作成成功後、投稿を読み込み
                 _needsAccountCreation.value = false
                 loadPosts()
             } catch (e: Exception) {
-                println("RemindNetViewModel: アカウント作成エラー: ${e.message}")
                 val errorMessage = when {
                     e.message?.contains("anonymous_provider_disabled") == true ->
                         "アカウントのせっていがひつようです。\nかんりしゃにれんらくしてください。"
@@ -189,18 +212,12 @@ class RemindNetViewModel(
                     // リマインド送信成功時に経験値+1
                     addParrotExperienceUseCase(1)
                         .onSuccess { updatedParrot ->
-                            println(
-                                "経験値を追加しました: +1 (現在: ${updatedParrot.currentExperience}/${updatedParrot.maxExperience})"
-                            )
                             // インコの状態表示をリアルタイムで更新
                             parrotViewModel.loadParrot()
                         }
                         .onFailure { exception ->
-                            println("経験値追加に失敗しました: ${exception.message}")
                             // 経験値追加の失敗はユーザーにエラーを表示しない（リマインド送信は成功している）
                         }
-
-                    println("リマインド通知を送信しました: ${post.userName}へ")
                 }
                 .onFailure { exception ->
                     _state.update {
@@ -224,7 +241,7 @@ class RemindNetViewModel(
      */
     suspend fun hasAlreadySent(postId: String): Boolean {
         val currentUserId = authService.getCurrentUserId() ?: return false
-        return notificationHistoryLocalDataSource.hasAlreadySent(postId, currentUserId)
+        return checkNotificationHistoryUseCase(postId, currentUserId)
     }
 
     /**
@@ -291,6 +308,59 @@ class RemindNetViewModel(
             }
         }
     }
+
+    /**
+     * リマインネット投稿をリマインダーとしてインポートする
+     * 他のインコの投稿を自分のインコに覚えさせる機能
+     */
+    fun importPost(post: RemindNetPost, onSuccess: () -> Unit = {}) {
+        viewModelScope.launch {
+            // 自分の投稿はインポートできない
+            if (isMyPost(post)) {
+                _state.update {
+                    it.copy(error = "じぶんのとうこうはおぼえられません")
+                }
+                return@launch
+            }
+
+            // 既にインポート済みの投稿はインポートできない（データベースから確認）
+            val currentUserId = authService.getCurrentUserId()
+            if (currentUserId != null && checkImportHistoryUseCase(post.id, currentUserId)) {
+                _state.update {
+                    it.copy(error = "すでにおぼえているよ")
+                }
+                return@launch
+            }
+
+            importRemindNetPostUseCase(post)
+                .onSuccess { importedReminder ->
+
+                    // インポート済みのpostIdをセットに追加（状態を即座に更新）
+                    _state.update { currentState ->
+                        currentState.copy(
+                            importedPostIds = currentState.importedPostIds + post.id
+                        )
+                    }
+
+                    // インコの状態表示をリアルタイムで更新（経験値+1が追加されている）
+                    parrotViewModel.loadParrot()
+
+                    // リマインダーリスト更新のためのコールバック実行
+                    onSuccess()
+
+                    _state.update {
+                        it.copy(error = null)
+                    }
+                }
+                .onFailure { exception ->
+                    _state.update {
+                        it.copy(
+                            error = "ことばをおぼえるのにしっぱいしました"
+                        )
+                    }
+                }
+        }
+    }
 }
 
 /**
@@ -301,5 +371,6 @@ data class RemindNetState(
     val isLoading: Boolean = false,
     val error: String? = null,
     val sentPostIds: Set<String> = emptySet(),
-    val myPostIds: Set<String> = emptySet()
+    val myPostIds: Set<String> = emptySet(),
+    val importedPostIds: Set<String> = emptySet()
 )
