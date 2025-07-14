@@ -21,6 +21,8 @@ import com.maropiyo.reminderparrot.domain.repository.RemindNetRepository
 import com.maropiyo.reminderparrot.domain.repository.ReminderRepository
 import com.maropiyo.reminderparrot.domain.usecase.AddParrotExperienceUseCase
 import com.maropiyo.reminderparrot.domain.usecase.CancelForgetNotificationUseCase
+import com.maropiyo.reminderparrot.domain.usecase.CheckImportHistoryUseCase
+import com.maropiyo.reminderparrot.domain.usecase.CheckNotificationHistoryUseCase
 import com.maropiyo.reminderparrot.domain.usecase.CreateReminderUseCase
 import com.maropiyo.reminderparrot.domain.usecase.DeleteExpiredRemindersUseCase
 import com.maropiyo.reminderparrot.domain.usecase.DeleteReminderUseCase
@@ -59,12 +61,12 @@ val appModule =
                 getRemindNetPostsUseCase = get(),
                 sendRemindNotificationUseCase = get(),
                 authService = get(),
-                notificationHistoryRepository = get(),
+                checkNotificationHistoryUseCase = get(),
                 deleteRemindNetPostUseCase = get(),
                 addParrotExperienceUseCase = get(),
                 parrotViewModel = get(),
                 importRemindNetPostUseCase = get(),
-                importHistoryRepository = get()
+                checkImportHistoryUseCase = get()
             )
         }
         single<SettingsViewModel> { SettingsViewModel(get(), get(), get()) }
@@ -107,6 +109,8 @@ val appModule =
                 importHistoryRepository = get()
             )
         }
+        single<CheckImportHistoryUseCase> { CheckImportHistoryUseCase(get()) }
+        single<CheckNotificationHistoryUseCase> { CheckNotificationHistoryUseCase(get()) }
 
         // Repository
         single<ReminderRepository> { ReminderRepositoryImpl(get()) }

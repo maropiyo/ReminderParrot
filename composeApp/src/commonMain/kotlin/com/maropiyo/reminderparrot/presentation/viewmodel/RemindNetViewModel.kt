@@ -3,8 +3,8 @@ package com.maropiyo.reminderparrot.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.maropiyo.reminderparrot.domain.entity.RemindNetPost
-import com.maropiyo.reminderparrot.domain.repository.ImportHistoryRepository
-import com.maropiyo.reminderparrot.domain.repository.NotificationHistoryRepository
+import com.maropiyo.reminderparrot.domain.usecase.CheckImportHistoryUseCase
+import com.maropiyo.reminderparrot.domain.usecase.CheckNotificationHistoryUseCase
 import com.maropiyo.reminderparrot.domain.service.AuthService
 import com.maropiyo.reminderparrot.domain.usecase.AddParrotExperienceUseCase
 import com.maropiyo.reminderparrot.domain.usecase.ImportRemindNetPostUseCase
@@ -25,12 +25,12 @@ class RemindNetViewModel(
     private val getRemindNetPostsUseCase: GetRemindNetPostsUseCase,
     private val sendRemindNotificationUseCase: SendRemindNotificationUseCase,
     private val authService: AuthService,
-    private val notificationHistoryRepository: NotificationHistoryRepository,
+    private val checkNotificationHistoryUseCase: CheckNotificationHistoryUseCase,
     private val deleteRemindNetPostUseCase: DeleteRemindNetPostUseCase,
     private val addParrotExperienceUseCase: AddParrotExperienceUseCase,
     private val parrotViewModel: ParrotViewModel,
     private val importRemindNetPostUseCase: ImportRemindNetPostUseCase,
-    private val importHistoryRepository: ImportHistoryRepository
+    private val checkImportHistoryUseCase: CheckImportHistoryUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(RemindNetState())
@@ -73,7 +73,7 @@ class RemindNetViewModel(
                     val currentUserId = authService.getCurrentUserId()
                     val sentPostIds = if (currentUserId != null) {
                         posts.filter { post ->
-                            notificationHistoryRepository.hasAlreadySent(post.id, currentUserId)
+                            checkNotificationHistoryUseCase(post.id, currentUserId)
                         }.map { it.id }.toSet()
                     } else {
                         emptySet()
@@ -89,7 +89,7 @@ class RemindNetViewModel(
 
                     val importedPostIds = if (currentUserId != null) {
                         posts.filter { post ->
-                            importHistoryRepository.hasAlreadyImported(post.id, currentUserId)
+                            checkImportHistoryUseCase(post.id, currentUserId)
                         }.map { it.id }.toSet()
                     } else {
                         emptySet()
@@ -229,7 +229,7 @@ class RemindNetViewModel(
      */
     suspend fun hasAlreadySent(postId: String): Boolean {
         val currentUserId = authService.getCurrentUserId() ?: return false
-        return notificationHistoryRepository.hasAlreadySent(postId, currentUserId)
+        return checkNotificationHistoryUseCase(postId, currentUserId)
     }
 
     /**
@@ -313,7 +313,7 @@ class RemindNetViewModel(
 
             // 既にインポート済みの投稿はインポートできない（データベースから確認）
             val currentUserId = authService.getCurrentUserId()
-            if (currentUserId != null && importHistoryRepository.hasAlreadyImported(post.id, currentUserId)) {
+            if (currentUserId != null && checkImportHistoryUseCase(post.id, currentUserId)) {
                 _state.update {
                     it.copy(error = "すでにおぼえているよ")
                 }
