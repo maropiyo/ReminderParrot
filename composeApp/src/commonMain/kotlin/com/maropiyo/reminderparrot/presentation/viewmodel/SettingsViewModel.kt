@@ -44,7 +44,7 @@ class SettingsViewModel(
     val isNameUpdateCooldown: StateFlow<Boolean> = _isNameUpdateCooldown.asStateFlow()
 
     private var lastNameUpdateTime = 0L
-    private val NAME_UPDATE_COOLDOWN_MS = 5000L // 5秒のクールダウン
+    private val NAME_UPDATE_COOLDOWN_MS = 2000L // 2秒のクールダウン
 
     init {
         loadSettings()
