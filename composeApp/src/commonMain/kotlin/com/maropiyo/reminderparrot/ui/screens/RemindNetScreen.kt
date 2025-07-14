@@ -313,20 +313,15 @@ fun RemindNetScreen(
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                     )
                     
-                    // 投稿リスト
-                    LazyColumn(
-                        state = listState,
-                        modifier = Modifier.fillMaxHeight(),
-                        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 100.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
+                    // 投稿リストまたは空状態
                     if (state.posts.isEmpty() && !state.isLoading) {
                         // 投稿がない場合の空状態表示
-                        item {
+                        Column(
+                            modifier = Modifier.fillMaxHeight()
+                        ) {
+                            Spacer(modifier = Modifier.weight(1f))
                             Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 64.dp),
+                                modifier = Modifier.fillMaxWidth(),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
@@ -340,32 +335,39 @@ fun RemindNetScreen(
                                     fontWeight = FontWeight.Bold
                                 )
                             }
+                            Spacer(modifier = Modifier.weight(1.5f))
                         }
                     } else {
                         // 投稿リスト
-                        items(state.posts, key = { it.id }) { post ->
-                            RemindNetPostCard(
-                            post = post,
-                            onBellClick = { clickedPost ->
-                                remindNetViewModel.sendRemindNotification(clickedPost)
-                            },
-                            onImportClick = { clickedPost ->
-                                remindNetViewModel.importPost(clickedPost) {
-                                    // インポート成功時のコールバック
-                                    onReminderImported()
-                                }
-                            },
-                            onCardClick = { clickedPost ->
-                                selectedPost = clickedPost
-                                showPostDetailBottomSheet = true
-                            },
-                            isAlreadySent = state.sentPostIds.contains(post.id),
-                            isMyPost = state.myPostIds.contains(post.id),
-                            isAlreadyImported = state.importedPostIds.contains(post.id)
-                        )
+                        LazyColumn(
+                            state = listState,
+                            modifier = Modifier.fillMaxHeight(),
+                            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 100.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(state.posts, key = { it.id }) { post ->
+                                RemindNetPostCard(
+                                post = post,
+                                onBellClick = { clickedPost ->
+                                    remindNetViewModel.sendRemindNotification(clickedPost)
+                                },
+                                onImportClick = { clickedPost ->
+                                    remindNetViewModel.importPost(clickedPost) {
+                                        // インポート成功時のコールバック
+                                        onReminderImported()
+                                    }
+                                },
+                                onCardClick = { clickedPost ->
+                                    selectedPost = clickedPost
+                                    showPostDetailBottomSheet = true
+                                },
+                                isAlreadySent = state.sentPostIds.contains(post.id),
+                                isMyPost = state.myPostIds.contains(post.id),
+                                isAlreadyImported = state.importedPostIds.contains(post.id)
+                            )
+                            }
                         }
                     }
-                }
                 }
             }
 
