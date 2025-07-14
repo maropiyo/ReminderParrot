@@ -11,6 +11,7 @@ import com.maropiyo.reminderparrot.domain.usecase.ImportRemindNetPostUseCase
 import com.maropiyo.reminderparrot.domain.usecase.SendRemindNotificationUseCase
 import com.maropiyo.reminderparrot.domain.usecase.remindnet.DeleteRemindNetPostUseCase
 import com.maropiyo.reminderparrot.domain.usecase.remindnet.GetRemindNetPostsUseCase
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -71,39 +72,50 @@ class RemindNetViewModel(
                 .collect { posts ->
                     // 送信済み状態と自分の投稿も併せて取得
                     val currentUserId = authService.getCurrentUserId()
-                    val sentPostIds = if (currentUserId != null) {
-                        posts.filter { post ->
-                            checkNotificationHistoryUseCase(post.id, currentUserId)
-                        }.map { it.id }.toSet()
-                    } else {
-                        emptySet()
-                    }
 
-                    val myPostIds = if (currentUserId != null) {
-                        posts.filter { post ->
+                    if (currentUserId != null) {
+                        // データベースクエリを並列で実行してUIスレッドの負荷を軽減
+                        val sentPostIdsDeferred = async {
+                            posts.filter { post ->
+                                checkNotificationHistoryUseCase(post.id, currentUserId)
+                            }.map { it.id }.toSet()
+                        }
+
+                        val importedPostIdsDeferred = async {
+                            posts.filter { post ->
+                                checkImportHistoryUseCase(post.id, currentUserId)
+                            }.map { it.id }.toSet()
+                        }
+
+                        val myPostIds = posts.filter { post ->
                             post.userId == currentUserId
                         }.map { it.id }.toSet()
-                    } else {
-                        emptySet()
-                    }
 
-                    val importedPostIds = if (currentUserId != null) {
-                        posts.filter { post ->
-                            checkImportHistoryUseCase(post.id, currentUserId)
-                        }.map { it.id }.toSet()
-                    } else {
-                        emptySet()
-                    }
+                        // 並列処理の結果を待つ
+                        val sentPostIds = sentPostIdsDeferred.await()
+                        val importedPostIds = importedPostIdsDeferred.await()
 
-                    _state.update {
-                        it.copy(
-                            posts = posts,
-                            isLoading = false,
-                            error = null,
-                            sentPostIds = sentPostIds,
-                            myPostIds = myPostIds,
-                            importedPostIds = importedPostIds
-                        )
+                        _state.update {
+                            it.copy(
+                                posts = posts,
+                                isLoading = false,
+                                error = null,
+                                sentPostIds = sentPostIds,
+                                myPostIds = myPostIds,
+                                importedPostIds = importedPostIds
+                            )
+                        }
+                    } else {
+                        _state.update {
+                            it.copy(
+                                posts = posts,
+                                isLoading = false,
+                                error = null,
+                                sentPostIds = emptySet(),
+                                myPostIds = emptySet(),
+                                importedPostIds = emptySet()
+                            )
+                        }
                     }
                 }
         }
