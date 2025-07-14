@@ -23,7 +23,7 @@ class SendRemindNotificationUseCase(
             ?: return Result.failure(Exception("ユーザーがログインしていません"))
 
         val currentUserName = authService.getDisplayName()
-            ?: "名無しのインコさん"
+            ?: "ひよっこインコ"
 
         // 自分の投稿には通知を送らない
         if (post.userId == currentUserId) {
