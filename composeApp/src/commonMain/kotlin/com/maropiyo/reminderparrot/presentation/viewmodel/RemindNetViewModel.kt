@@ -3,10 +3,10 @@ package com.maropiyo.reminderparrot.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.maropiyo.reminderparrot.domain.entity.RemindNetPost
-import com.maropiyo.reminderparrot.domain.usecase.CheckImportHistoryUseCase
-import com.maropiyo.reminderparrot.domain.usecase.CheckNotificationHistoryUseCase
 import com.maropiyo.reminderparrot.domain.service.AuthService
 import com.maropiyo.reminderparrot.domain.usecase.AddParrotExperienceUseCase
+import com.maropiyo.reminderparrot.domain.usecase.CheckImportHistoryUseCase
+import com.maropiyo.reminderparrot.domain.usecase.CheckNotificationHistoryUseCase
 import com.maropiyo.reminderparrot.domain.usecase.ImportRemindNetPostUseCase
 import com.maropiyo.reminderparrot.domain.usecase.SendRemindNotificationUseCase
 import com.maropiyo.reminderparrot.domain.usecase.remindnet.DeleteRemindNetPostUseCase
