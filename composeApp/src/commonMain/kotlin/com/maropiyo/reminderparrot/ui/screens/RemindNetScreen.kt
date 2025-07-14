@@ -2,6 +2,7 @@ package com.maropiyo.reminderparrot.ui.screens
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -68,6 +69,7 @@ import com.maropiyo.reminderparrot.domain.usecase.RegisterPushNotificationTokenU
 import com.maropiyo.reminderparrot.presentation.viewmodel.ParrotViewModel
 import com.maropiyo.reminderparrot.presentation.viewmodel.RemindNetViewModel
 import com.maropiyo.reminderparrot.ui.components.AccountCreationBottomSheet
+import com.maropiyo.reminderparrot.ui.components.home.LevelUpDialog
 import com.maropiyo.reminderparrot.ui.theme.Background
 import com.maropiyo.reminderparrot.ui.theme.Error
 import com.maropiyo.reminderparrot.ui.theme.ParrotYellow
@@ -109,6 +111,10 @@ fun RemindNetScreen(
     var newPostNotificationCount by remember { mutableStateOf(0) }
     var showNewPostNotification by remember { mutableStateOf(false) }
 
+    // レベルアップポップアップの表示状態
+    var showLevelUpPopup by remember { mutableStateOf(false) }
+    var previousLevel by remember { mutableStateOf(parrotState.parrot.level) }
+
     // ユーザーがスクロール中かどうかを判定
     val isAtTop by remember {
         derivedStateOf {
@@ -137,6 +143,18 @@ fun RemindNetScreen(
     // 画面に遷移した時に投稿を再取得
     LaunchedEffect(Unit) {
         remindNetViewModel.onScreenEntered()
+    }
+
+    // レベルアップを検出
+    LaunchedEffect(parrotState.parrot.level) {
+        if (parrotState.parrot.level > previousLevel) {
+            // 経験値ゲージのアニメーション完了を待つ
+            delay(1000)
+
+            // レベルアップポップアップを表示
+            showLevelUpPopup = true
+            previousLevel = parrotState.parrot.level
+        }
     }
 
     // ユーザーがスクロール位置を変更したことを検出
@@ -400,6 +418,13 @@ fun RemindNetScreen(
                 isMyPost = selectedPost?.let { state.myPostIds.contains(it.id) } ?: false
             )
         }
+
+        // レベルアップダイアログ（画面全体をマスク）
+        LevelUpDialog(
+            isVisible = showLevelUpPopup,
+            parrot = parrotState.parrot,
+            onDismiss = { showLevelUpPopup = false }
+        )
     }
 }
 
@@ -900,7 +925,7 @@ private fun SimpleParrotInfoDisplay(
                     )
                 }
 
-                // 経験値ゲージ
+                // 経験値ゲージ（アニメーション付き）
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -908,19 +933,62 @@ private fun SimpleParrotInfoDisplay(
                         .clip(RoundedCornerShape(8.dp))
                         .background(Secondary.copy(alpha = 0.1f))
                 ) {
+                    // 前回のレベルを記憶
+                    var previousLevel by remember { mutableStateOf(parrot.level) }
+                    var displayProgress by remember {
+                        mutableStateOf(
+                            if (parrot.maxExperience > 0) {
+                                parrot.currentExperience.toFloat() / parrot.maxExperience.toFloat()
+                            } else {
+                                0f
+                            }
+                        )
+                    }
+                    var skipAnimation by remember { mutableStateOf(false) }
+
+                    // 現在の実際の進捗を計算
+                    val actualProgress = if (parrot.maxExperience > 0) {
+                        (parrot.currentExperience.toFloat() / parrot.maxExperience.toFloat()).coerceIn(0f, 1f)
+                    } else {
+                        0f
+                    }
+
+                    // レベルアップを検出
+                    LaunchedEffect(parrot.level, parrot.currentExperience) {
+                        if (parrot.level > previousLevel) {
+                            // レベルアップした場合、まず100%まで上昇させる
+                            skipAnimation = false
+                            displayProgress = 1f
+                            kotlinx.coroutines.delay(800) // アニメーション完了まで待機
+
+                            previousLevel = parrot.level
+                            // 新レベルの初期値に即座にリセット（アニメーションなし）
+                            skipAnimation = true
+                            displayProgress = actualProgress
+                            // 次回のアニメーションを有効にする
+                            kotlinx.coroutines.delay(50)
+                            skipAnimation = false
+                        } else {
+                            // 通常の経験値増加
+                            displayProgress = actualProgress
+                        }
+                    }
+
+                    // アニメーション付き進捗
+                    val animatedProgress by animateFloatAsState(
+                        targetValue = displayProgress,
+                        animationSpec = if (skipAnimation) {
+                            tween(durationMillis = 0) // 即座に変更
+                        } else {
+                            tween(durationMillis = 800) // 通常のアニメーション
+                        },
+                        label = "experience_progress_remindnet"
+                    )
+
                     Box(
                         modifier = Modifier
                             .fillMaxHeight()
-                            .fillMaxWidth(
-                                fraction = if (parrot.maxExperience > 0) {
-                                    (parrot.currentExperience.toFloat() / parrot.maxExperience.toFloat()).coerceIn(
-                                        0f,
-                                        1f
-                                    )
-                                } else {
-                                    0f
-                                }
-                            )
+                            .fillMaxWidth(fraction = animatedProgress)
                             .background(
                                 brush = androidx.compose.ui.graphics.Brush.horizontalGradient(
                                     colors = listOf(
