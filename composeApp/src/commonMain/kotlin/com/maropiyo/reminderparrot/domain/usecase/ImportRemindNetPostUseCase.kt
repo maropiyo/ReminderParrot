@@ -1,9 +1,9 @@
 package com.maropiyo.reminderparrot.domain.usecase
 
-import com.maropiyo.reminderparrot.data.datasource.local.ImportHistoryLocalDataSource
 import com.maropiyo.reminderparrot.domain.common.UuidGenerator
 import com.maropiyo.reminderparrot.domain.entity.RemindNetPost
 import com.maropiyo.reminderparrot.domain.entity.Reminder
+import com.maropiyo.reminderparrot.domain.repository.ImportHistoryRepository
 import com.maropiyo.reminderparrot.domain.repository.ParrotRepository
 import com.maropiyo.reminderparrot.domain.repository.ReminderRepository
 import com.maropiyo.reminderparrot.domain.service.AuthService
@@ -23,7 +23,7 @@ import kotlinx.datetime.Clock
  * @property getUserSettingsUseCase ユーザー設定取得ユースケース
  * @property addParrotExperienceUseCase インコ経験値追加ユースケース
  * @property authService 認証サービス
- * @property importHistoryLocalDataSource インポート履歴データソース
+ * @property importHistoryRepository インポート履歴リポジトリ
  */
 class ImportRemindNetPostUseCase(
     private val reminderRepository: ReminderRepository,
@@ -33,7 +33,7 @@ class ImportRemindNetPostUseCase(
     private val getUserSettingsUseCase: GetUserSettingsUseCase,
     private val addParrotExperienceUseCase: AddParrotExperienceUseCase,
     private val authService: AuthService,
-    private val importHistoryLocalDataSource: ImportHistoryLocalDataSource
+    private val importHistoryRepository: ImportHistoryRepository
 ) {
     /**
      * リマインネット投稿をリマインダーとしてインポートする
@@ -48,7 +48,7 @@ class ImportRemindNetPostUseCase(
                 ?: return Result.failure(IllegalStateException("ユーザーが認証されていません"))
 
             // 既にインポート済みかチェック
-            if (importHistoryLocalDataSource.hasAlreadyImported(post.id, currentUserId)) {
+            if (importHistoryRepository.hasAlreadyImported(post.id, currentUserId)) {
                 return Result.failure(IllegalStateException("すでにおぼえているよ"))
             }
 
@@ -83,7 +83,7 @@ class ImportRemindNetPostUseCase(
             if (createResult.isSuccess) {
                 try {
                     // インポート履歴を記録
-                    importHistoryLocalDataSource.recordImportHistory(post.id, currentUserId)
+                    importHistoryRepository.recordImportHistory(post.id, currentUserId)
 
                     // 忘却通知をスケジュール
                     notificationService.scheduleForgetNotification(createResult.getOrThrow())

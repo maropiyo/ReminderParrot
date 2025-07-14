@@ -8,10 +8,14 @@ import com.maropiyo.reminderparrot.data.datasource.local.ReminderLocalDataSource
 import com.maropiyo.reminderparrot.data.datasource.remote.RemindNetRemoteDataSource
 import com.maropiyo.reminderparrot.data.mapper.ParrotMapper
 import com.maropiyo.reminderparrot.data.mapper.ReminderMapper
+import com.maropiyo.reminderparrot.data.repository.ImportHistoryRepositoryImpl
+import com.maropiyo.reminderparrot.data.repository.NotificationHistoryRepositoryImpl
 import com.maropiyo.reminderparrot.data.repository.ParrotRepositoryImpl
 import com.maropiyo.reminderparrot.data.repository.RemindNetRepositoryImpl
 import com.maropiyo.reminderparrot.data.repository.ReminderRepositoryImpl
 import com.maropiyo.reminderparrot.domain.common.UuidGenerator
+import com.maropiyo.reminderparrot.domain.repository.ImportHistoryRepository
+import com.maropiyo.reminderparrot.domain.repository.NotificationHistoryRepository
 import com.maropiyo.reminderparrot.domain.repository.ParrotRepository
 import com.maropiyo.reminderparrot.domain.repository.RemindNetRepository
 import com.maropiyo.reminderparrot.domain.repository.ReminderRepository
@@ -50,7 +54,19 @@ val appModule =
             ReminderListViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
         }
         single<ParrotViewModel> { ParrotViewModel(get()) }
-        single<RemindNetViewModel> { RemindNetViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+        single<RemindNetViewModel> {
+            RemindNetViewModel(
+                getRemindNetPostsUseCase = get(),
+                sendRemindNotificationUseCase = get(),
+                authService = get(),
+                notificationHistoryRepository = get(),
+                deleteRemindNetPostUseCase = get(),
+                addParrotExperienceUseCase = get(),
+                parrotViewModel = get(),
+                importRemindNetPostUseCase = get(),
+                importHistoryRepository = get()
+            )
+        }
         single<SettingsViewModel> { SettingsViewModel(get(), get(), get()) }
 
         // UseCase
@@ -81,14 +97,14 @@ val appModule =
         single<SignInAnonymouslyUseCase> { SignInAnonymouslyUseCase(get()) }
         single<ImportRemindNetPostUseCase> {
             ImportRemindNetPostUseCase(
-                get(),
-                get(),
-                get(),
-                get(),
-                get(),
-                get(),
-                get(),
-                get()
+                reminderRepository = get(),
+                parrotRepository = get(),
+                uuidGenerator = get(),
+                notificationService = get(),
+                getUserSettingsUseCase = get(),
+                addParrotExperienceUseCase = get(),
+                authService = get(),
+                importHistoryRepository = get()
             )
         }
 
@@ -96,6 +112,8 @@ val appModule =
         single<ReminderRepository> { ReminderRepositoryImpl(get()) }
         single<ParrotRepository> { ParrotRepositoryImpl(get()) }
         single<RemindNetRepository> { RemindNetRepositoryImpl(get()) }
+        single<ImportHistoryRepository> { ImportHistoryRepositoryImpl(get()) }
+        single<NotificationHistoryRepository> { NotificationHistoryRepositoryImpl(get()) }
 
         // Mapper
         single { ReminderMapper() }
