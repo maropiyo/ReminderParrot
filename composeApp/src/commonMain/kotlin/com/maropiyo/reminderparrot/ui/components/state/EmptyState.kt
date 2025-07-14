@@ -7,6 +7,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import com.maropiyo.reminderparrot.ui.theme.Secondary
 
 /**
  * 空の状態を表示するコンポーネント
@@ -21,7 +23,9 @@ fun EmptyState(emptyMessage: String, modifier: Modifier = Modifier) {
     ) {
         Text(
             text = emptyMessage,
-            style = MaterialTheme.typography.bodyLarge
+            style = MaterialTheme.typography.titleMedium,
+            color = Secondary,
+            fontWeight = FontWeight.Bold
         )
     }
 }
