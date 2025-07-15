@@ -235,10 +235,6 @@ fun RemindNetScreen(
                     errorTitle = "もうおぼえられないよ〜"
                     errorMessage = "レベルをあげてもっとかしこくなろう！"
                 }
-                "すでにおぼえているよ" -> {
-                    errorTitle = "あれれ？"
-                    errorMessage = "すでにおぼえているよ"
-                }
                 else -> {
                     errorTitle = "あれれ？"
                     errorMessage = error
@@ -1021,15 +1017,6 @@ private fun PostDetailCard(
                                 fontWeight = FontWeight.Bold
                             )
                         }
-                    } else {
-                        Text(
-                            text = "すでにおぼえているよ",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = Secondary.copy(alpha = 0.6f),
-                            fontWeight = FontWeight.Medium,
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center
-                        )
                     }
                 }
             } else {

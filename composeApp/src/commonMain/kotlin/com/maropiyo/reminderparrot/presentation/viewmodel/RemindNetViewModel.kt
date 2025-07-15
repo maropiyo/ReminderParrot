@@ -326,9 +326,7 @@ class RemindNetViewModel(
             // 既にインポート済みの投稿はインポートできない（データベースから確認）
             val currentUserId = authService.getCurrentUserId()
             if (currentUserId != null && checkImportHistoryUseCase(post.id, currentUserId)) {
-                _state.update {
-                    it.copy(error = "すでにおぼえているよ")
-                }
+                // 既にインポート済みの場合は何もしない（エラーメッセージを表示しない）
                 return@launch
             }
 
@@ -355,11 +353,13 @@ class RemindNetViewModel(
                 .onFailure { exception ->
                     val errorMessage = when (exception.message) {
                         "もうおぼえられないよ〜" -> "もうおぼえられないよ〜"
-                        "すでにおぼえているよ" -> "すでにおぼえているよ"
+                        "すでにおぼえているよ" -> null // エラーメッセージを表示しない
                         else -> "ことばをおぼえるのにしっぱいしました"
                     }
-                    _state.update {
-                        it.copy(error = errorMessage)
+                    if (errorMessage != null) {
+                        _state.update {
+                            it.copy(error = errorMessage)
+                        }
                     }
                 }
         }
