@@ -596,15 +596,39 @@ private fun RemindNetPostCard(
                 Column(
                     modifier = Modifier.weight(1f)
                 ) {
-                    // ユーザー名
-                    Text(
-                        text = post.userName,
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = Secondary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        // ユーザー名
+                        Text(
+                            text = post.userName,
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = Secondary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+
+                        // あなたの投稿
+                        if (isMyPost) {
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        color = Secondary.copy(alpha = 0.1f),
+                                        shape = RoundedCornerShape(16.dp)
+                                    )
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Text(
+                                    text = "あなた",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = Secondary,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
+                    }
 
                     // 投稿時間
                     Text(
@@ -896,13 +920,37 @@ private fun PostDetailCard(
                 Column(
                     modifier = Modifier.weight(1f)
                 ) {
-                    // ユーザー名
-                    Text(
-                        text = post.userName,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = Secondary
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        // ユーザー名
+                        Text(
+                            text = post.userName,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = Secondary
+                        )
+
+                        // スマートな投稿者表示
+                        if (isMyPost) {
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        color = Secondary.copy(alpha = 0.1f),
+                                        shape = RoundedCornerShape(16.dp)
+                                    )
+                                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                            ) {
+                                Text(
+                                    text = "あなた",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Secondary,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
+                    }
 
                     // 投稿時間
                     Text(
@@ -1027,26 +1075,6 @@ private fun PostDetailCard(
                         .padding(horizontal = 16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // スマートな投稿者表示
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = null,
-                            tint = Secondary,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = "あなたの投稿",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Secondary,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-
                     // 編集ボトムシートスタイルの削除ボタン
                     ElevatedButton(
                         onClick = { onDeleteClick(post) },
@@ -1062,7 +1090,7 @@ private fun PostDetailCard(
                         )
                     ) {
                         Text(
-                            text = "わすれる",
+                            text = "さくじょ",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )
