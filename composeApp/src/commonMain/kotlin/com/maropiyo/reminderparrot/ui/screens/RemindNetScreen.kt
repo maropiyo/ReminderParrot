@@ -1027,15 +1027,6 @@ private fun PostDetailCard(
                                 fontWeight = FontWeight.Bold
                             )
                         }
-                    } else {
-                        Text(
-                            text = "リマインドを送信済み",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = Secondary.copy(alpha = 0.6f),
-                            fontWeight = FontWeight.Medium,
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center
-                        )
                     }
 
                     // インポートボタン（未インポートのみ表示）
