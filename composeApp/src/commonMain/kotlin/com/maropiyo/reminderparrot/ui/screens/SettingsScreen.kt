@@ -112,7 +112,6 @@ fun SettingsScreen() {
             errorTitle = "あれれ？"
             errorMessage = error
             showErrorBottomSheet = true
-            viewModel.clearNameUpdateError()
         }
     }
 
@@ -482,6 +481,7 @@ fun SettingsScreen() {
                         scope.launch {
                             errorSheetState.hide()
                             showErrorBottomSheet = false
+                            viewModel.clearNameUpdateError()
                         }
                     },
                     sheetState = errorSheetState

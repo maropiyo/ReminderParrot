@@ -58,7 +58,7 @@ class ImportRemindNetPostUseCase(
             if (remindersResult.isFailure || parrotResult.isFailure) {
                 return Result.failure(Exception("記憶容量チェックに失敗しました"))
             }
-            
+
             val currentReminderCount = remindersResult.getOrThrow().size
             val memorizedWords = parrotResult.getOrThrow().memorizedWords
             if (currentReminderCount >= memorizedWords) {

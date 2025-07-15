@@ -245,7 +245,6 @@ fun RemindNetScreen(
                 }
             }
             showErrorBottomSheet = true
-            remindNetViewModel.clearError()
         }
     }
 
@@ -336,7 +335,7 @@ fun RemindNetScreen(
                         color = Secondary,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                     )
-                    
+
                     // 投稿リストまたは空状態
                     if (state.posts.isEmpty() && !state.isLoading) {
                         // 投稿がない場合の空状態表示
@@ -371,24 +370,24 @@ fun RemindNetScreen(
                         ) {
                             items(state.posts, key = { it.id }) { post ->
                                 RemindNetPostCard(
-                                post = post,
-                                onBellClick = { clickedPost ->
-                                    remindNetViewModel.sendRemindNotification(clickedPost)
-                                },
-                                onImportClick = { clickedPost ->
-                                    remindNetViewModel.importPost(clickedPost) {
-                                        // インポート成功時のコールバック
-                                        onReminderImported()
-                                    }
-                                },
-                                onCardClick = { clickedPost ->
-                                    selectedPost = clickedPost
-                                    showPostDetailBottomSheet = true
-                                },
-                                isAlreadySent = state.sentPostIds.contains(post.id),
-                                isMyPost = state.myPostIds.contains(post.id),
-                                isAlreadyImported = state.importedPostIds.contains(post.id)
-                            )
+                                    post = post,
+                                    onBellClick = { clickedPost ->
+                                        remindNetViewModel.sendRemindNotification(clickedPost)
+                                    },
+                                    onImportClick = { clickedPost ->
+                                        remindNetViewModel.importPost(clickedPost) {
+                                            // インポート成功時のコールバック
+                                            onReminderImported()
+                                        }
+                                    },
+                                    onCardClick = { clickedPost ->
+                                        selectedPost = clickedPost
+                                        showPostDetailBottomSheet = true
+                                    },
+                                    isAlreadySent = state.sentPostIds.contains(post.id),
+                                    isMyPost = state.myPostIds.contains(post.id),
+                                    isAlreadyImported = state.importedPostIds.contains(post.id)
+                                )
                             }
                         }
                     }
@@ -496,6 +495,7 @@ fun RemindNetScreen(
                     scope.launch {
                         errorSheetState.hide()
                         showErrorBottomSheet = false
+                        remindNetViewModel.clearError()
                     }
                 },
                 sheetState = errorSheetState
