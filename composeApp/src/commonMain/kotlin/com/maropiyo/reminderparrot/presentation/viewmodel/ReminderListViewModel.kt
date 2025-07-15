@@ -67,8 +67,9 @@ class ReminderListViewModel(
      * リマインダーを作成する
      *
      * @param text リマインダーのテキスト
+     * @param onExperienceAdded 経験値加算完了時のコールバック
      */
-    fun createReminder(text: String) {
+    fun createReminder(text: String, onExperienceAdded: (() -> Unit)? = null) {
         viewModelScope.launch {
             createReminderUseCase(text)
                 .onSuccess { reminder ->
@@ -83,6 +84,16 @@ class ReminderListViewModel(
                     }
                     // インコの経験値を追加（+1）
                     addParrotExperienceUseCase()
+                        .onSuccess {
+                            // 経験値加算成功時のコールバック実行
+                            onExperienceAdded?.invoke()
+                        }
+                        .onFailure { exception ->
+                            // 経験値加算失敗をログに記録（UI表示はしない）
+                            println("経験値加算に失敗しました: ${exception.message}")
+                            // 失敗してもコールバックは実行する（リマインダー作成自体は成功）
+                            onExperienceAdded?.invoke()
+                        }
 
                     // 設定を確認してリマインネットに投稿するかどうかを決める
                     val settings = getUserSettingsUseCase()
