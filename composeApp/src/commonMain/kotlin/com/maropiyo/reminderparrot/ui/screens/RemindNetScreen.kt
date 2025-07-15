@@ -75,6 +75,7 @@ import com.maropiyo.reminderparrot.domain.usecase.RegisterPushNotificationTokenU
 import com.maropiyo.reminderparrot.presentation.viewmodel.ParrotViewModel
 import com.maropiyo.reminderparrot.presentation.viewmodel.RemindNetViewModel
 import com.maropiyo.reminderparrot.ui.components.AccountCreationBottomSheet
+import com.maropiyo.reminderparrot.ui.components.ErrorMessageBottomSheet
 import com.maropiyo.reminderparrot.ui.components.home.LevelUpDialog
 import com.maropiyo.reminderparrot.ui.icons.CustomIcons
 import com.maropiyo.reminderparrot.ui.theme.Background
@@ -144,6 +145,15 @@ fun RemindNetScreen(
     var selectedPost by remember { mutableStateOf<RemindNetPost?>(null) }
     var showPostDetailBottomSheet by remember { mutableStateOf(false) }
     val postDetailSheetState =
+        rememberModalBottomSheetState(
+            skipPartiallyExpanded = true
+        )
+
+    // エラーメッセージボトムシートの状態
+    var showErrorBottomSheet by remember { mutableStateOf(false) }
+    var errorTitle by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf("") }
+    val errorSheetState =
         rememberModalBottomSheetState(
             skipPartiallyExpanded = true
         )
@@ -220,7 +230,21 @@ fun RemindNetScreen(
     // エラー表示
     LaunchedEffect(state.error) {
         state.error?.let { error ->
-            snackbarHostState.showSnackbar(error)
+            when (error) {
+                "もうおぼえられないよ〜" -> {
+                    errorTitle = "もうおぼえられないよ〜"
+                    errorMessage = "レベルをあげてもっとかしこくなろう！"
+                }
+                "すでにおぼえているよ" -> {
+                    errorTitle = "あれれ？"
+                    errorMessage = "すでにおぼえているよ"
+                }
+                else -> {
+                    errorTitle = "あれれ？"
+                    errorMessage = error
+                }
+            }
+            showErrorBottomSheet = true
             remindNetViewModel.clearError()
         }
     }
@@ -460,6 +484,21 @@ fun RemindNetScreen(
                 isAlreadySent = selectedPost?.let { state.sentPostIds.contains(it.id) } ?: false,
                 isMyPost = selectedPost?.let { state.myPostIds.contains(it.id) } ?: false,
                 isAlreadyImported = selectedPost?.let { state.importedPostIds.contains(it.id) } ?: false
+            )
+        }
+
+        // エラーメッセージボトムシート
+        if (showErrorBottomSheet) {
+            ErrorMessageBottomSheet(
+                title = errorTitle,
+                message = errorMessage,
+                onDismiss = {
+                    scope.launch {
+                        errorSheetState.hide()
+                        showErrorBottomSheet = false
+                    }
+                },
+                sheetState = errorSheetState
             )
         }
 

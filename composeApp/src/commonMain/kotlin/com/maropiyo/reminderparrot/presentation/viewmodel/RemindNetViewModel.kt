@@ -353,10 +353,13 @@ class RemindNetViewModel(
                     }
                 }
                 .onFailure { exception ->
+                    val errorMessage = when (exception.message) {
+                        "もうおぼえられないよ〜" -> "もうおぼえられないよ〜"
+                        "すでにおぼえているよ" -> "すでにおぼえているよ"
+                        else -> "ことばをおぼえるのにしっぱいしました"
+                    }
                     _state.update {
-                        it.copy(
-                            error = "ことばをおぼえるのにしっぱいしました"
-                        )
+                        it.copy(error = errorMessage)
                     }
                 }
         }
