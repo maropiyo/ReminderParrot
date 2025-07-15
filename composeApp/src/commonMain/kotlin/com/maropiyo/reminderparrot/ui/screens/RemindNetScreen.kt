@@ -1002,62 +1002,72 @@ private fun PostDetailCard(
                         .padding(horizontal = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    // リマインドボタン（未送信のみ）
-                    if (!isAlreadySent) {
-                        ElevatedButton(
-                            onClick = { onBellClick(post) },
-                            modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .height(50.dp),
-                            shape = Shapes.large,
-                            colors =
-                            ButtonDefaults.elevatedButtonColors(
-                                containerColor = ParrotYellow,
-                                contentColor = White
-                            )
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Notifications,
-                                contentDescription = "リマインドをおくる",
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "リマインドをおくる",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
+                    // リマインドボタン
+                    ElevatedButton(
+                        onClick = { 
+                            if (!isAlreadySent) {
+                                onBellClick(post)
+                            }
+                        },
+                        modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(50.dp),
+                        shape = Shapes.large,
+                        enabled = !isAlreadySent,
+                        colors =
+                        ButtonDefaults.elevatedButtonColors(
+                            containerColor = if (isAlreadySent) ParrotYellow.copy(alpha = 0.3f) else ParrotYellow,
+                            contentColor = if (isAlreadySent) White.copy(alpha = 0.5f) else White,
+                            disabledContainerColor = ParrotYellow.copy(alpha = 0.3f),
+                            disabledContentColor = White.copy(alpha = 0.5f)
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Notifications,
+                            contentDescription = "リマインドをおくる",
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = if (isAlreadySent) "リマインドそうしんずみ" else "リマインドをおくる",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
 
-                    // インポートボタン（未インポートのみ表示）
-                    if (!isAlreadyImported) {
-                        ElevatedButton(
-                            onClick = { onImportClick(post) },
-                            modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .height(50.dp),
-                            shape = Shapes.large,
-                            colors =
-                            ButtonDefaults.elevatedButtonColors(
-                                containerColor = Primary,
-                                contentColor = White
-                            )
-                        ) {
-                            Icon(
-                                imageVector = CustomIcons.ArrowDownward,
-                                contentDescription = "ことばをおぼえる",
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "このことばをおぼえる",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
+                    // インポートボタン
+                    ElevatedButton(
+                        onClick = { 
+                            if (!isAlreadyImported) {
+                                onImportClick(post)
+                            }
+                        },
+                        modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(50.dp),
+                        shape = Shapes.large,
+                        enabled = !isAlreadyImported,
+                        colors =
+                        ButtonDefaults.elevatedButtonColors(
+                            containerColor = if (isAlreadyImported) Primary.copy(alpha = 0.3f) else Primary,
+                            contentColor = if (isAlreadyImported) White.copy(alpha = 0.5f) else White,
+                            disabledContainerColor = Primary.copy(alpha = 0.3f),
+                            disabledContentColor = White.copy(alpha = 0.5f)
+                        )
+                    ) {
+                        Icon(
+                            imageVector = CustomIcons.ArrowDownward,
+                            contentDescription = "ことばをおぼえる",
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = if (isAlreadyImported) "おぼえてるよ" else "このことばをおぼえる",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
             } else {
