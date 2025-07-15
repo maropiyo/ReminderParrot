@@ -215,11 +215,8 @@ class SettingsViewModel(
                 // エラーをクリア
                 _accountCreationError.value = null
 
-                // 匿名認証でアカウントを作成
+                // 匿名認証でアカウントを作成（初期名は自動設定される）
                 authService.getUserId()
-
-                // 初期名を設定
-                authService.updateDisplayName("ひよっこインコ")
 
                 // ユーザーIDを再読み込み
                 loadUserId()
