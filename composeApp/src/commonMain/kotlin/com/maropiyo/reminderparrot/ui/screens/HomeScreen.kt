@@ -81,9 +81,10 @@ fun HomeScreen(
                     parrotViewModel.loadParrot()
                 },
                 onCreateReminder = { text, _ ->
-                    reminderListViewModel.createReminder(text)
-                    // リマインダー作成後にインコの状態を再読み込み
-                    parrotViewModel.loadParrot()
+                    reminderListViewModel.createReminder(text) {
+                        // 経験値加算完了後にインコの状態を再読み込み
+                        parrotViewModel.loadParrot()
+                    }
                 },
                 onUpdateReminder = { reminderId, newText ->
                     reminderListViewModel.updateReminderText(reminderId, newText)

@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import com.maropiyo.reminderparrot.domain.entity.Reminder
 import com.maropiyo.reminderparrot.presentation.state.ParrotState
 import com.maropiyo.reminderparrot.presentation.state.ReminderListState
+import com.maropiyo.reminderparrot.ui.components.ErrorMessageBottomSheet
 import com.maropiyo.reminderparrot.ui.components.common.CountdownText
 import com.maropiyo.reminderparrot.ui.components.state.EmptyState
 import com.maropiyo.reminderparrot.ui.components.state.ErrorState
@@ -89,6 +90,8 @@ fun ReminderContent(
     var isShowBottomSheet by remember { mutableStateOf(false) }
     // 編集ボトムシートの表示状態
     var isShowEditBottomSheet by remember { mutableStateOf(false) }
+    // エラーボトムシートの表示状態
+    var showErrorBottomSheet by remember { mutableStateOf(false) }
     // 編集中のリマインダー
     var editingReminder by remember { mutableStateOf<Reminder?>(null) }
     // リマインダーテキスト
@@ -97,6 +100,8 @@ fun ReminderContent(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     // 編集ボトムシートの状態
     val editSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    // エラーボトムシートの状態
+    val errorSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     // コルーチンスコープとキーボードコントローラーの取得
     val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -130,8 +135,13 @@ fun ReminderContent(
         // フローティングアクションボタン
         ReminderFloatingActionButton(
             onClick = {
-                reminderText = ""
-                isShowBottomSheet = true
+                // リマインダー数が上限に達しているかチェック
+                if (state.reminders.size >= parrotState.parrot.memorizedWords) {
+                    showErrorBottomSheet = true
+                } else {
+                    reminderText = ""
+                    isShowBottomSheet = true
+                }
             },
             modifier =
             Modifier
@@ -189,6 +199,21 @@ fun ReminderContent(
                     }
                 },
                 sheetState = editSheetState
+            )
+        }
+
+        // エラーボトムシート
+        if (showErrorBottomSheet) {
+            ErrorMessageBottomSheet(
+                title = "もうおぼえられないよ〜",
+                message = "レベルをあげてもっとかしこくなろう！",
+                onDismiss = {
+                    scope.launch {
+                        errorSheetState.hide()
+                        showErrorBottomSheet = false
+                    }
+                },
+                sheetState = errorSheetState
             )
         }
     }
