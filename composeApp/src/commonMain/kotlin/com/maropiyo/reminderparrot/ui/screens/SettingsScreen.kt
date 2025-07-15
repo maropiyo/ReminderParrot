@@ -144,7 +144,7 @@ fun SettingsScreen() {
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // インコじょうほうカード（アカウント作成済みの場合のみ表示）
+            // リマインネット設定（アカウント作成済みの場合のみ表示）
             if (userId != null) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -156,7 +156,7 @@ fun SettingsScreen() {
                         modifier = Modifier.padding(20.dp)
                     ) {
                         Text(
-                            text = "インコじょうほう",
+                            text = "リマインネット",
                             style = MaterialTheme.typography.titleMedium,
                             color = Secondary,
                             fontWeight = FontWeight.Bold
@@ -253,31 +253,8 @@ fun SettingsScreen() {
                                 color = Secondary.copy(alpha = 0.7f)
                             )
                         }
-                    }
-                }
-            }
 
-            // リマインネット設定（アカウント作成済みの場合のみ表示）
-            if (userId != null) {
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = CardBackgroundColor),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.padding(20.dp)
-                    ) {
-                        Text(
-                            text = "リマインネット",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = Secondary,
-                            fontWeight = FontWeight.Bold
-                        )
-
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(20.dp))
 
                         // リマインネット投稿設定
                         Row(
