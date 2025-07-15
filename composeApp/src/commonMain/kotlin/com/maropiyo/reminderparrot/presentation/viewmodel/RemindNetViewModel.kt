@@ -179,9 +179,9 @@ class RemindNetViewModel(
             } catch (e: Exception) {
                 val errorMessage = when {
                     e.message?.contains("anonymous_provider_disabled") == true ->
-                        "アカウントのせっていがひつようです。\nかんりしゃにれんらくしてください。"
+                        "アカウントのせっていがひつようです\nかんりしゃにれんらくしてください"
                     else ->
-                        "アカウントのさくせいにしっぱいしました。\nもういちどためしてください。"
+                        "アカウントのさくせいにしっぱいしました\nもういちどためしてください"
                 }
                 _accountCreationError.value = errorMessage
             }
@@ -353,10 +353,13 @@ class RemindNetViewModel(
                     }
                 }
                 .onFailure { exception ->
+                    val errorMessage = when (exception.message) {
+                        "もうおぼえられないよ〜" -> "もうおぼえられないよ〜"
+                        "すでにおぼえているよ" -> "すでにおぼえているよ"
+                        else -> "ことばをおぼえるのにしっぱいしました"
+                    }
                     _state.update {
-                        it.copy(
-                            error = "ことばをおぼえるのにしっぱいしました"
-                        )
+                        it.copy(error = errorMessage)
                     }
                 }
         }

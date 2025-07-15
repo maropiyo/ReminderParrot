@@ -38,7 +38,7 @@ class RemindNetRemoteDataSource(
                 id = reminderId,
                 reminderText = reminderText,
                 userId = userId,
-                userName = userName ?: "名無しのインコ",
+                userName = userName ?: "ひよっこインコ",
                 forgetAt = forgetAt.toString()
             )
 
@@ -182,7 +182,7 @@ class RemindNetRemoteDataSource(
                 postUserId = notification.postUserId,
                 senderUserId = notification.senderUserId,
                 senderUserName = notification.senderUserName,
-                title = notification.senderUserName,
+                title = "${notification.senderUserName}",
                 body = message,
                 notificationType = notification.notificationType.name
             )
@@ -240,7 +240,7 @@ data class RemindNetPostDto(
     val id: String,
     @SerialName("reminder_text") val reminderText: String,
     @SerialName("user_id") val userId: String? = null,
-    @SerialName("user_name") val userName: String = "名無しのインコ",
+    @SerialName("user_name") val userName: String = "ひよっこインコ",
     @SerialName("forget_at") val forgetAt: String
 )
 

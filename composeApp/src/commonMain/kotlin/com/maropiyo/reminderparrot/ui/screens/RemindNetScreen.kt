@@ -75,6 +75,7 @@ import com.maropiyo.reminderparrot.domain.usecase.RegisterPushNotificationTokenU
 import com.maropiyo.reminderparrot.presentation.viewmodel.ParrotViewModel
 import com.maropiyo.reminderparrot.presentation.viewmodel.RemindNetViewModel
 import com.maropiyo.reminderparrot.ui.components.AccountCreationBottomSheet
+import com.maropiyo.reminderparrot.ui.components.ErrorMessageBottomSheet
 import com.maropiyo.reminderparrot.ui.components.home.LevelUpDialog
 import com.maropiyo.reminderparrot.ui.icons.CustomIcons
 import com.maropiyo.reminderparrot.ui.theme.Background
@@ -144,6 +145,15 @@ fun RemindNetScreen(
     var selectedPost by remember { mutableStateOf<RemindNetPost?>(null) }
     var showPostDetailBottomSheet by remember { mutableStateOf(false) }
     val postDetailSheetState =
+        rememberModalBottomSheetState(
+            skipPartiallyExpanded = true
+        )
+
+    // エラーメッセージボトムシートの状態
+    var showErrorBottomSheet by remember { mutableStateOf(false) }
+    var errorTitle by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf("") }
+    val errorSheetState =
         rememberModalBottomSheetState(
             skipPartiallyExpanded = true
         )
@@ -220,8 +230,21 @@ fun RemindNetScreen(
     // エラー表示
     LaunchedEffect(state.error) {
         state.error?.let { error ->
-            snackbarHostState.showSnackbar(error)
-            remindNetViewModel.clearError()
+            when (error) {
+                "もうおぼえられないよ〜" -> {
+                    errorTitle = "もうおぼえられないよ〜"
+                    errorMessage = "レベルをあげてもっとかしこくなろう！"
+                }
+                "すでにおぼえているよ" -> {
+                    errorTitle = "あれれ？"
+                    errorMessage = "すでにおぼえているよ"
+                }
+                else -> {
+                    errorTitle = "あれれ？"
+                    errorMessage = error
+                }
+            }
+            showErrorBottomSheet = true
         }
     }
 
@@ -300,59 +323,73 @@ fun RemindNetScreen(
                         )
                     }
                 }
-            } else if (state.posts.isEmpty() && !state.isLoading) {
-                // 投稿がない場合
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text =
-                            if (needsAccountCreation) {
-                                "リマインネットに参加していません"
-                            } else {
-                                "だれかいませんか？"
-                            },
-                            style = MaterialTheme.typography.titleMedium,
-                            color = Secondary,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
             } else {
-                // 投稿リスト
-                LazyColumn(
-                    state = listState,
-                    modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 100.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                Column(
+                    modifier = Modifier.padding(paddingValues)
                 ) {
-                    items(state.posts, key = { it.id }) { post ->
-                        RemindNetPostCard(
-                            post = post,
-                            onBellClick = { clickedPost ->
-                                remindNetViewModel.sendRemindNotification(clickedPost)
-                            },
-                            onImportClick = { clickedPost ->
-                                remindNetViewModel.importPost(clickedPost) {
-                                    // インポート成功時のコールバック
-                                    onReminderImported()
-                                }
-                            },
-                            onCardClick = { clickedPost ->
-                                selectedPost = clickedPost
-                                showPostDetailBottomSheet = true
-                            },
-                            isAlreadySent = state.sentPostIds.contains(post.id),
-                            isMyPost = state.myPostIds.contains(post.id),
-                            isAlreadyImported = state.importedPostIds.contains(post.id)
-                        )
+                    // タイムライン見出し
+                    Text(
+                        text = "タイムライン",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = Secondary,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
+
+                    // 投稿リストまたは空状態
+                    if (state.posts.isEmpty() && !state.isLoading) {
+                        // 投稿がない場合の空状態表示
+                        Column(
+                            modifier = Modifier.fillMaxHeight()
+                        ) {
+                            Spacer(modifier = Modifier.weight(1f))
+                            Box(
+                                modifier = Modifier.fillMaxWidth(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = if (needsAccountCreation) {
+                                        "リマインネットに参加していません"
+                                    } else {
+                                        "だれかいませんか？"
+                                    },
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = Secondary,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                            Spacer(modifier = Modifier.weight(1.5f))
+                        }
+                    } else {
+                        // 投稿リスト
+                        LazyColumn(
+                            state = listState,
+                            modifier = Modifier.fillMaxHeight(),
+                            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 100.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(state.posts, key = { it.id }) { post ->
+                                RemindNetPostCard(
+                                    post = post,
+                                    onBellClick = { clickedPost ->
+                                        remindNetViewModel.sendRemindNotification(clickedPost)
+                                    },
+                                    onImportClick = { clickedPost ->
+                                        remindNetViewModel.importPost(clickedPost) {
+                                            // インポート成功時のコールバック
+                                            onReminderImported()
+                                        }
+                                    },
+                                    onCardClick = { clickedPost ->
+                                        selectedPost = clickedPost
+                                        showPostDetailBottomSheet = true
+                                    },
+                                    isAlreadySent = state.sentPostIds.contains(post.id),
+                                    isMyPost = state.myPostIds.contains(post.id),
+                                    isAlreadyImported = state.importedPostIds.contains(post.id)
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -446,6 +483,22 @@ fun RemindNetScreen(
                 isAlreadySent = selectedPost?.let { state.sentPostIds.contains(it.id) } ?: false,
                 isMyPost = selectedPost?.let { state.myPostIds.contains(it.id) } ?: false,
                 isAlreadyImported = selectedPost?.let { state.importedPostIds.contains(it.id) } ?: false
+            )
+        }
+
+        // エラーメッセージボトムシート
+        if (showErrorBottomSheet) {
+            ErrorMessageBottomSheet(
+                title = errorTitle,
+                message = errorMessage,
+                onDismiss = {
+                    scope.launch {
+                        errorSheetState.hide()
+                        showErrorBottomSheet = false
+                        remindNetViewModel.clearError()
+                    }
+                },
+                sheetState = errorSheetState
             )
         }
 
@@ -1180,8 +1233,8 @@ private fun SimpleParrotInfoDisplay(
                                 androidx.compose.ui.graphics.Brush.horizontalGradient(
                                     colors =
                                     listOf(
-                                        ParrotYellow.copy(alpha = 0.8f),
-                                        ParrotYellow
+                                        Secondary.copy(alpha = 0.8f),
+                                        Secondary
                                     )
                                 ),
                                 shape = RoundedCornerShape(8.dp)
