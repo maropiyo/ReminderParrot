@@ -29,7 +29,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -67,7 +66,6 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.maropiyo.reminderparrot.domain.entity.RemindNetPost
@@ -108,6 +106,7 @@ fun RemindNetScreen(
     val accountCreationError by remindNetViewModel.accountCreationError.collectAsState()
     val parrotState by parrotViewModel.state.collectAsState()
     val displayName by remindNetViewModel.displayName.collectAsState()
+    val isLoadingDisplayName by remindNetViewModel.isLoadingDisplayName.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
@@ -161,6 +160,8 @@ fun RemindNetScreen(
     // 画面に遷移した時に投稿を再取得
     LaunchedEffect(Unit) {
         remindNetViewModel.onScreenEntered()
+        // 他の画面で名前が変更されている可能性があるため強制的に再読み込み
+        remindNetViewModel.forceReloadDisplayName()
     }
 
     // レベルアップを検出
@@ -285,6 +286,7 @@ fun RemindNetScreen(
                     SimpleParrotInfoDisplay(
                         parrot = parrotState.parrot!!,
                         displayName = displayName?.takeIf { it.isNotBlank() } ?: "ひよっこインコ",
+                        isLoadingDisplayName = isLoadingDisplayName,
                         modifier =
                         Modifier
                             .fillMaxWidth()
@@ -1099,6 +1101,7 @@ private fun PostDetailCard(
 private fun SimpleParrotInfoDisplay(
     parrot: com.maropiyo.reminderparrot.domain.entity.Parrot,
     displayName: String,
+    isLoadingDisplayName: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -1155,15 +1158,27 @@ private fun SimpleParrotInfoDisplay(
                             color = Primary
                         )
                     }
-                    Text(
-                        text = displayName,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium,
-                        color = Secondary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f)
-                    )
+                    if (isLoadingDisplayName && displayName == null) {
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(16.dp)
+                                .background(
+                                    Secondary.copy(alpha = 0.1f),
+                                    RoundedCornerShape(8.dp)
+                                )
+                        )
+                    } else {
+                        Text(
+                            text = displayName,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium,
+                            color = Secondary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
                 }
 
                 // 経験値ゲージ（アニメーション付き）

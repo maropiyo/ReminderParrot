@@ -31,6 +31,9 @@ class SettingsViewModel(
     private val _displayName = MutableStateFlow<String?>(null)
     val displayName: StateFlow<String?> = _displayName.asStateFlow()
 
+    private val _isLoadingDisplayName = MutableStateFlow(false)
+    val isLoadingDisplayName: StateFlow<Boolean> = _isLoadingDisplayName.asStateFlow()
+
     private val _accountCreationError = MutableStateFlow<String?>(null)
     val accountCreationError: StateFlow<String?> = _accountCreationError.asStateFlow()
 
@@ -77,7 +80,11 @@ class SettingsViewModel(
      * 表示名を読み込む
      */
     private fun loadDisplayName() {
+        // 既にローディング中または既に取得済みの場合はスキップ
+        if (_isLoadingDisplayName.value || _displayName.value != null) return
+        
         viewModelScope.launch {
+            _isLoadingDisplayName.value = true
             try {
                 // 既存のアカウントがある場合のみ表示名を取得
                 val currentUserId = authService.getCurrentUserId()
@@ -90,6 +97,32 @@ class SettingsViewModel(
             } catch (e: Exception) {
                 // エラーは無視してnullのまま
                 _displayName.value = null
+            } finally {
+                _isLoadingDisplayName.value = false
+            }
+        }
+    }
+
+    /**
+     * 表示名を強制的に再読み込みする
+     */
+    fun forceReloadDisplayName() {
+        viewModelScope.launch {
+            _isLoadingDisplayName.value = true
+            try {
+                // 既存のアカウントがある場合のみ表示名を取得
+                val currentUserId = authService.getCurrentUserId()
+                if (currentUserId != null) {
+                    val name = authService.getDisplayName()
+                    _displayName.value = name
+                } else {
+                    _displayName.value = null
+                }
+            } catch (e: Exception) {
+                // エラーは無視してnullのまま
+                _displayName.value = null
+            } finally {
+                _isLoadingDisplayName.value = false
             }
         }
     }

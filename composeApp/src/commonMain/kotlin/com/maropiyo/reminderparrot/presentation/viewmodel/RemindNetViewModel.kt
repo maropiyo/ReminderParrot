@@ -291,6 +291,31 @@ class RemindNetViewModel(
      * 表示名を読み込む
      */
     private fun loadDisplayName() {
+        // 既にローディング中または既に取得済みの場合はスキップ
+        if (_isLoadingDisplayName.value || _displayName.value != null) return
+        
+        viewModelScope.launch {
+            _isLoadingDisplayName.value = true
+            try {
+                val currentUserId = authService.getCurrentUserId()
+                if (currentUserId != null) {
+                    val name = authService.getDisplayName()
+                    _displayName.value = name
+                } else {
+                    _displayName.value = null
+                }
+            } catch (e: Exception) {
+                _displayName.value = null
+            } finally {
+                _isLoadingDisplayName.value = false
+            }
+        }
+    }
+
+    /**
+     * 表示名を強制的に再読み込みする
+     */
+    fun forceReloadDisplayName() {
         viewModelScope.launch {
             _isLoadingDisplayName.value = true
             try {

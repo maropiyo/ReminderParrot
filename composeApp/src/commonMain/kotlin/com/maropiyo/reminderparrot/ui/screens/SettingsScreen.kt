@@ -70,6 +70,7 @@ fun SettingsScreen() {
     val settings by viewModel.settings.collectAsState()
     val userId by viewModel.userId.collectAsState()
     val displayName by viewModel.displayName.collectAsState()
+    val isLoadingDisplayName by viewModel.isLoadingDisplayName.collectAsState()
     val accountCreationError by viewModel.accountCreationError.collectAsState()
     val isUpdatingParrotName by viewModel.isUpdatingParrotName.collectAsState()
     val nameUpdateError by viewModel.nameUpdateError.collectAsState()
@@ -79,6 +80,8 @@ fun SettingsScreen() {
     // タブ切り替え時に最新情報を取得
     LaunchedEffect(Unit) {
         viewModel.refreshAll()
+        // 他の画面で名前が変更されている可能性があるため強制的に再読み込み
+        viewModel.forceReloadDisplayName()
     }
 
     // アカウント作成ボトムシートの状態
@@ -176,19 +179,31 @@ fun SettingsScreen() {
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(
-                                    text = displayName?.takeIf { it.isNotBlank() } ?: "ひよっこインコ",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = Secondary,
-                                    fontWeight = FontWeight.Medium,
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .background(
-                                            color = Secondary.copy(alpha = 0.1f),
-                                            shape = RoundedCornerShape(16.dp)
-                                        )
-                                        .padding(horizontal = 16.dp, vertical = 12.dp)
-                                )
+                                if (isLoadingDisplayName && displayName == null) {
+                                    androidx.compose.foundation.layout.Box(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .height(44.dp)
+                                            .background(
+                                                color = Secondary.copy(alpha = 0.1f),
+                                                shape = RoundedCornerShape(16.dp)
+                                            )
+                                    )
+                                } else {
+                                    Text(
+                                        text = displayName?.takeIf { it.isNotBlank() } ?: "ひよっこインコ",
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = Secondary,
+                                        fontWeight = FontWeight.Medium,
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .background(
+                                                color = Secondary.copy(alpha = 0.1f),
+                                                shape = RoundedCornerShape(16.dp)
+                                            )
+                                            .padding(horizontal = 16.dp, vertical = 12.dp)
+                                    )
+                                }
 
                                 IconButton(
                                     onClick = {
