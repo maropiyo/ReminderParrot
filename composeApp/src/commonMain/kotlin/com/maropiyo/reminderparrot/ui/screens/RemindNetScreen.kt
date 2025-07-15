@@ -730,7 +730,7 @@ private fun CircularBellButton(onClick: () -> Unit, modifier: Modifier = Modifie
     ) {
         Icon(
             imageVector = Icons.Default.Notifications,
-            contentDescription = "リマインドを送る",
+            contentDescription = "リマインドをおくる",
             tint = White,
             modifier = Modifier.size(18.dp)
         )
@@ -1017,12 +1017,12 @@ private fun PostDetailCard(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Notifications,
-                                contentDescription = "リマインドを送る",
+                                contentDescription = "リマインドをおくる",
                                 modifier = Modifier.size(20.dp)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "リマインドを送る",
+                                text = "リマインドをおくる",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
