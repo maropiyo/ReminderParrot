@@ -1233,8 +1233,8 @@ private fun SimpleParrotInfoDisplay(
                                 androidx.compose.ui.graphics.Brush.horizontalGradient(
                                     colors =
                                     listOf(
-                                        ParrotYellow.copy(alpha = 0.8f),
-                                        ParrotYellow
+                                        Secondary.copy(alpha = 0.8f),
+                                        Secondary
                                     )
                                 ),
                                 shape = RoundedCornerShape(8.dp)

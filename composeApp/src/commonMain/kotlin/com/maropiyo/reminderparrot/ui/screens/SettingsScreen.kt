@@ -28,8 +28,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -51,6 +49,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.maropiyo.reminderparrot.presentation.viewmodel.SettingsViewModel
 import com.maropiyo.reminderparrot.ui.components.AccountCreationBottomSheet
+import com.maropiyo.reminderparrot.ui.components.ErrorMessageBottomSheet
 import com.maropiyo.reminderparrot.ui.theme.Background
 import com.maropiyo.reminderparrot.ui.theme.CardBackgroundColor
 import com.maropiyo.reminderparrot.ui.theme.Primary
@@ -76,7 +75,6 @@ fun SettingsScreen() {
     val nameUpdateError by viewModel.nameUpdateError.collectAsState()
     val isNameUpdateCooldown by viewModel.isNameUpdateCooldown.collectAsState()
     val scope = rememberCoroutineScope()
-    val snackbarHostState = remember { SnackbarHostState() }
 
     // タブ切り替え時に最新情報を取得
     LaunchedEffect(Unit) {
@@ -86,6 +84,14 @@ fun SettingsScreen() {
     // アカウント作成ボトムシートの状態
     var showAccountCreationBottomSheet by remember { mutableStateOf(false) }
     val accountCreationSheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
+
+    // エラーメッセージボトムシートの状態
+    var showErrorBottomSheet by remember { mutableStateOf(false) }
+    var errorTitle by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf("") }
+    val errorSheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true
     )
 
@@ -103,13 +109,14 @@ fun SettingsScreen() {
     // 名前更新エラーの表示
     LaunchedEffect(nameUpdateError) {
         nameUpdateError?.let { error ->
-            snackbarHostState.showSnackbar(error)
+            errorTitle = "あれれ？"
+            errorMessage = error
+            showErrorBottomSheet = true
             viewModel.clearNameUpdateError()
         }
     }
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = {
@@ -463,6 +470,21 @@ fun SettingsScreen() {
                     },
                     sheetState = accountCreationSheetState,
                     errorMessage = accountCreationError
+                )
+            }
+
+            // エラーメッセージボトムシート
+            if (showErrorBottomSheet) {
+                ErrorMessageBottomSheet(
+                    title = errorTitle,
+                    message = errorMessage,
+                    onDismiss = {
+                        scope.launch {
+                            errorSheetState.hide()
+                            showErrorBottomSheet = false
+                        }
+                    },
+                    sheetState = errorSheetState
                 )
             }
         }

@@ -105,7 +105,7 @@ class SettingsViewModel(
         val currentTime = Clock.System.now().toEpochMilliseconds()
         if (currentTime - lastNameUpdateTime < NAME_UPDATE_COOLDOWN_MS) {
             val remainingSeconds = ((NAME_UPDATE_COOLDOWN_MS - (currentTime - lastNameUpdateTime)) / 1000L).toInt() + 1
-            _nameUpdateError.value = "${remainingSeconds}びょうまってからもういちどおためしください。"
+            _nameUpdateError.value = "${remainingSeconds}びょうまってからもういちどおためしください"
             return
         }
 
@@ -129,11 +129,11 @@ class SettingsViewModel(
                 // エラーメッセージを設定
                 val errorMessage = when {
                     e.message?.contains("over_request_rate_limit") == true ->
-                        "なまえのへんこうがおおすぎます。\nしばらくまってからもういちどおためしください。"
+                        "なまえのへんこうがおおすぎます\nしばらくまってからもういちどおためしください"
                     e.message?.contains("network") == true ->
-                        "インターネットにせつぞくできません。\nもういちどおためしください。"
+                        "インターネットにせつぞくできません\nもういちどおためしください"
                     else ->
-                        "なまえのへんこうにしっぱいしました。\nもういちどおためしください。"
+                        "なまえのへんこうにしっぱいしました\nもういちどおためしください"
                 }
                 _nameUpdateError.value = errorMessage
 
@@ -228,9 +228,9 @@ class SettingsViewModel(
             } catch (e: Exception) {
                 val errorMessage = when {
                     e.message?.contains("anonymous_provider_disabled") == true ->
-                        "アカウントのせっていがひつようです。\nかんりしゃにれんらくしてください。"
+                        "アカウントのせっていがひつようです\nかんりしゃにれんらくしてください"
                     else ->
-                        "アカウントのさくせいにしっぱいしました。\nもういちどためしてください。"
+                        "アカウントのさくせいにしっぱいしました\nもういちどためしてください"
                 }
                 _accountCreationError.value = errorMessage
             }

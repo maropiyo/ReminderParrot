@@ -179,9 +179,9 @@ class RemindNetViewModel(
             } catch (e: Exception) {
                 val errorMessage = when {
                     e.message?.contains("anonymous_provider_disabled") == true ->
-                        "アカウントのせっていがひつようです。\nかんりしゃにれんらくしてください。"
+                        "アカウントのせっていがひつようです\nかんりしゃにれんらくしてください"
                     else ->
-                        "アカウントのさくせいにしっぱいしました。\nもういちどためしてください。"
+                        "アカウントのさくせいにしっぱいしました\nもういちどためしてください"
                 }
                 _accountCreationError.value = errorMessage
             }
