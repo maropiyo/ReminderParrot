@@ -27,7 +27,19 @@ class AuthServiceImpl(
         // 匿名認証を実行
         supabaseClient.auth.signInAnonymously()
         val authenticatedUser = supabaseClient.auth.currentUserOrNull()
-        return@withLock authenticatedUser?.id ?: throw IllegalStateException("匿名認証に失敗しました")
+        val userId = authenticatedUser?.id ?: throw IllegalStateException("匿名認証に失敗しました")
+
+        // 新規ユーザーの場合、初期表示名を設定
+        try {
+            val currentDisplayName = getDisplayName()
+            if (currentDisplayName.isNullOrBlank()) {
+                updateDisplayName("ひよっこインコ")
+            }
+        } catch (e: Exception) {
+            // 初期名設定失敗は無視（認証自体は成功）
+        }
+
+        return@withLock userId
     }
 
     override suspend fun getCurrentUserId(): String? {
