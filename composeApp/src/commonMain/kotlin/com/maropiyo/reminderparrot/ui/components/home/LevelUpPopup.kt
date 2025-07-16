@@ -119,7 +119,7 @@ fun LevelUpDialog(isVisible: Boolean, parrot: Parrot, onDismiss: () -> Unit) {
 
                     // レベル表示
                     Text(
-                        text = "レベル ${parrot.level}",
+                        text = "Lv.${parrot.level}",
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
