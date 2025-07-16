@@ -29,7 +29,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -67,7 +66,6 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.maropiyo.reminderparrot.domain.entity.RemindNetPost
@@ -108,6 +106,7 @@ fun RemindNetScreen(
     val accountCreationError by remindNetViewModel.accountCreationError.collectAsState()
     val parrotState by parrotViewModel.state.collectAsState()
     val displayName by remindNetViewModel.displayName.collectAsState()
+    val isLoadingDisplayName by remindNetViewModel.isLoadingDisplayName.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
@@ -161,6 +160,8 @@ fun RemindNetScreen(
     // 画面に遷移した時に投稿を再取得
     LaunchedEffect(Unit) {
         remindNetViewModel.onScreenEntered()
+        // 他の画面で名前が変更されている可能性があるため強制的に再読み込み
+        remindNetViewModel.forceReloadDisplayName()
     }
 
     // レベルアップを検出
@@ -285,6 +286,7 @@ fun RemindNetScreen(
                     SimpleParrotInfoDisplay(
                         parrot = parrotState.parrot!!,
                         displayName = displayName?.takeIf { it.isNotBlank() } ?: "ひよっこインコ",
+                        isLoadingDisplayName = isLoadingDisplayName,
                         modifier =
                         Modifier
                             .fillMaxWidth()
@@ -464,15 +466,14 @@ fun RemindNetScreen(
                     }
                 },
                 onDeleteClick = { clickedPost ->
-                    println("RemindNetScreen: 削除ボタンクリック - postId: ${clickedPost.id}")
+                    // 削除処理開始時に即座にボトムシートを閉じる
+                    scope.launch {
+                        postDetailSheetState.hide()
+                        showPostDetailBottomSheet = false
+                        selectedPost = null
+                    }
                     remindNetViewModel.deletePost(clickedPost.id) {
-                        println("RemindNetScreen: 削除成功コールバック実行")
-                        // 削除成功時にボトムシートを閉じる
-                        scope.launch {
-                            postDetailSheetState.hide()
-                            showPostDetailBottomSheet = false
-                            selectedPost = null
-                        }
+                        // 削除成功時の処理（必要に応じてトースト表示など）
                     }
                 },
                 sheetState = postDetailSheetState,
@@ -596,15 +597,39 @@ private fun RemindNetPostCard(
                 Column(
                     modifier = Modifier.weight(1f)
                 ) {
-                    // ユーザー名
-                    Text(
-                        text = post.userName,
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = Secondary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        // ユーザー名
+                        Text(
+                            text = post.userName,
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = Secondary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+
+                        // あなたの投稿
+                        if (isMyPost) {
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        color = Secondary.copy(alpha = 0.1f),
+                                        shape = RoundedCornerShape(16.dp)
+                                    )
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Text(
+                                    text = "あなた",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = Secondary,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
+                    }
 
                     // 投稿時間
                     Text(
@@ -706,7 +731,7 @@ private fun CircularBellButton(onClick: () -> Unit, modifier: Modifier = Modifie
     ) {
         Icon(
             imageVector = Icons.Default.Notifications,
-            contentDescription = "リマインドを送る",
+            contentDescription = "リマインドをおくる",
             tint = White,
             modifier = Modifier.size(18.dp)
         )
@@ -896,13 +921,37 @@ private fun PostDetailCard(
                 Column(
                     modifier = Modifier.weight(1f)
                 ) {
-                    // ユーザー名
-                    Text(
-                        text = post.userName,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = Secondary
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        // ユーザー名
+                        Text(
+                            text = post.userName,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = Secondary
+                        )
+
+                        // スマートな投稿者表示
+                        if (isMyPost) {
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        color = Secondary.copy(alpha = 0.1f),
+                                        shape = RoundedCornerShape(16.dp)
+                                    )
+                                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                            ) {
+                                Text(
+                                    text = "あなた",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Secondary,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
+                    }
 
                     // 投稿時間
                     Text(
@@ -952,71 +1001,72 @@ private fun PostDetailCard(
                         .padding(horizontal = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    // リマインドボタン（未送信のみ）
-                    if (!isAlreadySent) {
-                        ElevatedButton(
-                            onClick = { onBellClick(post) },
-                            modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .height(50.dp),
-                            shape = Shapes.large,
-                            colors =
-                            ButtonDefaults.elevatedButtonColors(
-                                containerColor = ParrotYellow,
-                                contentColor = White
-                            )
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Notifications,
-                                contentDescription = "リマインドを送る",
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "リマインドを送る",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                    } else {
+                    // リマインドボタン
+                    ElevatedButton(
+                        onClick = {
+                            if (!isAlreadySent) {
+                                onBellClick(post)
+                            }
+                        },
+                        modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(50.dp),
+                        shape = Shapes.large,
+                        enabled = !isAlreadySent,
+                        colors =
+                        ButtonDefaults.elevatedButtonColors(
+                            containerColor = if (isAlreadySent) ParrotYellow.copy(alpha = 0.3f) else ParrotYellow,
+                            contentColor = if (isAlreadySent) White.copy(alpha = 0.5f) else White,
+                            disabledContainerColor = ParrotYellow.copy(alpha = 0.3f),
+                            disabledContentColor = White.copy(alpha = 0.5f)
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Notifications,
+                            contentDescription = "リマインドをおくる",
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "リマインドを送信済み",
+                            text = if (isAlreadySent) "リマインドそうしんずみ" else "リマインドをおくる",
                             style = MaterialTheme.typography.titleMedium,
-                            color = Secondary.copy(alpha = 0.6f),
-                            fontWeight = FontWeight.Medium,
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center
+                            fontWeight = FontWeight.Bold
                         )
                     }
 
-                    // インポートボタン（未インポートのみ表示）
-                    if (!isAlreadyImported) {
-                        ElevatedButton(
-                            onClick = { onImportClick(post) },
-                            modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .height(50.dp),
-                            shape = Shapes.large,
-                            colors =
-                            ButtonDefaults.elevatedButtonColors(
-                                containerColor = Primary,
-                                contentColor = White
-                            )
-                        ) {
-                            Icon(
-                                imageVector = CustomIcons.ArrowDownward,
-                                contentDescription = "ことばをおぼえる",
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "このことばをおぼえる",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
+                    // インポートボタン
+                    ElevatedButton(
+                        onClick = {
+                            if (!isAlreadyImported) {
+                                onImportClick(post)
+                            }
+                        },
+                        modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(50.dp),
+                        shape = Shapes.large,
+                        enabled = !isAlreadyImported,
+                        colors =
+                        ButtonDefaults.elevatedButtonColors(
+                            containerColor = if (isAlreadyImported) Primary.copy(alpha = 0.3f) else Primary,
+                            contentColor = if (isAlreadyImported) White.copy(alpha = 0.5f) else White,
+                            disabledContainerColor = Primary.copy(alpha = 0.3f),
+                            disabledContentColor = White.copy(alpha = 0.5f)
+                        )
+                    ) {
+                        Icon(
+                            imageVector = CustomIcons.ArrowDownward,
+                            contentDescription = "ことばをおぼえる",
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = if (isAlreadyImported) "おぼえてるよ" else "このことばをおぼえる",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
             } else {
@@ -1027,26 +1077,6 @@ private fun PostDetailCard(
                         .padding(horizontal = 16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // スマートな投稿者表示
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = null,
-                            tint = Secondary,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = "あなたの投稿",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Secondary,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-
                     // 編集ボトムシートスタイルの削除ボタン
                     ElevatedButton(
                         onClick = { onDeleteClick(post) },
@@ -1062,7 +1092,7 @@ private fun PostDetailCard(
                         )
                     ) {
                         Text(
-                            text = "わすれる",
+                            text = "さくじょ",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )
@@ -1080,6 +1110,7 @@ private fun PostDetailCard(
 private fun SimpleParrotInfoDisplay(
     parrot: com.maropiyo.reminderparrot.domain.entity.Parrot,
     displayName: String,
+    isLoadingDisplayName: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -1136,15 +1167,27 @@ private fun SimpleParrotInfoDisplay(
                             color = Primary
                         )
                     }
-                    Text(
-                        text = displayName,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium,
-                        color = Secondary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f)
-                    )
+                    if (isLoadingDisplayName && displayName == null) {
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(16.dp)
+                                .background(
+                                    Secondary.copy(alpha = 0.1f),
+                                    RoundedCornerShape(8.dp)
+                                )
+                        )
+                    } else {
+                        Text(
+                            text = displayName,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium,
+                            color = Secondary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
                 }
 
                 // 経験値ゲージ（アニメーション付き）
