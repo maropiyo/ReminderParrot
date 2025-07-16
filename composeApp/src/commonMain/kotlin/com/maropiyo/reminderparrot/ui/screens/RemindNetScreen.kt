@@ -466,7 +466,6 @@ fun RemindNetScreen(
                     }
                 },
                 onDeleteClick = { clickedPost ->
-                    println("RemindNetScreen: 削除ボタンクリック - postId: ${clickedPost.id}")
                     // 削除処理開始時に即座にボトムシートを閉じる
                     scope.launch {
                         postDetailSheetState.hide()
@@ -474,7 +473,7 @@ fun RemindNetScreen(
                         selectedPost = null
                     }
                     remindNetViewModel.deletePost(clickedPost.id) {
-                        println("RemindNetScreen: 削除成功コールバック実行")
+                        // 削除成功時の処理（必要に応じてトースト表示など）
                     }
                 },
                 sheetState = postDetailSheetState,
