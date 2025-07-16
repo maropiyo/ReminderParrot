@@ -82,7 +82,7 @@ val appModule =
         single<ScheduleForgetNotificationUseCase> { ScheduleForgetNotificationUseCase(get()) }
         single<CancelForgetNotificationUseCase> { CancelForgetNotificationUseCase(get()) }
         single<RequestNotificationPermissionUseCase> { RequestNotificationPermissionUseCase(get()) }
-        single<CreateRemindNetPostUseCase> { CreateRemindNetPostUseCase(get(), get()) }
+        single<CreateRemindNetPostUseCase> { CreateRemindNetPostUseCase(get(), get(), get()) }
         single<DeleteRemindNetPostUseCase> { DeleteRemindNetPostUseCase(get()) }
         single<GetRemindNetPostsUseCase> { GetRemindNetPostsUseCase(get()) }
         single<SendRemindNotificationUseCase> { SendRemindNotificationUseCase(get(), get(), get()) }

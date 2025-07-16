@@ -12,6 +12,7 @@ data class RemindNetPost(
     val reminderText: String,
     val userId: String?,
     val userName: String = "ひよっこインコ",
+    val userLevel: Int? = null,
     val createdAt: Instant,
     val forgetAt: Instant,
     val likesCount: Int = 0,

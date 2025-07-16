@@ -81,7 +81,7 @@ fun ParrotContent(state: ParrotState, modifier: Modifier = Modifier) {
             ) {
                 // レベル表示
                 Text(
-                    text = "レベル${state.parrot.level}",
+                    text = "Lv.${state.parrot.level}",
                     style =
                     MaterialTheme.typography.labelMedium.copy(
                         fontWeight = FontWeight.Bold,

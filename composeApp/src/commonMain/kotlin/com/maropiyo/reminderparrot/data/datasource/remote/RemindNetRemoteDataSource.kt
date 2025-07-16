@@ -31,7 +31,8 @@ class RemindNetRemoteDataSource(
         reminderText: String,
         forgetAt: Instant,
         userId: String?,
-        userName: String?
+        userName: String?,
+        userLevel: Int? = null
     ): Result<RemindNetPost> = try {
         val dto =
             RemindNetPostDto(
@@ -39,6 +40,7 @@ class RemindNetRemoteDataSource(
                 reminderText = reminderText,
                 userId = userId,
                 userName = userName ?: "ひよっこインコ",
+                userLevel = userLevel,
                 forgetAt = forgetAt.toString()
             )
 
@@ -241,6 +243,7 @@ data class RemindNetPostDto(
     @SerialName("reminder_text") val reminderText: String,
     @SerialName("user_id") val userId: String? = null,
     @SerialName("user_name") val userName: String = "ひよっこインコ",
+    @SerialName("user_level") val userLevel: Int? = null,
     @SerialName("forget_at") val forgetAt: String
 )
 
@@ -250,6 +253,7 @@ data class RemindNetPostResponseDto(
     @SerialName("reminder_text") val reminderText: String,
     @SerialName("user_id") val userId: String?,
     @SerialName("user_name") val userName: String,
+    @SerialName("user_level") val userLevel: Int? = null,
     @SerialName("created_at") val createdAt: String,
     @SerialName("forget_at") val forgetAt: String,
     @SerialName("likes_count") val likesCount: Int,
@@ -260,6 +264,7 @@ data class RemindNetPostResponseDto(
         reminderText = reminderText,
         userId = userId,
         userName = userName,
+        userLevel = userLevel,
         createdAt = Instant.parse(createdAt),
         forgetAt = Instant.parse(forgetAt),
         likesCount = likesCount,
