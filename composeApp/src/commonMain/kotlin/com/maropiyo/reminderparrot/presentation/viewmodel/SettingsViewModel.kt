@@ -7,6 +7,7 @@ import com.maropiyo.reminderparrot.domain.service.AuthService
 import com.maropiyo.reminderparrot.domain.usecase.GetUserSettingsUseCase
 import com.maropiyo.reminderparrot.domain.usecase.SaveUserSettingsUseCase
 import com.maropiyo.reminderparrot.util.BuildConfig
+import com.maropiyo.reminderparrot.util.Constants
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -47,7 +48,6 @@ class SettingsViewModel(
     val isNameUpdateCooldown: StateFlow<Boolean> = _isNameUpdateCooldown.asStateFlow()
 
     private var lastNameUpdateTime = 0L
-    private val NAME_UPDATE_COOLDOWN_MS = 2000L // 2秒のクールダウン
 
     init {
         loadSettings()
@@ -131,21 +131,23 @@ class SettingsViewModel(
      * インコの名前を更新
      */
     fun updateParrotName(name: String) {
-        // 既に更新中の場合は処理しない
-        if (_isUpdatingParrotName.value) return
-
-        // クールダウン期間中は処理しない
-        val currentTime = Clock.System.now().toEpochMilliseconds()
-        if (currentTime - lastNameUpdateTime < NAME_UPDATE_COOLDOWN_MS) {
-            val remainingSeconds = ((NAME_UPDATE_COOLDOWN_MS - (currentTime - lastNameUpdateTime)) / 1000L).toInt() + 1
-            _nameUpdateError.value = "${remainingSeconds}びょうまってからもういちどおためしください"
-            return
-        }
-
         viewModelScope.launch {
+            // 競合状態チェック
+            if (_isUpdatingParrotName.value) {
+                return@launch
+            }
+            _isUpdatingParrotName.value = true
+
             try {
-                _isUpdatingParrotName.value = true
-                println("SettingsViewModel: 名前更新開始 - '$name'")
+                // クールダウン期間中は処理しない
+                val currentTime = Clock.System.now().toEpochMilliseconds()
+                if (currentTime - lastNameUpdateTime < Constants.NAME_UPDATE_COOLDOWN_MS) {
+                    val cooldownTimeRemaining = Constants.NAME_UPDATE_COOLDOWN_MS - (currentTime - lastNameUpdateTime)
+                    val remainingSeconds = (cooldownTimeRemaining / 1000L).toInt() + 1
+                    _nameUpdateError.value = "${remainingSeconds}びょうまってからもういちどおためしください"
+                    return@launch
+                }
+
                 authService.updateDisplayName(name)
                 _displayName.value = name
                 lastNameUpdateTime = currentTime
@@ -153,12 +155,7 @@ class SettingsViewModel(
                 // クールダウン期間開始
                 _isNameUpdateCooldown.value = true
                 startCooldownTimer()
-
-                println("SettingsViewModel: 名前更新完了 - '$name'")
             } catch (e: Exception) {
-                println("SettingsViewModel: 名前更新エラー - ${e.message}")
-                println("SettingsViewModel: エラー詳細 - $e")
-
                 // エラーメッセージを設定
                 val errorMessage = when {
                     e.message?.contains("over_request_rate_limit") == true ->
@@ -286,7 +283,7 @@ class SettingsViewModel(
      */
     private fun startCooldownTimer() {
         viewModelScope.launch {
-            kotlinx.coroutines.delay(NAME_UPDATE_COOLDOWN_MS)
+            kotlinx.coroutines.delay(Constants.NAME_UPDATE_COOLDOWN_MS)
             _isNameUpdateCooldown.value = false
         }
     }
