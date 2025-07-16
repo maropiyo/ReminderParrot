@@ -17,7 +17,8 @@ interface RemindNetRepository {
         reminderText: String,
         forgetAt: kotlinx.datetime.Instant,
         userId: String? = null,
-        userName: String? = null
+        userName: String? = null,
+        userLevel: Int? = null
     ): Result<RemindNetPost>
 
     /**

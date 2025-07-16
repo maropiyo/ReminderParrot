@@ -611,6 +611,11 @@ private fun RemindNetPostCard(
                             overflow = TextOverflow.Ellipsis
                         )
 
+                        // レベルバッジ
+                        if (post.userLevel != null) {
+                            UserLevelBadge(level = post.userLevel)
+                        }
+
                         // あなたの投稿
                         if (isMyPost) {
                             Box(
@@ -932,6 +937,11 @@ private fun PostDetailCard(
                             fontWeight = FontWeight.Bold,
                             color = Secondary
                         )
+
+                        // レベルバッジ
+                        if (post.userLevel != null) {
+                            UserLevelBadge(level = post.userLevel)
+                        }
 
                         // スマートな投稿者表示
                         if (isMyPost) {
@@ -1272,6 +1282,39 @@ private fun SimpleParrotInfoDisplay(
                     )
                 }
             }
+        }
+    }
+}
+
+/**
+ * ユーザーレベルを表示するバッジコンポーネント
+ */
+@Composable
+private fun UserLevelBadge(level: Int, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .background(
+                color = Primary.copy(alpha = 0.1f),
+                shape = RoundedCornerShape(12.dp)
+            )
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                text = "Lv",
+                style = MaterialTheme.typography.labelSmall,
+                color = Primary,
+                fontWeight = FontWeight.Medium
+            )
+            Text(
+                text = level.toString(),
+                style = MaterialTheme.typography.labelSmall,
+                color = Primary,
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }

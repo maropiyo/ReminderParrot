@@ -1,6 +1,7 @@
 package com.maropiyo.reminderparrot.domain.usecase.remindnet
 
 import com.maropiyo.reminderparrot.domain.entity.RemindNetPost
+import com.maropiyo.reminderparrot.domain.repository.ParrotRepository
 import com.maropiyo.reminderparrot.domain.repository.RemindNetRepository
 import com.maropiyo.reminderparrot.domain.service.AuthService
 import kotlinx.datetime.Instant
@@ -10,7 +11,8 @@ import kotlinx.datetime.Instant
  */
 class CreateRemindNetPostUseCase(
     private val remindNetRepository: RemindNetRepository,
-    private val authService: AuthService
+    private val authService: AuthService,
+    private val parrotRepository: ParrotRepository
 ) {
     suspend operator fun invoke(
         reminderId: String,
@@ -23,6 +25,9 @@ class CreateRemindNetPostUseCase(
         // パラメータで指定されていない場合はSupabaseAuthから取得
         val actualUserName = userName ?: authService.getDisplayName()
 
-        return remindNetRepository.createPost(reminderId, reminderText, forgetAt, userId, actualUserName)
+        // ローカルのインコからレベル情報を取得
+        val userLevel = parrotRepository.getParrot().getOrNull()?.level
+
+        return remindNetRepository.createPost(reminderId, reminderText, forgetAt, userId, actualUserName, userLevel)
     }
 }

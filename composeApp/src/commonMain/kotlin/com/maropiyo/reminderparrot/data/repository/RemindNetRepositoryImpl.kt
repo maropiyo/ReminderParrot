@@ -20,9 +20,10 @@ class RemindNetRepositoryImpl(
         reminderText: String,
         forgetAt: Instant,
         userId: String?,
-        userName: String?
+        userName: String?,
+        userLevel: Int?
     ): Result<RemindNetPost> {
-        return remoteDataSource.createPost(reminderId, reminderText, forgetAt, userId, userName)
+        return remoteDataSource.createPost(reminderId, reminderText, forgetAt, userId, userName, userLevel)
     }
 
     override fun getAllPosts(): Flow<List<RemindNetPost>> {
