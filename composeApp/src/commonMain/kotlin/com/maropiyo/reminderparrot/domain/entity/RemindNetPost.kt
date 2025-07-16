@@ -15,7 +15,6 @@ data class RemindNetPost(
     val userLevel: Int? = null,
     val createdAt: Instant,
     val forgetAt: Instant,
-    val likesCount: Int = 0,
     val isDeleted: Boolean = false
 ) {
     /**
