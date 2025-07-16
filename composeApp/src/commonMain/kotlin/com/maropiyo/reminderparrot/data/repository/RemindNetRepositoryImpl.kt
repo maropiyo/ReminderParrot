@@ -30,10 +30,6 @@ class RemindNetRepositoryImpl(
         return remoteDataSource.getAllPosts()
     }
 
-    override suspend fun likePost(postId: String): Result<Unit> {
-        return remoteDataSource.likePost(postId)
-    }
-
     override suspend fun deletePost(postId: String, userId: String): Result<Unit> {
         return remoteDataSource.deletePost(postId, userId)
     }
