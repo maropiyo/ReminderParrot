@@ -96,22 +96,6 @@ fun AccountCreationBottomSheet(
                     )
                 2 ->
                     FunctionExplanationCard(
-                        onNext = { currentStep = 3 },
-                        modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(top = 104.dp)
-                    )
-                3 ->
-                    RulesCard(
-                        onNext = { currentStep = 4 },
-                        modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(top = 104.dp)
-                    )
-                4 ->
-                    FinalConfirmationCard(
                         onCreateAccount = onCreateAccount,
                         errorMessage = errorMessage,
                         modifier =
@@ -167,7 +151,7 @@ private fun ParticipationConfirmationCard(onNext: () -> Unit, modifier: Modifier
 
             // 説明テキスト
             Text(
-                text = "リマインネットはインコどうしで\nおぼえたことばをきょうゆうするきのうだよ！",
+                text = "リマインネットはインコたちが\nおぼえたことばを共有する場所だよ！",
                 color = Secondary.copy(alpha = 0.8f),
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
@@ -193,7 +177,11 @@ private fun ParticipationConfirmationCard(onNext: () -> Unit, modifier: Modifier
  * 第2段階：機能説明カード
  */
 @Composable
-private fun FunctionExplanationCard(onNext: () -> Unit, modifier: Modifier = Modifier) {
+private fun FunctionExplanationCard(
+    onCreateAccount: () -> Unit,
+    errorMessage: String? = null,
+    modifier: Modifier = Modifier
+) {
     Card(
         modifier = modifier,
         colors =
@@ -298,125 +286,13 @@ private fun FunctionExplanationCard(onNext: () -> Unit, modifier: Modifier = Mod
                     }
                     Spacer(Modifier.width(12.dp))
                     Text(
-                        text = "気に入ったことばを\nじぶんのインコにおぼえさせることができるよ",
+                        text = "おもいだしたことばを\nじぶんのインコにおぼえさせられるよ",
                         color = Secondary.copy(alpha = 0.8f),
                         style = MaterialTheme.typography.bodyMedium,
                         lineHeight = MaterialTheme.typography.bodyMedium.lineHeight
                     )
                 }
             }
-
-            Spacer(Modifier.height(24.dp))
-
-            // つぎボタン
-            NextButton(
-                onClick = onNext,
-                modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .height(50.dp)
-            )
-        }
-    }
-}
-
-/**
- * 第3段階：ルールカード
- */
-@Composable
-private fun RulesCard(onNext: () -> Unit, modifier: Modifier = Modifier) {
-    Card(
-        modifier = modifier,
-        colors =
-        CardDefaults.cardColors(
-            containerColor = Background
-        ),
-        shape = Shapes.extraLarge
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(vertical = 24.dp)
-        ) {
-            // タイトルテキスト
-            Text(
-                text = "やくそく",
-                color = Secondary,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(Modifier.height(16.dp))
-
-            // 注意事項
-            Text(
-                text = "みんなでたのしくつかうために\nふてきせつなことはしないようにしよう！",
-                color = Secondary.copy(alpha = 0.8f),
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
-
-            Spacer(Modifier.height(24.dp))
-
-            // つぎボタン
-            NextButton(
-                onClick = onNext,
-                modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .height(50.dp)
-            )
-        }
-    }
-}
-
-/**
- * 第4段階：最終確認カード
- */
-@Composable
-private fun FinalConfirmationCard(
-    onCreateAccount: () -> Unit,
-    errorMessage: String? = null,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier,
-        colors =
-        CardDefaults.cardColors(
-            containerColor = Background
-        ),
-        shape = Shapes.extraLarge
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(vertical = 24.dp)
-        ) {
-            // タイトルテキスト
-            Text(
-                text = "じゅんびかんりょう！",
-                color = Secondary,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(Modifier.height(16.dp))
-
-            // 説明テキスト
-            Text(
-                text = "リマインネットをはじめよう",
-                color = Secondary.copy(alpha = 0.8f),
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
 
             Spacer(Modifier.height(24.dp))
 
@@ -479,7 +355,7 @@ private fun CreateAccountButton(onClick: () -> Unit, modifier: Modifier = Modifi
         shape = Shapes.large,
         colors =
         ButtonDefaults.elevatedButtonColors(
-            containerColor = Secondary,
+            containerColor = Primary,
             contentColor = White
         )
     ) {

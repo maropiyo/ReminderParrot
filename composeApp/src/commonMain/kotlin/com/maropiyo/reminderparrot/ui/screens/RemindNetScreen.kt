@@ -467,14 +467,14 @@ fun RemindNetScreen(
                 },
                 onDeleteClick = { clickedPost ->
                     println("RemindNetScreen: 削除ボタンクリック - postId: ${clickedPost.id}")
+                    // 削除処理開始時に即座にボトムシートを閉じる
+                    scope.launch {
+                        postDetailSheetState.hide()
+                        showPostDetailBottomSheet = false
+                        selectedPost = null
+                    }
                     remindNetViewModel.deletePost(clickedPost.id) {
                         println("RemindNetScreen: 削除成功コールバック実行")
-                        // 削除成功時にボトムシートを閉じる
-                        scope.launch {
-                            postDetailSheetState.hide()
-                            showPostDetailBottomSheet = false
-                            selectedPost = null
-                        }
                     }
                 },
                 sheetState = postDetailSheetState,
@@ -1004,7 +1004,7 @@ private fun PostDetailCard(
                 ) {
                     // リマインドボタン
                     ElevatedButton(
-                        onClick = { 
+                        onClick = {
                             if (!isAlreadySent) {
                                 onBellClick(post)
                             }
@@ -1038,7 +1038,7 @@ private fun PostDetailCard(
 
                     // インポートボタン
                     ElevatedButton(
-                        onClick = { 
+                        onClick = {
                             if (!isAlreadyImported) {
                                 onImportClick(post)
                             }

@@ -293,7 +293,7 @@ class RemindNetViewModel(
     private fun loadDisplayName() {
         // 既にローディング中または既に取得済みの場合はスキップ
         if (_isLoadingDisplayName.value || _displayName.value != null) return
-        
+
         viewModelScope.launch {
             _isLoadingDisplayName.value = true
             try {
