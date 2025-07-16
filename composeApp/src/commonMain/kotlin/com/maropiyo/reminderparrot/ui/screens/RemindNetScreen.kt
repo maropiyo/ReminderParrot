@@ -935,31 +935,15 @@ private fun PostDetailCard(
                             text = post.userName,
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
-                            color = Secondary
+                            color = Secondary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false)
                         )
 
                         // レベルバッジ
                         if (post.userLevel != null) {
                             UserLevelBadge(level = post.userLevel)
-                        }
-
-                        // スマートな投稿者表示
-                        if (isMyPost) {
-                            Box(
-                                modifier = Modifier
-                                    .background(
-                                        color = Secondary.copy(alpha = 0.1f),
-                                        shape = RoundedCornerShape(16.dp)
-                                    )
-                                    .padding(horizontal = 12.dp, vertical = 6.dp)
-                            ) {
-                                Text(
-                                    text = "あなた",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = Secondary,
-                                    fontWeight = FontWeight.Medium
-                                )
-                            }
                         }
                     }
 
@@ -1300,18 +1284,17 @@ private fun UserLevelBadge(level: Int, modifier: Modifier = Modifier) {
             .padding(horizontal = 8.dp, vertical = 4.dp)
     ) {
         Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Lv",
-                style = MaterialTheme.typography.labelSmall,
+                text = "Lv.",
+                style = MaterialTheme.typography.bodySmall,
                 color = Primary,
                 fontWeight = FontWeight.Medium
             )
             Text(
                 text = level.toString(),
-                style = MaterialTheme.typography.labelSmall,
+                style = MaterialTheme.typography.bodySmall,
                 color = Primary,
                 fontWeight = FontWeight.Bold
             )
