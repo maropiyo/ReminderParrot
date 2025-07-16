@@ -68,6 +68,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.maropiyo.reminderparrot.domain.entity.RemindNetPost
 import com.maropiyo.reminderparrot.domain.usecase.RegisterPushNotificationTokenUseCase
 import com.maropiyo.reminderparrot.presentation.viewmodel.ParrotViewModel
@@ -597,44 +598,13 @@ private fun RemindNetPostCard(
                 Column(
                     modifier = Modifier.weight(1f)
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        // ユーザー名
-                        Text(
-                            text = post.userName,
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = Secondary,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-
-                        // レベルバッジ
-                        if (post.userLevel != null) {
-                            UserLevelBadge(level = post.userLevel)
-                        }
-
-                        // あなたの投稿
-                        if (isMyPost) {
-                            Box(
-                                modifier = Modifier
-                                    .background(
-                                        color = Secondary.copy(alpha = 0.1f),
-                                        shape = RoundedCornerShape(16.dp)
-                                    )
-                                    .padding(horizontal = 8.dp, vertical = 4.dp)
-                            ) {
-                                Text(
-                                    text = "あなた",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = Secondary,
-                                    fontWeight = FontWeight.Medium
-                                )
-                            }
-                        }
-                    }
+                    UserInfoRow(
+                        post = post,
+                        isMyPost = isMyPost,
+                        showMyPostBadge = true,
+                        textStyle = MaterialTheme.typography.titleSmall,
+                        badgeSize = BadgeSize.Default
+                    )
 
                     // 投稿時間
                     Text(
@@ -926,26 +896,13 @@ private fun PostDetailCard(
                 Column(
                     modifier = Modifier.weight(1f)
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        // ユーザー名
-                        Text(
-                            text = post.userName,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = Secondary,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.weight(1f, fill = false)
-                        )
-
-                        // レベルバッジ
-                        if (post.userLevel != null) {
-                            UserLevelBadge(level = post.userLevel)
-                        }
-                    }
+                    UserInfoRow(
+                        post = post,
+                        isMyPost = isMyPost,
+                        showMyPostBadge = false,
+                        textStyle = MaterialTheme.typography.titleMedium,
+                        badgeSize = BadgeSize.Default
+                    )
 
                     // 投稿時間
                     Text(
@@ -1271,30 +1228,119 @@ private fun SimpleParrotInfoDisplay(
 }
 
 /**
+ * ユーザー情報を表示する共通コンポーネント
+ */
+@Composable
+private fun UserInfoRow(
+    post: RemindNetPost,
+    isMyPost: Boolean,
+    showMyPostBadge: Boolean = true,
+    textStyle: androidx.compose.ui.text.TextStyle = MaterialTheme.typography.titleSmall,
+    badgeSize: BadgeSize = BadgeSize.Default,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = modifier
+    ) {
+        // ユーザー名
+        Text(
+            text = post.userName,
+            style = textStyle,
+            fontWeight = FontWeight.Bold,
+            color = Secondary,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = if (showMyPostBadge) Modifier.weight(1f, fill = false) else Modifier
+        )
+
+        // レベルバッジ
+        if (post.userLevel != null) {
+            UserLevelBadge(level = post.userLevel, size = badgeSize)
+        }
+
+        // あなたの投稿バッジ（オプション）
+        if (isMyPost && showMyPostBadge) {
+            Box(
+                modifier = Modifier
+                    .background(
+                        color = Secondary.copy(alpha = 0.1f),
+                        shape = RoundedCornerShape(16.dp)
+                    )
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+            ) {
+                Text(
+                    text = "あなた",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Secondary,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+        }
+    }
+}
+
+/**
+ * バッジサイズを定義するenum
+ */
+enum class BadgeSize(
+    val textStyle: androidx.compose.ui.text.TextStyle,
+    val horizontalPadding: androidx.compose.ui.unit.Dp,
+    val verticalPadding: androidx.compose.ui.unit.Dp,
+    val cornerRadius: androidx.compose.ui.unit.Dp
+) {
+    Small(
+        textStyle = androidx.compose.ui.text.TextStyle(fontSize = 10.sp),
+        horizontalPadding = 6.dp,
+        verticalPadding = 2.dp,
+        cornerRadius = 8.dp
+    ),
+    Default(
+        textStyle = androidx.compose.ui.text.TextStyle(fontSize = 12.sp),
+        horizontalPadding = 8.dp,
+        verticalPadding = 4.dp,
+        cornerRadius = 12.dp
+    ),
+    Large(
+        textStyle = androidx.compose.ui.text.TextStyle(fontSize = 14.sp),
+        horizontalPadding = 10.dp,
+        verticalPadding = 6.dp,
+        cornerRadius = 16.dp
+    )
+}
+
+/**
  * ユーザーレベルを表示するバッジコンポーネント
  */
 @Composable
-private fun UserLevelBadge(level: Int, modifier: Modifier = Modifier) {
+private fun UserLevelBadge(level: Int, modifier: Modifier = Modifier, size: BadgeSize = BadgeSize.Default) {
     Box(
         modifier = modifier
             .background(
                 color = Primary.copy(alpha = 0.1f),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(size.cornerRadius)
             )
-            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .padding(horizontal = size.horizontalPadding, vertical = size.verticalPadding)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = "Lv.",
-                style = MaterialTheme.typography.bodySmall,
+                style = size.textStyle.copy(
+                    color = Primary,
+                    fontWeight = FontWeight.Medium
+                ),
                 color = Primary,
                 fontWeight = FontWeight.Medium
             )
             Text(
                 text = level.toString(),
-                style = MaterialTheme.typography.bodySmall,
+                style = size.textStyle.copy(
+                    color = Primary,
+                    fontWeight = FontWeight.Bold
+                ),
                 color = Primary,
                 fontWeight = FontWeight.Bold
             )
