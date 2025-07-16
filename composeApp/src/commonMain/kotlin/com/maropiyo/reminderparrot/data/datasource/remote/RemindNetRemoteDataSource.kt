@@ -81,26 +81,6 @@ class RemindNetRemoteDataSource(
     }
 
     /**
-     * 投稿にいいねをする
-     */
-    suspend fun likePost(postId: String): Result<Unit> = try {
-        // いいね数をインクリメント
-        supabaseClient
-            .from("remind_net_posts")
-            .update({
-                set("likes_count", "likes_count + 1")
-            }) {
-                filter {
-                    eq("id", postId)
-                }
-            }
-
-        Result.success(Unit)
-    } catch (e: Exception) {
-        Result.failure(e)
-    }
-
-    /**
      * 投稿を削除する（物理削除）
      */
     suspend fun deletePost(postId: String, userId: String): Result<Unit> {
@@ -256,7 +236,6 @@ data class RemindNetPostResponseDto(
     @SerialName("user_level") val userLevel: Int? = null,
     @SerialName("created_at") val createdAt: String,
     @SerialName("forget_at") val forgetAt: String,
-    @SerialName("likes_count") val likesCount: Int,
     @SerialName("is_deleted") val isDeleted: Boolean
 ) {
     fun toEntity(): RemindNetPost = RemindNetPost(
@@ -267,7 +246,6 @@ data class RemindNetPostResponseDto(
         userLevel = userLevel,
         createdAt = Instant.parse(createdAt),
         forgetAt = Instant.parse(forgetAt),
-        likesCount = likesCount,
         isDeleted = isDeleted
     )
 }

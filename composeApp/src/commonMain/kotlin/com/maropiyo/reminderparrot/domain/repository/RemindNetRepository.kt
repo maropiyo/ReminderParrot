@@ -27,11 +27,6 @@ interface RemindNetRepository {
     fun getAllPosts(): Flow<List<RemindNetPost>>
 
     /**
-     * 投稿にいいねをする
-     */
-    suspend fun likePost(postId: String): Result<Unit>
-
-    /**
      * 投稿を削除する
      */
     suspend fun deletePost(postId: String, userId: String): Result<Unit>
