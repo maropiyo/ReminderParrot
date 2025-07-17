@@ -12,10 +12,12 @@
 		15BCD5702E1B524800D36CE3 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 15BCD56F2E1B524800D36CE3 /* GoogleService-Info.plist */; };
 		15BCD5742E1B5C0600D36CE3 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 15BCD5732E1B5C0600D36CE3 /* FirebaseCore */; };
 		15BCD5762E1B5C0600D36CE3 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 15BCD5752E1B5C0600D36CE3 /* FirebaseMessaging */; };
+		15BCD5772E1B5C0700D36CE3 /* FirebaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15BCD5782E1B5C0700D36CE3 /* FirebaseManager.swift */; };
 		15C1A62D2DE1D6F2001E648E /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 15C1A62C2DE1D6F2001E648E /* libsqlite3.tbd */; };
+		15D5EEB52E28A86F00F22A03 /* BannerAdView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15D5EEB42E28A86100F22A03 /* BannerAdView.swift */; };
+		15DFCF9E2E288F8100966C7C /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = 15DFCF9D2E288F8100966C7C /* GoogleMobileAds */; };
 		2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2152FB032600AC8F00CF470E /* iOSApp.swift */; };
 		7555FF83242A565900829871 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7555FF82242A565900829871 /* ContentView.swift */; };
-		15BCD5772E1B5C0700D36CE3 /* FirebaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15BCD5782E1B5C0700D36CE3 /* FirebaseManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -23,13 +25,14 @@
 		058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		15BCD56F2E1B524800D36CE3 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		15BCD5712E1B533400D36CE3 /* iosApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = iosApp.entitlements; sourceTree = "<group>"; };
+		15BCD5782E1B5C0700D36CE3 /* FirebaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseManager.swift; sourceTree = "<group>"; };
 		15C1A62C2DE1D6F2001E648E /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
+		15D5EEB42E28A86100F22A03 /* BannerAdView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BannerAdView.swift; sourceTree = "<group>"; };
 		2152FB032600AC8F00CF470E /* iOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSApp.swift; sourceTree = "<group>"; };
 		7555FF7B242A565900829871 /* ReminderParrot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ReminderParrot.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7555FF82242A565900829871 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		7555FF8C242A565B00829871 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AB3632DC29227652001CCB65 /* Config.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
-		15BCD5782E1B5C0700D36CE3 /* FirebaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -37,6 +40,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				15DFCF9E2E288F8100966C7C /* GoogleMobileAds in Frameworks */,
 				15BCD5762E1B5C0600D36CE3 /* FirebaseMessaging in Frameworks */,
 				15BCD5742E1B5C0600D36CE3 /* FirebaseCore in Frameworks */,
 				15C1A62D2DE1D6F2001E648E /* libsqlite3.tbd in Frameworks */,
@@ -52,6 +56,14 @@
 				058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		15D5EEB32E28A84D00F22A03 /* AdViews */ = {
+			isa = PBXGroup;
+			children = (
+				15D5EEB42E28A86100F22A03 /* BannerAdView.swift */,
+			);
+			path = AdViews;
 			sourceTree = "<group>";
 		};
 		42799AB246E5F90AF97AA0EF /* Frameworks */ = {
@@ -91,6 +103,7 @@
 				058557D7273AAEEB004C7B11 /* Preview Content */,
 				15BCD56F2E1B524800D36CE3 /* GoogleService-Info.plist */,
 				15BCD5782E1B5C0700D36CE3 /* FirebaseManager.swift */,
+				15D5EEB32E28A84D00F22A03 /* AdViews */,
 			);
 			path = iosApp;
 			sourceTree = "<group>";
@@ -123,6 +136,7 @@
 			packageProductDependencies = (
 				15BCD5732E1B5C0600D36CE3 /* FirebaseCore */,
 				15BCD5752E1B5C0600D36CE3 /* FirebaseMessaging */,
+				15DFCF9D2E288F8100966C7C /* GoogleMobileAds */,
 			);
 			productName = iosApp;
 			productReference = 7555FF7B242A565900829871 /* ReminderParrot.app */;
@@ -155,6 +169,7 @@
 			mainGroup = 7555FF72242A565900829871;
 			packageReferences = (
 				15BCD5722E1B5C0500D36CE3 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				15DFCF9C2E288F8100966C7C /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */,
 			);
 			productRefGroup = 7555FF7C242A565900829871 /* Products */;
 			projectDirPath = "";
@@ -207,6 +222,7 @@
 				2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */,
 				7555FF83242A565900829871 /* ContentView.swift in Sources */,
 				15BCD5772E1B5C0700D36CE3 /* FirebaseManager.swift in Sources */,
+				15D5EEB52E28A86F00F22A03 /* BannerAdView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -433,6 +449,14 @@
 				minimumVersion = 11.15.0;
 			};
 		};
+		15DFCF9C2E288F8100966C7C /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/googleads/swift-package-manager-google-mobile-ads.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.7.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -445,6 +469,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 15BCD5722E1B5C0500D36CE3 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseMessaging;
+		};
+		15DFCF9D2E288F8100966C7C /* GoogleMobileAds */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 15DFCF9C2E288F8100966C7C /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */;
+			productName = GoogleMobileAds;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -21,7 +21,6 @@
       "Bash(npm:*)",
       "Bash(node:*)",
       "Bash(npx:*)",
-      "mcp__supabase__*"
     ],
     "deny": [
       "Bash(sudo:*)",
@@ -44,7 +43,8 @@
       "Bash(nc:*)",
       "Bash(psql:*)",
       "Bash(mysql:*)",
-      "Bash(mongod:*)"
+      "Bash(mongod:*)",
+      "mcp__supabase__*"
     ]
   },
   "environment": {
@@ -106,7 +106,7 @@
   },
   "customCommands": {
     "/test-reminder": {
-      "description": "Run all reminder-related tests", 
+      "description": "Run all reminder-related tests",
       "command": "./gradlew allTests --tests '*Reminder*'"
     },
     "/build-all": {

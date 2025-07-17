@@ -18,6 +18,7 @@ material3Android = "1.3.2"
 sqlDelight = "2.0.2"
 mockk = "1.14.2"
 firebase-bom = "33.7.0"
+google-play-services = "24.4.0"
 
 [libraries]
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
@@ -58,6 +59,8 @@ sql-android-driver = { module = "app.cash.sqldelight:android-driver", version.re
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase-bom" }
 firebase-messaging = { module = "com.google.firebase:firebase-messaging-ktx" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics-ktx" }
+
+google-playServices-ads = { group = "com.google.android.gms", name = "play-services-ads", version.ref = "google-play-services" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

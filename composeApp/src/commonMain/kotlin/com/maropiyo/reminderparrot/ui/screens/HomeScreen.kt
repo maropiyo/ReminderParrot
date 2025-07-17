@@ -1,6 +1,5 @@
 package com.maropiyo.reminderparrot.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,13 +14,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.maropiyo.reminderparrot.presentation.viewmodel.ParrotViewModel
 import com.maropiyo.reminderparrot.presentation.viewmodel.ReminderListViewModel
+import com.maropiyo.reminderparrot.ui.components.common.ad.AdFactory
 import com.maropiyo.reminderparrot.ui.components.home.LevelUpDialog
 import com.maropiyo.reminderparrot.ui.components.home.ParrotContent
 import com.maropiyo.reminderparrot.ui.components.home.ReminderContent
 import kotlinx.coroutines.delay
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
@@ -30,12 +30,14 @@ import org.koin.compose.viewmodel.koinViewModel
  *
  * @param parrotViewModel インコのViewModel
  * @param reminderListViewModel リマインダーリストのViewModel
+ * @param adFactory 広告バナーのファクトリー
  * @param modifier 修飾子
  */
 @Composable
 fun HomeScreen(
     parrotViewModel: ParrotViewModel = koinViewModel(),
     reminderListViewModel: ReminderListViewModel = koinViewModel(),
+    adFactory: AdFactory = koinInject(),
     modifier: Modifier = Modifier
 ) {
     // ViewModelの状態を取得
@@ -60,10 +62,10 @@ fun HomeScreen(
 
     Box(modifier = modifier.fillMaxSize()) {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .verticalScroll(rememberScrollState())
         ) {
             // Parrotコンテンツ
             ParrotContent(
@@ -92,10 +94,14 @@ fun HomeScreen(
                 onDeleteReminder = { reminderId ->
                     reminderListViewModel.deleteReminder(reminderId)
                 },
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .weight(1f)
             )
+
+            // 広告バナー
+            adFactory.AdBanner(Modifier.fillMaxWidth())
         }
 
         // レベルアップダイアログ（画面全体をマスク）

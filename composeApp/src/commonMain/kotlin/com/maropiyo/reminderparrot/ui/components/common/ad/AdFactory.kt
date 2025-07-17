@@ -1,0 +1,9 @@
+package com.maropiyo.reminderparrot.ui.components.common.ad
+
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+
+interface AdFactory {
+    @Composable
+    fun AdBanner(modifier: Modifier)
+}
