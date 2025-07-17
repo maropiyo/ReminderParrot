@@ -17,14 +17,14 @@ fun MainViewController(bannerAdViewFactory: BannerAdViewFactory): UIViewControll
     initKoin(
         supabaseConfig = getSupabaseConfig(),
         additionalModules =
-            listOf(
-                databaseModule,
-                platformModule,
-                // AdMob
-                module {
-                    single<AdFactory> { IOSAdFactory(bannerAdViewFactory) }
-                }
-            )
+        listOf(
+            databaseModule,
+            platformModule,
+            // AdMob
+            module {
+                single<AdFactory> { IOSAdFactory(bannerAdViewFactory) }
+            }
+        )
     )
 
     // ComposeUIの作成

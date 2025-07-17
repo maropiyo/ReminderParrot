@@ -23,7 +23,7 @@ class AndroidAdFactory : AdFactory {
                     )
                     loadAd(AdRequest.Builder().build())
                 }
-            },
+            }
         )
     }
 }

@@ -16,7 +16,7 @@ class IOSAdFactory(
             factory = {
                 bannerAdViewFactory.createBannerAdView()
             },
-            modifier = modifier.fillMaxWidth().height(50.dp),
+            modifier = modifier.fillMaxWidth().height(50.dp)
         )
     }
 }

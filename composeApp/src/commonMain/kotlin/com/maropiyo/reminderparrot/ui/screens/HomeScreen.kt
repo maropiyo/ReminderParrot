@@ -63,9 +63,9 @@ fun HomeScreen(
     Box(modifier = modifier.fillMaxSize()) {
         Column(
             modifier =
-                Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState()),
+            Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
         ) {
             // Parrotコンテンツ
             ParrotContent(
@@ -95,9 +95,9 @@ fun HomeScreen(
                     reminderListViewModel.deleteReminder(reminderId)
                 },
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
+                Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
             )
 
             // 広告バナー
