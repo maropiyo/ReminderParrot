@@ -79,6 +79,9 @@ kotlin {
             implementation("com.google.firebase:firebase-bom:33.7.0")
             implementation("com.google.firebase:firebase-messaging-ktx")
             implementation("com.google.firebase:firebase-analytics-ktx")
+
+            // Google Play Services Ads
+            implementation(libs.google.playServices.ads)
         }
 
         iosMain.dependencies {
