@@ -9,7 +9,7 @@ import com.google.android.gms.ads.AdView
 
 class AndroidAdFactory : AdFactory {
     @Composable
-    override fun AdBanner(modifier: Modifier) {
+    override fun BannerAd(modifier: Modifier) {
         AndroidView(
             modifier = modifier,
             factory = { context ->

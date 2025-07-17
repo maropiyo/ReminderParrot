@@ -11,7 +11,7 @@ class IOSAdFactory(
     private val bannerAdViewFactory: BannerAdViewFactory
 ) : AdFactory {
     @Composable
-    override fun AdBanner(modifier: Modifier) {
+    override fun BannerAd(modifier: Modifier) {
         UIKitView(
             factory = {
                 bannerAdViewFactory.createBannerAdView()
