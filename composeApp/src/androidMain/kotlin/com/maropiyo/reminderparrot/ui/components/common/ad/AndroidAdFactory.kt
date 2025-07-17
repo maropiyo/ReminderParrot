@@ -111,15 +111,8 @@ class AndroidAdFactory : AdFactory {
                 gravity = Gravity.CENTER_VERTICAL
             }
 
-        // 広告のアイコン（左側）
-        val iconView =
-            ImageView(context).apply {
-                layoutParams = ViewGroup.LayoutParams(40, 40)
-                scaleType = ImageView.ScaleType.FIT_CENTER
-            }
-
-        // テキストコンテナ（中央）
-        val textLayout =
+        // 左側：アイコンと本文のコンテナ
+        val leftLayout =
             LinearLayout(context).apply {
                 orientation = LinearLayout.VERTICAL
                 layoutParams =
@@ -128,23 +121,43 @@ class AndroidAdFactory : AdFactory {
                         ViewGroup.LayoutParams.WRAP_CONTENT,
                         1f
                     )
-                setPadding(8, 0, 8, 0)
+            }
+
+        // 上段：アイコンと見出しの水平レイアウト
+        val topLayout =
+            LinearLayout(context).apply {
+                orientation = LinearLayout.HORIZONTAL
+                layoutParams =
+                    ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                    )
+                gravity = Gravity.CENTER_VERTICAL
+            }
+
+        // 広告のアイコン（左上）
+        val iconView =
+            ImageView(context).apply {
+                layoutParams = ViewGroup.LayoutParams(40, 40)
+                scaleType = ImageView.ScaleType.FIT_CENTER
             }
 
         // 広告の見出し
         val headlineView =
             TextView(context).apply {
                 layoutParams =
-                    ViewGroup.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT
+                    LinearLayout.LayoutParams(
+                        0,
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        1f
                     )
                 textSize = 14f
                 setTextColor(Color.BLACK)
                 maxLines = 1
+                setPadding(8, 0, 0, 0)
             }
 
-        // 広告の本文
+        // 広告の本文（アイコンの下）
         val bodyView =
             TextView(context).apply {
                 layoutParams =
@@ -155,19 +168,17 @@ class AndroidAdFactory : AdFactory {
                 textSize = 12f
                 setTextColor(Color.GRAY)
                 maxLines = 1
+                setPadding(0, 8, 0, 0)
             }
 
-        // CTAボタン（右側）
+        // CTAボタン（右側、上下中央）
         val ctaButton =
             Button(context).apply {
                 layoutParams =
-                    LinearLayout
-                        .LayoutParams(
-                            ViewGroup.LayoutParams.WRAP_CONTENT,
-                            ViewGroup.LayoutParams.WRAP_CONTENT
-                        ).apply {
-                            gravity = Gravity.CENTER_VERTICAL
-                        }
+                    ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                    )
                 textSize = 11f
                 setPadding(16, 6, 16, 6)
                 minHeight = 36
@@ -189,11 +200,16 @@ class AndroidAdFactory : AdFactory {
             }
 
         // レイアウトに追加
-        textLayout.addView(headlineView)
-        textLayout.addView(bodyView)
+        // 上段：アイコンと見出し
+        topLayout.addView(iconView)
+        topLayout.addView(headlineView)
 
-        mainLayout.addView(iconView)
-        mainLayout.addView(textLayout)
+        // 左側：上段と本文
+        leftLayout.addView(topLayout)
+        leftLayout.addView(bodyView)
+
+        // メインレイアウト：左側とCTAボタン
+        mainLayout.addView(leftLayout)
         mainLayout.addView(ctaButton)
 
         adView.addView(mainLayout)

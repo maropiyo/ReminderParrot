@@ -1405,9 +1405,9 @@ private fun RemindNetAdCard(adFactory: AdFactory, modifier: Modifier = Modifier)
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
-                            text = "広告インコ",
+                            text = "おしらせインコ",
                             style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Medium,
+                            fontWeight = FontWeight.Bold,
                             color = Secondary
                         )
 
