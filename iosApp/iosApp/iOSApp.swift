@@ -1,6 +1,7 @@
 import SwiftUI
 import FirebaseCore
 import FirebaseMessaging
+import GoogleMobileAds
 
 @main
 struct iOSApp: App {
@@ -18,6 +19,9 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         // Firebase初期化
         _ = FirebaseManager.shared
+        
+        // Google Mobile Ads SDK初期化
+        MobileAds.shared.start()
         return true
     }
     
