@@ -4,4 +4,5 @@ import platform.UIKit.UIView
 
 interface NativeAdViewFactory {
     fun createNativeAdView(): UIView
+    fun createNativeAdView(adPosition: Int): UIView
 }

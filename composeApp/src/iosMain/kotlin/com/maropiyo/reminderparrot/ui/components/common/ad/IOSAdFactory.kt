@@ -22,10 +22,10 @@ class IOSAdFactory(
     }
 
     @Composable
-    override fun NativeAd(modifier: Modifier) {
+    override fun NativeAd(modifier: Modifier, adPosition: Int) {
         UIKitView(
             factory = {
-                nativeAdViewFactory.createNativeAdView()
+                nativeAdViewFactory.createNativeAdView(adPosition)
             },
             modifier = modifier.fillMaxWidth().height(50.dp)
         )

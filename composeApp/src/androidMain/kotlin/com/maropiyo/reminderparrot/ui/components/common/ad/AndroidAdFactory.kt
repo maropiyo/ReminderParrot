@@ -10,23 +10,24 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
-import com.google.android.gms.ads.AdLoader
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.nativead.NativeAd
-import com.google.android.gms.ads.nativead.NativeAdOptions
 import com.google.android.gms.ads.nativead.NativeAdView
 
 class AndroidAdFactory : AdFactory {
+    private var nativeAdCache: NativeAdCache? = null
+
     @Composable
     override fun BannerAd(modifier: Modifier) {
         AndroidView(
@@ -47,28 +48,40 @@ class AndroidAdFactory : AdFactory {
     }
 
     @Composable
-    override fun NativeAd(modifier: Modifier) {
+    override fun NativeAd(modifier: Modifier, adPosition: Int) {
         val context = LocalContext.current
-        var nativeAd by remember { mutableStateOf<NativeAd?>(null) }
+        val scope = rememberCoroutineScope()
+        var nativeAd by remember(adPosition) { mutableStateOf<NativeAd?>(null) }
 
-        DisposableEffect(Unit) {
-            val adLoader =
-                AdLoader
-                    .Builder(context, "ca-app-pub-3940256099942544/2247696110")
-                    .forNativeAd { ad ->
-                        nativeAd = ad
-                    }.withNativeAdOptions(
-                        NativeAdOptions
-                            .Builder()
-                            .setAdChoicesPlacement(NativeAdOptions.ADCHOICES_TOP_RIGHT)
-                            .build()
-                    ).build()
+        // キャッシュを初期化
+        if (nativeAdCache == null) {
+            nativeAdCache = NativeAdCache(context, scope)
+        }
 
-            adLoader.loadAd(AdRequest.Builder().build())
+        // キャッシュから広告を取得または事前読み込み
+        LaunchedEffect(adPosition) {
+            val cache = nativeAdCache ?: return@LaunchedEffect
 
-            onDispose {
-                nativeAd?.destroy()
+            // キャッシュされた広告があるかチェック
+            val cachedAd = cache.getAd(adPosition)
+            if (cachedAd != null) {
+                nativeAd = cachedAd
+                println("📱 AndroidAdFactory: キャッシュから広告を取得 (position: $adPosition)")
+            } else {
+                // キャッシュにない場合は事前読み込み
+                cache.preloadAd(adPosition)
+
+                // 少し待ってから再度チェック
+                kotlinx.coroutines.delay(1000)
+                val newAd = cache.getAd(adPosition)
+                if (newAd != null) {
+                    nativeAd = newAd
+                    println("📱 AndroidAdFactory: 事前読み込み完了 (position: $adPosition)")
+                }
             }
+
+            // 次の広告も事前読み込み
+            cache.preloadAds(listOf(adPosition + 5, adPosition + 10))
         }
 
         AndroidView(
@@ -193,7 +206,7 @@ class AndroidAdFactory : AdFactory {
                 }
                 background = buttonBackground
                 setTextColor(Color.WHITE) // テキストを白に設定
-                
+
                 // 影を完全に削除
                 elevation = 0f
                 stateListAnimator = null

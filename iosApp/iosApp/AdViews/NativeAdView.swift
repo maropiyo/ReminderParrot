@@ -16,25 +16,40 @@ class NativeAdViewFactoryImpl: NativeAdViewFactory {
         let wrapper = NativeAdViewWrapper()
         return wrapper
     }
+    
+    func createNativeAdView(for position: Int) -> UIView {
+        print("📱 NativeAd: ポジション\(position)の広告ビューを作成開始")
+        let wrapper = NativeAdViewWrapper(adPosition: position)
+        return wrapper
+    }
 }
 
 class NativeAdViewWrapper: UIView {
     private var nativeAdView: NativeAdView!
     private var adLoader: AdLoader!
     private var delegate: NativeAdDelegate!
+    private let adPosition: Int
+    
+    init(adPosition: Int = 0) {
+        self.adPosition = adPosition
+        super.init(frame: .zero)
+        setupAdView()
+    }
     
     override init(frame: CGRect) {
+        self.adPosition = 0
         super.init(frame: frame)
         setupAdView()
     }
     
     required init?(coder: NSCoder) {
+        self.adPosition = 0
         super.init(coder: coder)
         setupAdView()
     }
     
     private func setupAdView() {
-        print("📱 NativeAdWrapper: セットアップ開始")
+        print("📱 NativeAdWrapper: セットアップ開始 (position: \(adPosition))")
         
         // NativeAdViewを作成
         nativeAdView = NativeAdView()
@@ -51,7 +66,36 @@ class NativeAdViewWrapper: UIView {
             nativeAdView.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
         
-        // AdLoaderを設定
+        // キャッシュから広告を取得
+        let cache = NativeAdCache.shared
+        if let cachedAd = cache.getAd(position: adPosition) {
+            print("📱 NativeAdWrapper: キャッシュから広告を取得 (position: \(adPosition))")
+            delegate = NativeAdDelegate(nativeAdView: nativeAdView)
+            delegate.setupNativeAdContent(nativeAd: cachedAd)
+        } else {
+            print("📱 NativeAdWrapper: 広告を事前読み込み (position: \(adPosition))")
+            // キャッシュにない場合は事前読み込みをトリガー
+            cache.preloadAd(position: adPosition)
+            
+            // 次の広告も事前読み込み
+            cache.preloadAds(positions: [adPosition + 5, adPosition + 10])
+            
+            // 少し待ってから再度チェック
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                if let newAd = cache.getAd(position: self.adPosition) {
+                    print("📱 NativeAdWrapper: 事前読み込み完了 (position: \(self.adPosition))")
+                    self.delegate = NativeAdDelegate(nativeAdView: self.nativeAdView)
+                    self.delegate.setupNativeAdContent(nativeAd: newAd)
+                } else {
+                    // フォールバック: 直接読み込み
+                    self.loadAdDirectly()
+                }
+            }
+        }
+    }
+    
+    private func loadAdDirectly() {
+        print("📱 NativeAdWrapper: 直接読み込み開始 (position: \(adPosition))")
         adLoader = AdLoader(adUnitID: "ca-app-pub-3940256099942544/3986624511",
                            rootViewController: getRootViewController(),
                            adTypes: [.native],
@@ -59,8 +103,6 @@ class NativeAdViewWrapper: UIView {
         
         delegate = NativeAdDelegate(nativeAdView: nativeAdView)
         adLoader.delegate = delegate
-        
-        print("📱 NativeAdWrapper: 広告読み込み開始")
         adLoader.load(Request())
     }
     
@@ -112,7 +154,7 @@ class NativeAdDelegate: NSObject, AdLoaderDelegate, NativeAdLoaderDelegate {
         createSimpleLayout(nativeAd: nil)
     }
     
-    private func setupNativeAdContent(nativeAd: NativeAd) {
+    func setupNativeAdContent(nativeAd: NativeAd) {
         print("📱 NativeAd: 広告データを設定開始")
         print("📱 NativeAd: headline = \(nativeAd.headline ?? "nil")")
         print("📱 NativeAd: body = \(nativeAd.body ?? "nil")")

@@ -8,5 +8,5 @@ interface AdFactory {
     fun BannerAd(modifier: Modifier)
 
     @Composable
-    fun NativeAd(modifier: Modifier)
+    fun NativeAd(modifier: Modifier, adPosition: Int = 0)
 }

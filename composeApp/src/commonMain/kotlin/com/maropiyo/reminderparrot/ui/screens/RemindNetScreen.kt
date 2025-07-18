@@ -61,7 +61,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
@@ -280,9 +279,9 @@ fun RemindNetScreen(
                         )
                     },
                     colors =
-                    TopAppBarDefaults.topAppBarColors(
-                        containerColor = White
-                    )
+                        TopAppBarDefaults.topAppBarColors(
+                            containerColor = White
+                        )
                 )
                 // インコ情報表示（アカウントがある場合のみ）
                 if (parrotState.parrot != null && !needsAccountCreation) {
@@ -291,9 +290,9 @@ fun RemindNetScreen(
                         displayName = displayName?.takeIf { it.isNotBlank() } ?: "ひよっこインコ",
                         isLoadingDisplayName = isLoadingDisplayName,
                         modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
                     )
                 }
             }
@@ -349,11 +348,12 @@ fun RemindNetScreen(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = if (needsAccountCreation) {
-                                        "リマインネットに参加していません"
-                                    } else {
-                                        "だれかいませんか？"
-                                    },
+                                    text =
+                                        if (needsAccountCreation) {
+                                            "リマインネットに参加していません"
+                                        } else {
+                                            "だれかいませんか？"
+                                        },
                                     style = MaterialTheme.typography.titleMedium,
                                     color = Secondary,
                                     fontWeight = FontWeight.Bold
@@ -396,6 +396,7 @@ fun RemindNetScreen(
                                     Spacer(modifier = Modifier.height(12.dp))
                                     RemindNetAdCard(
                                         adFactory = adFactory,
+                                        index = index,
                                         modifier = Modifier.fillMaxWidth()
                                     )
                                 }
@@ -409,10 +410,10 @@ fun RemindNetScreen(
             if (showNewPostNotification) {
                 Box(
                     modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                        .padding(top = 16.dp),
+                        Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues)
+                            .padding(top = 16.dp),
                     contentAlignment = Alignment.TopCenter
                 ) {
                     NewPostNotificationButton(
@@ -525,21 +526,25 @@ fun RemindNetScreen(
  * 新規投稿通知フローティングボタン
  */
 @Composable
-private fun NewPostNotificationButton(count: Int, onClick: () -> Unit, modifier: Modifier = Modifier) {
+private fun NewPostNotificationButton(
+    count: Int,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Button(
         onClick = onClick,
         modifier =
-        modifier
-            .wrapContentSize()
-            .shadow(
-                elevation = 8.dp,
-                shape = RoundedCornerShape(24.dp)
-            ),
+            modifier
+                .wrapContentSize()
+                .shadow(
+                    elevation = 8.dp,
+                    shape = RoundedCornerShape(24.dp)
+                ),
         colors =
-        ButtonDefaults.buttonColors(
-            containerColor = Primary,
-            contentColor = White
-        ),
+            ButtonDefaults.buttonColors(
+                containerColor = Primary,
+                contentColor = White
+            ),
         shape = RoundedCornerShape(24.dp),
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
     ) {
@@ -573,21 +578,21 @@ private fun RemindNetPostCard(
 ) {
     Card(
         modifier =
-        modifier
-            .fillMaxWidth()
-            .clickable { onCardClick(post) },
+            modifier
+                .fillMaxWidth()
+                .clickable { onCardClick(post) },
         colors =
-        CardDefaults.cardColors(
-            containerColor = White
-        ),
+            CardDefaults.cardColors(
+                containerColor = White
+            ),
         shape = Shapes.extraLarge,
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
             modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
         ) {
             // アイコンとユーザー名
             Row(
@@ -598,10 +603,10 @@ private fun RemindNetPostCard(
                     painter = painterResource(Res.drawable.reminko_face),
                     contentDescription = "インコ",
                     modifier =
-                    Modifier
-                        .size(32.dp)
-                        .clip(CircleShape)
-                        .background(ParrotYellow, CircleShape),
+                        Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .background(ParrotYellow, CircleShape),
                     contentScale = ContentScale.Crop
                 )
 
@@ -682,7 +687,10 @@ private fun RemindNetPostCard(
  * 軽やかなアニメーションと影効果でスタイリッシュに
  */
 @Composable
-private fun CircularBellButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+private fun CircularBellButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     // プレス時のスケールアニメーション
     var isPressed by remember { mutableStateOf(false) }
 
@@ -702,18 +710,18 @@ private fun CircularBellButton(onClick: () -> Unit, modifier: Modifier = Modifie
 
     Box(
         modifier =
-        modifier
-            .scale(scale)
-            .shadow(
-                elevation = 6.dp,
-                shape = CircleShape,
-                ambientColor = ParrotYellow.copy(alpha = 0.2f)
-            ).clip(CircleShape)
-            .background(ParrotYellow)
-            .clickable {
-                isPressed = true
-                onClick()
-            },
+            modifier
+                .scale(scale)
+                .shadow(
+                    elevation = 6.dp,
+                    shape = CircleShape,
+                    ambientColor = ParrotYellow.copy(alpha = 0.2f)
+                ).clip(CircleShape)
+                .background(ParrotYellow)
+                .clickable {
+                    isPressed = true
+                    onClick()
+                },
         contentAlignment = Alignment.Center
     ) {
         Icon(
@@ -730,7 +738,10 @@ private fun CircularBellButton(onClick: () -> Unit, modifier: Modifier = Modifie
  * フェッチするような下矢印アイコンとスタイリッシュなデザイン
  */
 @Composable
-private fun CircularImportButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+private fun CircularImportButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     // プレス時のスケールアニメーション
     var isPressed by remember { mutableStateOf(false) }
 
@@ -750,13 +761,13 @@ private fun CircularImportButton(onClick: () -> Unit, modifier: Modifier = Modif
 
     Box(
         modifier =
-        modifier
-            .scale(scale)
-            .clip(CircleShape)
-            .clickable {
-                isPressed = true
-                onClick()
-            },
+            modifier
+                .scale(scale)
+                .clip(CircleShape)
+                .clickable {
+                    isPressed = true
+                    onClick()
+                },
         contentAlignment = Alignment.Center
     ) {
         // 点線の円を描画
@@ -770,10 +781,10 @@ private fun CircularImportButton(onClick: () -> Unit, modifier: Modifier = Modif
                 radius = radius,
                 center = center,
                 style =
-                Stroke(
-                    width = strokeWidth,
-                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 6f), 0f)
-                )
+                    Stroke(
+                        width = strokeWidth,
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 6f), 0f)
+                    )
             )
         }
 
@@ -811,10 +822,10 @@ private fun RemindNetPostDetailBottomSheet(
     ) {
         Box(
             modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .padding(bottom = 16.dp)
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 16.dp)
         ) {
             PostDetailCard(
                 post = post,
@@ -825,9 +836,9 @@ private fun RemindNetPostDetailBottomSheet(
                 isMyPost = isMyPost,
                 isAlreadyImported = isAlreadyImported,
                 modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(top = 104.dp)
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 104.dp)
             )
 
             // インコの画像
@@ -835,9 +846,9 @@ private fun RemindNetPostDetailBottomSheet(
                 painter = painterResource(Res.drawable.reminko_raising_hand),
                 contentDescription = "Parrot",
                 modifier =
-                Modifier
-                    .size(128.dp)
-                    .align(Alignment.TopCenter),
+                    Modifier
+                        .size(128.dp)
+                        .align(Alignment.TopCenter),
                 contentScale = ContentScale.Crop
             )
         }
@@ -861,17 +872,17 @@ private fun PostDetailCard(
     Card(
         modifier = modifier,
         colors =
-        CardDefaults.cardColors(
-            containerColor = Background
-        ),
+            CardDefaults.cardColors(
+                containerColor = Background
+            ),
         shape = Shapes.extraLarge
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(vertical = 24.dp)
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 24.dp)
         ) {
             // タイトルテキスト
             Text(
@@ -887,19 +898,19 @@ private fun PostDetailCard(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
             ) {
                 // インコアイコン
                 Image(
                     painter = painterResource(Res.drawable.reminko_face),
                     contentDescription = "インコ",
                     modifier =
-                    Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .background(ParrotYellow, CircleShape),
+                        Modifier
+                            .size(48.dp)
+                            .clip(CircleShape)
+                            .background(ParrotYellow, CircleShape),
                     contentScale = ContentScale.Crop
                 )
 
@@ -930,13 +941,13 @@ private fun PostDetailCard(
             // リマインダーテキスト
             Card(
                 modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
                 colors =
-                CardDefaults.cardColors(
-                    containerColor = Secondary.copy(alpha = 0.08f) // 薄いグレー背景で読み取り専用感を演出
-                ),
+                    CardDefaults.cardColors(
+                        containerColor = Secondary.copy(alpha = 0.08f) // 薄いグレー背景で読み取り専用感を演出
+                    ),
                 shape = Shapes.large,
                 elevation = CardDefaults.cardElevation(defaultElevation = 0.dp) // 影を削除
             ) {
@@ -947,9 +958,9 @@ private fun PostDetailCard(
                     fontWeight = FontWeight.Bold,
                     lineHeight = MaterialTheme.typography.titleMedium.lineHeight,
                     modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(20.dp)
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp)
                 )
             }
 
@@ -959,9 +970,9 @@ private fun PostDetailCard(
             if (!isMyPost) {
                 Column(
                     modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     // リマインドボタン
@@ -972,18 +983,18 @@ private fun PostDetailCard(
                             }
                         },
                         modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .height(50.dp),
+                            Modifier
+                                .fillMaxWidth()
+                                .height(50.dp),
                         shape = Shapes.large,
                         enabled = !isAlreadySent,
                         colors =
-                        ButtonDefaults.elevatedButtonColors(
-                            containerColor = if (isAlreadySent) ParrotYellow.copy(alpha = 0.3f) else ParrotYellow,
-                            contentColor = if (isAlreadySent) White.copy(alpha = 0.5f) else White,
-                            disabledContainerColor = ParrotYellow.copy(alpha = 0.3f),
-                            disabledContentColor = White.copy(alpha = 0.5f)
-                        )
+                            ButtonDefaults.elevatedButtonColors(
+                                containerColor = if (isAlreadySent) ParrotYellow.copy(alpha = 0.3f) else ParrotYellow,
+                                contentColor = if (isAlreadySent) White.copy(alpha = 0.5f) else White,
+                                disabledContainerColor = ParrotYellow.copy(alpha = 0.3f),
+                                disabledContentColor = White.copy(alpha = 0.5f)
+                            )
                     ) {
                         Icon(
                             imageVector = Icons.Default.Notifications,
@@ -1006,18 +1017,18 @@ private fun PostDetailCard(
                             }
                         },
                         modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .height(50.dp),
+                            Modifier
+                                .fillMaxWidth()
+                                .height(50.dp),
                         shape = Shapes.large,
                         enabled = !isAlreadyImported,
                         colors =
-                        ButtonDefaults.elevatedButtonColors(
-                            containerColor = if (isAlreadyImported) Primary.copy(alpha = 0.3f) else Primary,
-                            contentColor = if (isAlreadyImported) White.copy(alpha = 0.5f) else White,
-                            disabledContainerColor = Primary.copy(alpha = 0.3f),
-                            disabledContentColor = White.copy(alpha = 0.5f)
-                        )
+                            ButtonDefaults.elevatedButtonColors(
+                                containerColor = if (isAlreadyImported) Primary.copy(alpha = 0.3f) else Primary,
+                                contentColor = if (isAlreadyImported) White.copy(alpha = 0.5f) else White,
+                                disabledContainerColor = Primary.copy(alpha = 0.3f),
+                                disabledContentColor = White.copy(alpha = 0.5f)
+                            )
                     ) {
                         Icon(
                             imageVector = CustomIcons.ArrowDownward,
@@ -1035,24 +1046,24 @@ private fun PostDetailCard(
             } else {
                 Column(
                     modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     // 編集ボトムシートスタイルの削除ボタン
                     ElevatedButton(
                         onClick = { onDeleteClick(post) },
                         modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .height(50.dp),
+                            Modifier
+                                .fillMaxWidth()
+                                .height(50.dp),
                         shape = Shapes.large,
                         colors =
-                        ButtonDefaults.elevatedButtonColors(
-                            containerColor = Error,
-                            contentColor = White
-                        )
+                            ButtonDefaults.elevatedButtonColors(
+                                containerColor = Error,
+                                contentColor = White
+                            )
                     ) {
                         Text(
                             text = "さくじょ",
@@ -1079,17 +1090,17 @@ private fun SimpleParrotInfoDisplay(
     Card(
         modifier = modifier,
         colors =
-        CardDefaults.cardColors(
-            containerColor = White
-        ),
+            CardDefaults.cardColors(
+                containerColor = White
+            ),
         shape = RoundedCornerShape(20.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
     ) {
         Row(
             modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -1098,10 +1109,10 @@ private fun SimpleParrotInfoDisplay(
                 painter = painterResource(Res.drawable.reminko_face),
                 contentDescription = "リマインコ",
                 modifier =
-                Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(ParrotYellow, CircleShape),
+                    Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(ParrotYellow, CircleShape),
                 contentScale = ContentScale.Crop
             )
 
@@ -1117,11 +1128,11 @@ private fun SimpleParrotInfoDisplay(
                 ) {
                     Box(
                         modifier =
-                        Modifier
-                            .background(
-                                Primary.copy(alpha = 0.15f),
-                                RoundedCornerShape(12.dp)
-                            ).padding(horizontal = 8.dp, vertical = 2.dp)
+                            Modifier
+                                .background(
+                                    Primary.copy(alpha = 0.15f),
+                                    RoundedCornerShape(12.dp)
+                                ).padding(horizontal = 8.dp, vertical = 2.dp)
                     ) {
                         Text(
                             text = "Lv.${parrot.level}",
@@ -1132,13 +1143,14 @@ private fun SimpleParrotInfoDisplay(
                     }
                     if (isLoadingDisplayName && displayName == null) {
                         Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(16.dp)
-                                .background(
-                                    Secondary.copy(alpha = 0.1f),
-                                    RoundedCornerShape(8.dp)
-                                )
+                            modifier =
+                                Modifier
+                                    .weight(1f)
+                                    .height(16.dp)
+                                    .background(
+                                        Secondary.copy(alpha = 0.1f),
+                                        RoundedCornerShape(8.dp)
+                                    )
                         )
                     } else {
                         Text(
@@ -1156,11 +1168,11 @@ private fun SimpleParrotInfoDisplay(
                 // 経験値ゲージ（アニメーション付き）
                 Box(
                     modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .height(8.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(Secondary.copy(alpha = 0.1f))
+                        Modifier
+                            .fillMaxWidth()
+                            .height(8.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Secondary.copy(alpha = 0.1f))
                 ) {
                     // 前回のレベルを記憶
                     var previousLevel by remember { mutableStateOf(parrot.level) }
@@ -1208,30 +1220,30 @@ private fun SimpleParrotInfoDisplay(
                     val animatedProgress by animateFloatAsState(
                         targetValue = displayProgress,
                         animationSpec =
-                        if (skipAnimation) {
-                            tween(durationMillis = 0) // 即座に変更
-                        } else {
-                            tween(durationMillis = 800) // 通常のアニメーション
-                        },
+                            if (skipAnimation) {
+                                tween(durationMillis = 0) // 即座に変更
+                            } else {
+                                tween(durationMillis = 800) // 通常のアニメーション
+                            },
                         label = "experience_progress_remindnet"
                     )
 
                     Box(
                         modifier =
-                        Modifier
-                            .fillMaxHeight()
-                            .fillMaxWidth(fraction = animatedProgress)
-                            .background(
-                                brush =
-                                androidx.compose.ui.graphics.Brush.horizontalGradient(
-                                    colors =
-                                    listOf(
-                                        Secondary.copy(alpha = 0.8f),
-                                        Secondary
-                                    )
-                                ),
-                                shape = RoundedCornerShape(8.dp)
-                            )
+                            Modifier
+                                .fillMaxHeight()
+                                .fillMaxWidth(fraction = animatedProgress)
+                                .background(
+                                    brush =
+                                        androidx.compose.ui.graphics.Brush.horizontalGradient(
+                                            colors =
+                                                listOf(
+                                                    Secondary.copy(alpha = 0.8f),
+                                                    Secondary
+                                                )
+                                        ),
+                                    shape = RoundedCornerShape(8.dp)
+                                )
                     )
                 }
             }
@@ -1275,12 +1287,12 @@ private fun UserInfoRow(
         // あなたの投稿バッジ（オプション）
         if (isMyPost && showMyPostBadge) {
             Box(
-                modifier = Modifier
-                    .background(
-                        color = Secondary.copy(alpha = 0.1f),
-                        shape = RoundedCornerShape(16.dp)
-                    )
-                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                modifier =
+                    Modifier
+                        .background(
+                            color = Secondary.copy(alpha = 0.1f),
+                            shape = RoundedCornerShape(16.dp)
+                        ).padding(horizontal = 8.dp, vertical = 4.dp)
             ) {
                 Text(
                     text = "あなた",
@@ -1303,19 +1315,25 @@ enum class BadgeSize(
     val cornerRadius: androidx.compose.ui.unit.Dp
 ) {
     Small(
-        textStyle = androidx.compose.ui.text.TextStyle(fontSize = 10.sp),
+        textStyle =
+            androidx.compose.ui.text
+                .TextStyle(fontSize = 10.sp),
         horizontalPadding = 6.dp,
         verticalPadding = 2.dp,
         cornerRadius = 8.dp
     ),
     Default(
-        textStyle = androidx.compose.ui.text.TextStyle(fontSize = 12.sp),
+        textStyle =
+            androidx.compose.ui.text
+                .TextStyle(fontSize = 12.sp),
         horizontalPadding = 8.dp,
         verticalPadding = 4.dp,
         cornerRadius = 12.dp
     ),
     Large(
-        textStyle = androidx.compose.ui.text.TextStyle(fontSize = 14.sp),
+        textStyle =
+            androidx.compose.ui.text
+                .TextStyle(fontSize = 14.sp),
         horizontalPadding = 10.dp,
         verticalPadding = 6.dp,
         cornerRadius = 16.dp
@@ -1326,33 +1344,39 @@ enum class BadgeSize(
  * ユーザーレベルを表示するバッジコンポーネント
  */
 @Composable
-private fun UserLevelBadge(level: Int, modifier: Modifier = Modifier, size: BadgeSize = BadgeSize.Default) {
+private fun UserLevelBadge(
+    level: Int,
+    modifier: Modifier = Modifier,
+    size: BadgeSize = BadgeSize.Default
+) {
     Box(
-        modifier = modifier
-            .background(
-                color = Primary.copy(alpha = 0.1f),
-                shape = RoundedCornerShape(size.cornerRadius)
-            )
-            .padding(horizontal = size.horizontalPadding, vertical = size.verticalPadding)
+        modifier =
+            modifier
+                .background(
+                    color = Primary.copy(alpha = 0.1f),
+                    shape = RoundedCornerShape(size.cornerRadius)
+                ).padding(horizontal = size.horizontalPadding, vertical = size.verticalPadding)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = "Lv.",
-                style = size.textStyle.copy(
-                    color = Primary,
-                    fontWeight = FontWeight.Medium
-                ),
+                style =
+                    size.textStyle.copy(
+                        color = Primary,
+                        fontWeight = FontWeight.Medium
+                    ),
                 color = Primary,
                 fontWeight = FontWeight.Medium
             )
             Text(
                 text = level.toString(),
-                style = size.textStyle.copy(
-                    color = Primary,
-                    fontWeight = FontWeight.Bold
-                ),
+                style =
+                    size.textStyle.copy(
+                        color = Primary,
+                        fontWeight = FontWeight.Bold
+                    ),
                 color = Primary,
                 fontWeight = FontWeight.Bold
             )
@@ -1365,19 +1389,25 @@ private fun UserLevelBadge(level: Int, modifier: Modifier = Modifier, size: Badg
  * 通常の投稿カードと同じデザインで広告コンテンツを表示
  */
 @Composable
-private fun RemindNetAdCard(adFactory: AdFactory, modifier: Modifier = Modifier) {
+private fun RemindNetAdCard(
+    adFactory: AdFactory,
+    index: Int,
+    modifier: Modifier = Modifier
+) {
     Card(
         modifier = modifier,
-        colors = CardDefaults.cardColors(
-            containerColor = White
-        ),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = White
+            ),
         shape = Shapes.extraLarge,
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
         ) {
             // アイコンとユーザー名（広告専用）
             Row(
@@ -1387,10 +1417,11 @@ private fun RemindNetAdCard(adFactory: AdFactory, modifier: Modifier = Modifier)
                 Image(
                     painter = painterResource(Res.drawable.reminko_face),
                     contentDescription = "インコ",
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(CircleShape)
-                        .background(ParrotYellow, CircleShape),
+                    modifier =
+                        Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .background(ParrotYellow, CircleShape),
                     contentScale = ContentScale.Crop
                 )
 
@@ -1413,12 +1444,12 @@ private fun RemindNetAdCard(adFactory: AdFactory, modifier: Modifier = Modifier)
 
                         // レベルバッジ
                         Box(
-                            modifier = Modifier
-                                .background(
-                                    Primary.copy(alpha = 0.15f),
-                                    RoundedCornerShape(12.dp)
-                                )
-                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                            modifier =
+                                Modifier
+                                    .background(
+                                        Primary.copy(alpha = 0.15f),
+                                        RoundedCornerShape(12.dp)
+                                    ).padding(horizontal = 6.dp, vertical = 2.dp)
                         ) {
                             Text(
                                 text = "Lv.1",
@@ -1442,7 +1473,8 @@ private fun RemindNetAdCard(adFactory: AdFactory, modifier: Modifier = Modifier)
 
             // ネイティブ広告コンテンツ
             adFactory.NativeAd(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                adPosition = index
             )
         }
     }
