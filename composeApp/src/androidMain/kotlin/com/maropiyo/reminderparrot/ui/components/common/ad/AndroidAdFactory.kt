@@ -113,7 +113,7 @@ class AndroidAdFactory : AdFactory {
                         adView.headlineView?.let { it as TextView }?.text = "おしらせ"
                         adView.bodyView?.let { it as TextView }?.text = "広告を読み込み中..."
                         adView.callToActionView?.let { it as Button }?.text = "読み込み中"
-                        
+
                         // アイコンを灰色のプレースホルダーに設定
                         adView.iconView?.let { iconView ->
                             iconView as ImageView
@@ -257,7 +257,7 @@ class AndroidAdFactory : AdFactory {
         headlineView.text = "おしらせ"
         bodyView.text = "広告を読み込み中..."
         ctaButton.text = "読み込み中"
-        
+
         // アイコンを灰色のプレースホルダーに設定
         iconView.setBackgroundColor(Color.LTGRAY)
 
