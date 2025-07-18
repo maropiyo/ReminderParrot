@@ -38,10 +38,7 @@ class NativeAdViewWrapper: UIView {
         
         // NativeAdViewを作成
         nativeAdView = NativeAdView()
-        nativeAdView.backgroundColor = UIColor.systemBackground
-        nativeAdView.layer.cornerRadius = 8
-        nativeAdView.layer.borderWidth = 1
-        nativeAdView.layer.borderColor = UIColor.systemGray4.cgColor
+        nativeAdView.backgroundColor = UIColor.clear
         nativeAdView.translatesAutoresizingMaskIntoConstraints = false
         
         addSubview(nativeAdView)
@@ -51,8 +48,7 @@ class NativeAdViewWrapper: UIView {
             nativeAdView.topAnchor.constraint(equalTo: topAnchor),
             nativeAdView.leadingAnchor.constraint(equalTo: leadingAnchor),
             nativeAdView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            nativeAdView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            nativeAdView.heightAnchor.constraint(equalToConstant: 100)
+            nativeAdView.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
         
         // AdLoaderを設定
@@ -91,11 +87,8 @@ class NativeAdDelegate: NSObject, AdLoaderDelegate, NativeAdLoaderDelegate {
         // Native Adのレイアウトを設定
         nativeAdView.translatesAutoresizingMaskIntoConstraints = false
         
-        // 基本的なスタイル設定
-        nativeAdView.backgroundColor = UIColor.systemBackground
-        nativeAdView.layer.cornerRadius = 8
-        nativeAdView.layer.borderWidth = 1
-        nativeAdView.layer.borderColor = UIColor.systemGray4.cgColor
+        // 基本的なスタイル設定（Androidに合わせて枠線なし）
+        nativeAdView.backgroundColor = UIColor.clear
         
         // サイズ制約を設定（Androidに合わせて100pt）
         NSLayoutConstraint.activate([
@@ -158,12 +151,10 @@ class NativeAdDelegate: NSObject, AdLoaderDelegate, NativeAdLoaderDelegate {
         topStackView.alignment = .center
         topStackView.translatesAutoresizingMaskIntoConstraints = false
         
-        // アイコン画像
+        // アイコン画像（見出しと同じ高さに調整）
         let iconImageView = UIImageView()
         iconImageView.contentMode = .scaleAspectFit
         iconImageView.translatesAutoresizingMaskIntoConstraints = false
-        iconImageView.widthAnchor.constraint(equalToConstant: 40).isActive = true
-        iconImageView.heightAnchor.constraint(equalToConstant: 40).isActive = true
         
         if let icon = nativeAd?.icon {
             iconImageView.image = icon.image
@@ -214,12 +205,16 @@ class NativeAdDelegate: NSObject, AdLoaderDelegate, NativeAdLoaderDelegate {
         
         nativeAdView.addSubview(mainStackView)
         
-        // 制約設定
+        // 制約設定（Androidと同じ12ptの余白）
         NSLayoutConstraint.activate([
-            mainStackView.topAnchor.constraint(equalTo: nativeAdView.topAnchor, constant: 12),
-            mainStackView.leadingAnchor.constraint(equalTo: nativeAdView.leadingAnchor, constant: 12),
-            mainStackView.trailingAnchor.constraint(equalTo: nativeAdView.trailingAnchor, constant: -12),
-            mainStackView.bottomAnchor.constraint(equalTo: nativeAdView.bottomAnchor, constant: -12)
+            mainStackView.topAnchor.constraint(equalTo: nativeAdView.topAnchor, constant: 8),
+            mainStackView.leadingAnchor.constraint(equalTo: nativeAdView.leadingAnchor, constant: 8),
+            mainStackView.trailingAnchor.constraint(equalTo: nativeAdView.trailingAnchor, constant: -8),
+            mainStackView.bottomAnchor.constraint(equalTo: nativeAdView.bottomAnchor, constant: -8),
+            
+            // アイコンを見出しテキストの高さに合わせる（適切なサイズに制限）
+            iconImageView.heightAnchor.constraint(equalToConstant: 16),
+            iconImageView.widthAnchor.constraint(equalToConstant: 16)
         ])
         
         // GADNativeAdViewに各要素を設定

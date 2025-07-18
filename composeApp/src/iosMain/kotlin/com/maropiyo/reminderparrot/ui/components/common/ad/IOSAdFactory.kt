@@ -27,7 +27,7 @@ class IOSAdFactory(
             factory = {
                 nativeAdViewFactory.createNativeAdView()
             },
-            modifier = modifier.fillMaxWidth().height(100.dp)
+            modifier = modifier.fillMaxWidth().height(50.dp)
         )
     }
 }
