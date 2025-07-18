@@ -112,10 +112,9 @@ fun RemindNetScreen(
     val isLoadingDisplayName by remindNetViewModel.isLoadingDisplayName.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    
+
     // ユーザー設定を取得
     var userSettings by remember { mutableStateOf<com.maropiyo.reminderparrot.domain.entity.UserSettings?>(null) }
-    
     LaunchedEffect(Unit) {
         userSettings = getUserSettingsUseCase()
     }
