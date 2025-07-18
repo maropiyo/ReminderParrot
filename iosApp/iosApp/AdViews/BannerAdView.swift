@@ -25,5 +25,3 @@ class BannerAdView: BannerAdViewFactory {
         return banner
     }
 }
-
-

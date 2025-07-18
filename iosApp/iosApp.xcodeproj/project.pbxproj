@@ -15,6 +15,7 @@
 		15BCD5772E1B5C0700D36CE3 /* FirebaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15BCD5782E1B5C0700D36CE3 /* FirebaseManager.swift */; };
 		15C1A62D2DE1D6F2001E648E /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 15C1A62C2DE1D6F2001E648E /* libsqlite3.tbd */; };
 		15D5EEB52E28A86F00F22A03 /* BannerAdView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15D5EEB42E28A86100F22A03 /* BannerAdView.swift */; };
+		C1CD37252462446EABDBAE5C /* NativeAdView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A07BF910396443698F6E7F8 /* NativeAdView.swift */; };
 		15DFCF9E2E288F8100966C7C /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = 15DFCF9D2E288F8100966C7C /* GoogleMobileAds */; };
 		2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2152FB032600AC8F00CF470E /* iOSApp.swift */; };
 		7555FF83242A565900829871 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7555FF82242A565900829871 /* ContentView.swift */; };
@@ -28,6 +29,7 @@
 		15BCD5782E1B5C0700D36CE3 /* FirebaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseManager.swift; sourceTree = "<group>"; };
 		15C1A62C2DE1D6F2001E648E /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
 		15D5EEB42E28A86100F22A03 /* BannerAdView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BannerAdView.swift; sourceTree = "<group>"; };
+		5A07BF910396443698F6E7F8 /* NativeAdView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeAdView.swift; sourceTree = "<group>"; };
 		2152FB032600AC8F00CF470E /* iOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSApp.swift; sourceTree = "<group>"; };
 		7555FF7B242A565900829871 /* ReminderParrot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ReminderParrot.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7555FF82242A565900829871 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -62,6 +64,7 @@
 			isa = PBXGroup;
 			children = (
 				15D5EEB42E28A86100F22A03 /* BannerAdView.swift */,
+				5A07BF910396443698F6E7F8 /* NativeAdView.swift */,
 			);
 			path = AdViews;
 			sourceTree = "<group>";
@@ -223,6 +226,7 @@
 				7555FF83242A565900829871 /* ContentView.swift in Sources */,
 				15BCD5772E1B5C0700D36CE3 /* FirebaseManager.swift in Sources */,
 				15D5EEB52E28A86F00F22A03 /* BannerAdView.swift in Sources */,
+				C1CD37252462446EABDBAE5C /* NativeAdView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
