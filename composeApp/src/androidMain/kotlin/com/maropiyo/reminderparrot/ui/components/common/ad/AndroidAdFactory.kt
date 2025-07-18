@@ -66,17 +66,22 @@ class AndroidAdFactory : AdFactory {
             val cachedAd = cache.getAd(adPosition)
             if (cachedAd != null) {
                 nativeAd = cachedAd
-                println("📱 AndroidAdFactory: キャッシュから広告を取得 (position: $adPosition)")
+                println("📱 AndroidAdFactory: ✅ キャッシュから広告を取得 (position: $adPosition)")
             } else {
+                println("📱 AndroidAdFactory: ❌ キャッシュなし、事前読み込み開始 (position: $adPosition)")
                 // キャッシュにない場合は事前読み込み
                 cache.preloadAd(adPosition)
 
                 // 少し待ってから再度チェック
-                kotlinx.coroutines.delay(1000)
+                kotlinx.coroutines.delay(1500)
                 val newAd = cache.getAd(adPosition)
                 if (newAd != null) {
                     nativeAd = newAd
-                    println("📱 AndroidAdFactory: 事前読み込み完了 (position: $adPosition)")
+                    println("📱 AndroidAdFactory: ✅ 事前読み込み完了 (position: $adPosition)")
+                } else {
+                    println("📱 AndroidAdFactory: ⚠️ 事前読み込み失敗、ダミー表示 (position: $adPosition)")
+                    // フォールバック: ダミーデータで表示
+                    // 実際の広告がない場合でも何かしら表示するためのダミー広告
                 }
             }
 
@@ -90,18 +95,31 @@ class AndroidAdFactory : AdFactory {
                 createNativeAdView(context, null)
             },
             update = { view ->
-                nativeAd?.let { ad ->
-                    (view as? NativeAdView)?.let { adView ->
-                        // 各ビューを更新
-                        adView.headlineView?.let { it as TextView }?.text = ad.headline
-                        adView.bodyView?.let { it as TextView }?.text = ad.body
-                        adView.callToActionView?.let { it as Button }?.text = ad.callToAction
+                (view as? NativeAdView)?.let { adView ->
+                    if (nativeAd != null) {
+                        val ad = nativeAd!!
+                        // 実際の広告データを設定
+                        adView.headlineView?.let { it as TextView }?.text = ad.headline ?: ""
+                        adView.bodyView?.let { it as TextView }?.text = ad.body ?: ""
+                        adView.callToActionView?.let { it as Button }?.text = ad.callToAction ?: ""
 
                         ad.icon?.let { icon ->
                             adView.iconView?.let { it as ImageView }?.setImageDrawable(icon.drawable)
                         }
 
                         adView.setNativeAd(ad)
+                    } else {
+                        // ダミーデータを表示
+                        adView.headlineView?.let { it as TextView }?.text = "おしらせ"
+                        adView.bodyView?.let { it as TextView }?.text = "広告を読み込み中..."
+                        adView.callToActionView?.let { it as Button }?.text = "読み込み中"
+                        
+                        // アイコンを灰色のプレースホルダーに設定
+                        adView.iconView?.let { iconView ->
+                            iconView as ImageView
+                            iconView.setImageDrawable(null)
+                            iconView.setBackgroundColor(Color.LTGRAY)
+                        }
                     }
                 }
             }
@@ -235,10 +253,13 @@ class AndroidAdFactory : AdFactory {
         adView.callToActionView = ctaButton
         adView.iconView = iconView
 
-        // 初期状態では空の状態で表示
-        headlineView.text = ""
-        bodyView.text = ""
-        ctaButton.text = ""
+        // 初期状態ではダミーデータで表示
+        headlineView.text = "おしらせ"
+        bodyView.text = "広告を読み込み中..."
+        ctaButton.text = "読み込み中"
+        
+        // アイコンを灰色のプレースホルダーに設定
+        iconView.setBackgroundColor(Color.LTGRAY)
 
         return adView
     }
