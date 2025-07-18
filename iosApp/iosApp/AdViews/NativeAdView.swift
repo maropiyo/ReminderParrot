@@ -73,7 +73,11 @@ class NativeAdViewWrapper: UIView {
             delegate = NativeAdDelegate(nativeAdView: nativeAdView, adPosition: adPosition)
             delegate.setupNativeAdContent(nativeAd: cachedAd)
         } else {
-            print("📱 NativeAdWrapper: ❌ キャッシュなし、直接読み込み (position: \(adPosition))")
+            print("📱 NativeAdWrapper: ❌ キャッシュなし、読み込み中表示を先に表示 (position: \(adPosition))")
+            // 先に読み込み中表示を表示
+            delegate = NativeAdDelegate(nativeAdView: nativeAdView, adPosition: adPosition)
+            delegate.createSimpleLayout(nativeAd: nil)
+            
             // キャッシュにない場合は直接読み込み
             loadAdDirectly()
             
@@ -145,9 +149,9 @@ class NativeAdDelegate: NSObject, AdLoaderDelegate, NativeAdLoaderDelegate {
     }
     
     func adLoader(_ adLoader: AdLoader, didFailToReceiveAdWithError error: Error) {
-        print("📱 NativeAd: 広告読み込み失敗 - \(error.localizedDescription)")
+        print("📱 NativeAd: ⚠️ 広告読み込み失敗、読み込み中表示維持 (position: \(adPosition)) - \(error.localizedDescription)")
         
-        // 失敗時はダミーデータで表示
+        // 失敗時は読み込み中表示を維持（ダミーデータで表示）
         createSimpleLayout(nativeAd: nil)
     }
     
@@ -168,7 +172,7 @@ class NativeAdDelegate: NSObject, AdLoaderDelegate, NativeAdLoaderDelegate {
         createSimpleLayout(nativeAd: nativeAd)
     }
     
-    private func createSimpleLayout(nativeAd: NativeAd?) {
+    func createSimpleLayout(nativeAd: NativeAd?) {
         // メインスタックビュー（水平レイアウト）
         let mainStackView = UIStackView()
         mainStackView.axis = .horizontal
@@ -199,9 +203,9 @@ class NativeAdDelegate: NSObject, AdLoaderDelegate, NativeAdLoaderDelegate {
             iconImageView.image = icon.image
             print("📱 NativeAd: アイコン画像を設定")
         } else {
-            // ダミーアイコンを設定
+            // ダミーアイコンを設定（Androidと同じ色）
             iconImageView.backgroundColor = UIColor.systemGray4
-            iconImageView.layer.cornerRadius = 20
+            iconImageView.layer.cornerRadius = 8 // 16x16のサイズに合わせて調整
             print("📱 NativeAd: ダミーアイコンを設定")
         }
         
@@ -210,7 +214,7 @@ class NativeAdDelegate: NSObject, AdLoaderDelegate, NativeAdLoaderDelegate {
         headlineLabel.font = UIFont.systemFont(ofSize: 14, weight: .medium)
         headlineLabel.textColor = UIColor.black
         headlineLabel.numberOfLines = 1
-        headlineLabel.text = nativeAd?.headline ?? "テスト見出し"
+        headlineLabel.text = nativeAd?.headline ?? "おしらせ"
         headlineLabel.translatesAutoresizingMaskIntoConstraints = false
         
         // 本文ラベル
@@ -218,12 +222,12 @@ class NativeAdDelegate: NSObject, AdLoaderDelegate, NativeAdLoaderDelegate {
         bodyLabel.font = UIFont.systemFont(ofSize: 12)
         bodyLabel.textColor = UIColor.gray
         bodyLabel.numberOfLines = 1
-        bodyLabel.text = nativeAd?.body ?? "テスト本文"
+        bodyLabel.text = nativeAd?.body ?? "広告を読み込み中..."
         bodyLabel.translatesAutoresizingMaskIntoConstraints = false
         
         // CTAボタン
         let ctaButton = UIButton(type: .system)
-        ctaButton.setTitle(nativeAd?.callToAction ?? "テスト", for: .normal)
+        ctaButton.setTitle(nativeAd?.callToAction ?? "読み込み中", for: .normal)
         ctaButton.backgroundColor = UIColor(red: 0.898, green: 0.624, blue: 0.263, alpha: 1.0) // #E59F43
         ctaButton.setTitleColor(UIColor.white, for: .normal)
         ctaButton.layer.cornerRadius = 16
