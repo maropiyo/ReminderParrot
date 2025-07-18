@@ -187,18 +187,20 @@ class AndroidAdFactory : AdFactory {
         // CTAボタン（右側、上下中央）
         val ctaButton =
             Button(context).apply {
+                val density = context.resources.displayMetrics.density
                 layoutParams =
                     ViewGroup.LayoutParams(
                         ViewGroup.LayoutParams.WRAP_CONTENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT
+                        (36 * density).toInt() // 36dpをpxに変換
                     )
                 textSize = 11f
-                setPadding(16, 6, 16, 6)
-                minHeight = 36
+                val paddingPx = (16 * density).toInt() // 16dpをpxに変換
+                val paddingVerticalPx = (6 * density).toInt() // 6dpをpxに変換
+                setPadding(paddingPx, paddingVerticalPx, paddingPx, paddingVerticalPx)
+                minHeight = (36 * density).toInt() // 36dpをpxに変換
 
                 // Secondaryオレンジの色を適用
                 val secondaryOrange = Color.parseColor("#E59F43")
-                val density = context.resources.displayMetrics.density
                 val cornerRadiusPx = (16 * density) // 16dpをpxに変換
                 val buttonBackground = GradientDrawable().apply {
                     setColor(secondaryOrange)
