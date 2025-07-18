@@ -5,5 +5,8 @@ import androidx.compose.ui.Modifier
 
 interface AdFactory {
     @Composable
-    fun AdBanner(modifier: Modifier)
+    fun BannerAd(modifier: Modifier)
+
+    @Composable
+    fun NativeAd(modifier: Modifier, adPosition: Int = 0)
 }

@@ -101,7 +101,7 @@ fun HomeScreen(
             )
 
             // 広告バナー
-            adFactory.AdBanner(Modifier.fillMaxWidth())
+            adFactory.BannerAd(Modifier.fillMaxWidth())
         }
 
         // レベルアップダイアログ（画面全体をマスク）

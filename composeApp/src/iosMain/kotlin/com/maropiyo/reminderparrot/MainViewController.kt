@@ -8,11 +8,15 @@ import com.maropiyo.reminderparrot.di.platformModule
 import com.maropiyo.reminderparrot.ui.components.common.ad.AdFactory
 import com.maropiyo.reminderparrot.ui.components.common.ad.BannerAdViewFactory
 import com.maropiyo.reminderparrot.ui.components.common.ad.IOSAdFactory
+import com.maropiyo.reminderparrot.ui.components.common.ad.NativeAdViewFactory
 import org.koin.dsl.module
 import platform.UIKit.UIViewController
 
 // iOSアプリのエントリポイント
-fun MainViewController(bannerAdViewFactory: BannerAdViewFactory): UIViewController {
+fun MainViewController(
+    bannerAdViewFactory: BannerAdViewFactory,
+    nativeAdViewFactory: NativeAdViewFactory
+): UIViewController {
     // Koinの初期化
     initKoin(
         supabaseConfig = getSupabaseConfig(),
@@ -22,7 +26,7 @@ fun MainViewController(bannerAdViewFactory: BannerAdViewFactory): UIViewControll
             platformModule,
             // AdMob
             module {
-                single<AdFactory> { IOSAdFactory(bannerAdViewFactory) }
+                single<AdFactory> { IOSAdFactory(bannerAdViewFactory, nativeAdViewFactory) }
             }
         )
     )

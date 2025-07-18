@@ -8,15 +8,26 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.UIKitView
 
 class IOSAdFactory(
-    private val bannerAdViewFactory: BannerAdViewFactory
+    private val bannerAdViewFactory: BannerAdViewFactory,
+    private val nativeAdViewFactory: NativeAdViewFactory
 ) : AdFactory {
     @Composable
-    override fun AdBanner(modifier: Modifier) {
+    override fun BannerAd(modifier: Modifier) {
         UIKitView(
             factory = {
                 bannerAdViewFactory.createBannerAdView()
             },
             modifier = modifier.fillMaxWidth().height(50.dp)
+        )
+    }
+
+    @Composable
+    override fun NativeAd(modifier: Modifier, adPosition: Int) {
+        UIKitView(
+            factory = {
+                nativeAdViewFactory.createNativeAdView(adPosition)
+            },
+            modifier = modifier.fillMaxWidth().height(54.dp)
         )
     }
 }

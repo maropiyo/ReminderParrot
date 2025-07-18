@@ -22,7 +22,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -61,7 +61,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
@@ -75,6 +74,7 @@ import com.maropiyo.reminderparrot.presentation.viewmodel.ParrotViewModel
 import com.maropiyo.reminderparrot.presentation.viewmodel.RemindNetViewModel
 import com.maropiyo.reminderparrot.ui.components.AccountCreationBottomSheet
 import com.maropiyo.reminderparrot.ui.components.ErrorMessageBottomSheet
+import com.maropiyo.reminderparrot.ui.components.common.ad.AdFactory
 import com.maropiyo.reminderparrot.ui.components.home.LevelUpDialog
 import com.maropiyo.reminderparrot.ui.icons.CustomIcons
 import com.maropiyo.reminderparrot.ui.theme.Background
@@ -100,6 +100,7 @@ import reminderparrot.composeapp.generated.resources.reminko_raising_hand
 fun RemindNetScreen(
     remindNetViewModel: RemindNetViewModel = koinInject(),
     parrotViewModel: ParrotViewModel = koinInject(),
+    adFactory: AdFactory = koinInject(),
     onReminderImported: () -> Unit = {}
 ) {
     val state by remindNetViewModel.state.collectAsState()
@@ -347,7 +348,8 @@ fun RemindNetScreen(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = if (needsAccountCreation) {
+                                    text =
+                                    if (needsAccountCreation) {
                                         "リマインネットに参加していません"
                                     } else {
                                         "だれかいませんか？"
@@ -367,7 +369,8 @@ fun RemindNetScreen(
                             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 100.dp),
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            items(state.posts, key = { it.id }) { post ->
+                            itemsIndexed(state.posts, key = { _, post -> post.id }) { index, post ->
+                                // 通常の投稿カード
                                 RemindNetPostCard(
                                     post = post,
                                     onBellClick = { clickedPost ->
@@ -387,6 +390,16 @@ fun RemindNetScreen(
                                     isMyPost = state.myPostIds.contains(post.id),
                                     isAlreadyImported = state.importedPostIds.contains(post.id)
                                 )
+
+                                // 5投稿置きに広告カードを表示
+                                if ((index + 1) % 5 == 0) {
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    RemindNetAdCard(
+                                        adFactory = adFactory,
+                                        index = index,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                }
                             }
                         }
                     }
@@ -1120,7 +1133,8 @@ private fun SimpleParrotInfoDisplay(
                     }
                     if (isLoadingDisplayName && displayName == null) {
                         Box(
-                            modifier = Modifier
+                            modifier =
+                            Modifier
                                 .weight(1f)
                                 .height(16.dp)
                                 .background(
@@ -1263,12 +1277,12 @@ private fun UserInfoRow(
         // あなたの投稿バッジ（オプション）
         if (isMyPost && showMyPostBadge) {
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .background(
                         color = Secondary.copy(alpha = 0.1f),
                         shape = RoundedCornerShape(16.dp)
-                    )
-                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                    ).padding(horizontal = 8.dp, vertical = 4.dp)
             ) {
                 Text(
                     text = "あなた",
@@ -1291,19 +1305,25 @@ enum class BadgeSize(
     val cornerRadius: androidx.compose.ui.unit.Dp
 ) {
     Small(
-        textStyle = androidx.compose.ui.text.TextStyle(fontSize = 10.sp),
+        textStyle =
+        androidx.compose.ui.text
+            .TextStyle(fontSize = 10.sp),
         horizontalPadding = 6.dp,
         verticalPadding = 2.dp,
         cornerRadius = 8.dp
     ),
     Default(
-        textStyle = androidx.compose.ui.text.TextStyle(fontSize = 12.sp),
+        textStyle =
+        androidx.compose.ui.text
+            .TextStyle(fontSize = 12.sp),
         horizontalPadding = 8.dp,
         verticalPadding = 4.dp,
         cornerRadius = 12.dp
     ),
     Large(
-        textStyle = androidx.compose.ui.text.TextStyle(fontSize = 14.sp),
+        textStyle =
+        androidx.compose.ui.text
+            .TextStyle(fontSize = 14.sp),
         horizontalPadding = 10.dp,
         verticalPadding = 6.dp,
         cornerRadius = 16.dp
@@ -1316,19 +1336,20 @@ enum class BadgeSize(
 @Composable
 private fun UserLevelBadge(level: Int, modifier: Modifier = Modifier, size: BadgeSize = BadgeSize.Default) {
     Box(
-        modifier = modifier
+        modifier =
+        modifier
             .background(
                 color = Primary.copy(alpha = 0.1f),
                 shape = RoundedCornerShape(size.cornerRadius)
-            )
-            .padding(horizontal = size.horizontalPadding, vertical = size.verticalPadding)
+            ).padding(horizontal = size.horizontalPadding, vertical = size.verticalPadding)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = "Lv.",
-                style = size.textStyle.copy(
+                style =
+                size.textStyle.copy(
                     color = Primary,
                     fontWeight = FontWeight.Medium
                 ),
@@ -1337,12 +1358,105 @@ private fun UserLevelBadge(level: Int, modifier: Modifier = Modifier, size: Badg
             )
             Text(
                 text = level.toString(),
-                style = size.textStyle.copy(
+                style =
+                size.textStyle.copy(
                     color = Primary,
                     fontWeight = FontWeight.Bold
                 ),
                 color = Primary,
                 fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+/**
+ * リマインネット広告カード
+ * 通常の投稿カードと同じデザインで広告コンテンツを表示
+ */
+@Composable
+private fun RemindNetAdCard(adFactory: AdFactory, index: Int, modifier: Modifier = Modifier) {
+    Card(
+        modifier = modifier,
+        colors =
+        CardDefaults.cardColors(
+            containerColor = White
+        ),
+        shape = Shapes.extraLarge,
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            // アイコンとユーザー名（広告専用）
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // インコアイコン
+                Image(
+                    painter = painterResource(Res.drawable.reminko_face),
+                    contentDescription = "インコ",
+                    modifier =
+                    Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(ParrotYellow, CircleShape),
+                    contentScale = ContentScale.Crop
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    // 広告インコ名とレベル
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "おしらせインコ",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = Secondary
+                        )
+
+                        // レベルバッジ
+                        Box(
+                            modifier =
+                            Modifier
+                                .background(
+                                    Primary.copy(alpha = 0.15f),
+                                    RoundedCornerShape(12.dp)
+                                ).padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = "Lv.1",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = Primary
+                            )
+                        }
+                    }
+
+                    // 広告表示
+                    Text(
+                        text = "広告",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Secondary.copy(alpha = 0.6f)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // ネイティブ広告コンテンツ
+            adFactory.NativeAd(
+                modifier = Modifier.fillMaxWidth(),
+                adPosition = index
             )
         }
     }

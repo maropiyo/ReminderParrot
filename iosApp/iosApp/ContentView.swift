@@ -4,7 +4,8 @@ import ComposeApp
 
 struct ComposeView: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> UIViewController {
-        MainViewControllerKt.MainViewController(bannerAdViewFactory: BannerAdView())
+        MainViewControllerKt
+            .MainViewController(bannerAdViewFactory: BannerAdView(), nativeAdViewFactory: NativeAdViewFactoryImpl())
     }
 
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
