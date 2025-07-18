@@ -17,6 +17,6 @@ val platformModule =
     module {
         single<NotificationService> { AndroidNotificationService(androidContext()) }
         single<UserSettingsService> { AndroidUserSettingsService(androidContext()) }
-        single<AdFactory> { AndroidAdFactory() }
+        single<AdFactory> { AndroidAdFactory(get()) }
         single<PlatformUtil> { PlatformUtil() }
     }

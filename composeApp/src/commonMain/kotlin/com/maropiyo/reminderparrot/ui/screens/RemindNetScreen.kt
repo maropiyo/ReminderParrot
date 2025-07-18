@@ -101,6 +101,7 @@ fun RemindNetScreen(
     remindNetViewModel: RemindNetViewModel = koinInject(),
     parrotViewModel: ParrotViewModel = koinInject(),
     adFactory: AdFactory = koinInject(),
+    getUserSettingsUseCase: com.maropiyo.reminderparrot.domain.usecase.GetUserSettingsUseCase = koinInject(),
     onReminderImported: () -> Unit = {}
 ) {
     val state by remindNetViewModel.state.collectAsState()
@@ -111,6 +112,12 @@ fun RemindNetScreen(
     val isLoadingDisplayName by remindNetViewModel.isLoadingDisplayName.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+
+    // ユーザー設定を取得
+    var userSettings by remember { mutableStateOf<com.maropiyo.reminderparrot.domain.entity.UserSettings?>(null) }
+    LaunchedEffect(Unit) {
+        userSettings = getUserSettingsUseCase()
+    }
 
     // リスト表示用のスクロール状態
     val listState = rememberLazyListState()
@@ -391,8 +398,8 @@ fun RemindNetScreen(
                                     isAlreadyImported = state.importedPostIds.contains(post.id)
                                 )
 
-                                // 5投稿置きに広告カードを表示
-                                if ((index + 1) % 5 == 0) {
+                                // 広告が有効な場合のみ5投稿置きに広告カードを表示
+                                if ((index + 1) % 5 == 0 && userSettings?.isAdsEnabled == true) {
                                     Spacer(modifier = Modifier.height(12.dp))
                                     RemindNetAdCard(
                                         adFactory = adFactory,

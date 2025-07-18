@@ -14,22 +14,64 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
+import com.google.android.gms.ads.AdListener
+import com.google.android.gms.ads.AdLoader
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.nativead.NativeAd
+import com.google.android.gms.ads.nativead.NativeAdOptions
 import com.google.android.gms.ads.nativead.NativeAdView
+import com.maropiyo.reminderparrot.domain.usecase.GetUserSettingsUseCase
 
-class AndroidAdFactory : AdFactory {
-    private var nativeAdCache: NativeAdCache? = null
+class AndroidAdFactory(
+    private val getUserSettingsUseCase: GetUserSettingsUseCase
+) : AdFactory {
+    // 読み込み済み広告を保持するマップ
+    private val loadedAds = mutableMapOf<Int, NativeAd>()
+
+    // メモリリーク防止: 最大保持数制限
+    private val maxCachedAds = 20
+
+    /**
+     * 古い広告をクリーンアップしてメモリリークを防ぐ
+     */
+    private fun cleanupOldAds(currentPosition: Int) {
+        if (loadedAds.size >= maxCachedAds) {
+            // 現在位置から離れた古い広告を削除
+            val positionsToRemove = loadedAds.keys.filter { position ->
+                kotlin.math.abs(position - currentPosition) > 10
+            }.sortedBy { kotlin.math.abs(it - currentPosition) }
+
+            // 最も離れた位置から削除
+            positionsToRemove.take(loadedAds.size - maxCachedAds + 1).forEach { position ->
+                loadedAds[position]?.let { ad ->
+                    // 広告リソースを適切に解放
+                    println("📱 AndroidAdFactory: 古い広告を削除 (position: $position)")
+                }
+                loadedAds.remove(position)
+            }
+        }
+    }
 
     @Composable
     override fun BannerAd(modifier: Modifier) {
+        var userSettings by remember { mutableStateOf<com.maropiyo.reminderparrot.domain.entity.UserSettings?>(null) }
+
+        LaunchedEffect(Unit) {
+            userSettings = getUserSettingsUseCase()
+        }
+
+        // 広告が無効な場合は何も表示しない
+        if (userSettings?.isAdsEnabled == false) {
+            return
+        }
+
         AndroidView(
             modifier = modifier,
             factory = { context ->
@@ -49,50 +91,52 @@ class AndroidAdFactory : AdFactory {
 
     @Composable
     override fun NativeAd(modifier: Modifier, adPosition: Int) {
-        val context = LocalContext.current
-        val scope = rememberCoroutineScope()
-        var nativeAd by remember(adPosition) { mutableStateOf<NativeAd?>(null) }
+        var userSettings by remember { mutableStateOf<com.maropiyo.reminderparrot.domain.entity.UserSettings?>(null) }
 
-        // キャッシュを初期化
-        if (nativeAdCache == null) {
-            nativeAdCache = NativeAdCache(context, scope)
+        LaunchedEffect(Unit) {
+            userSettings = getUserSettingsUseCase()
         }
 
-        // キャッシュから広告を取得または事前読み込み
+        // 広告が無効な場合は何も表示しない
+        if (userSettings?.isAdsEnabled == false) {
+            return
+        }
+
+        val context = LocalContext.current
+        var nativeAd by remember(adPosition) { mutableStateOf<NativeAd?>(loadedAds[adPosition]) }
+
+        // 広告をロード（まだ読み込んでいない場合のみ）
         LaunchedEffect(adPosition) {
-            val cache = nativeAdCache ?: return@LaunchedEffect
+            if (loadedAds[adPosition] == null) {
+                // メモリリーク防止のクリーンアップ
+                cleanupOldAds(adPosition)
 
-            // キャッシュされた広告があるかチェック
-            val cachedAd = cache.getAd(adPosition)
-            if (cachedAd != null) {
-                nativeAd = cachedAd
-                println("📱 AndroidAdFactory: ✅ キャッシュから広告を取得 (position: $adPosition)")
-            } else {
-                println("📱 AndroidAdFactory: ❌ キャッシュなし、事前読み込み開始 (position: $adPosition)")
-                // キャッシュにない場合は事前読み込み
-                cache.preloadAd(adPosition)
+                val adLoader = AdLoader.Builder(context, "ca-app-pub-3940256099942544/2247696110")
+                    .forNativeAd { ad ->
+                        loadedAds[adPosition] = ad
+                        nativeAd = ad
+                        println("📱 AndroidAdFactory: 広告を保存 (position: $adPosition, total: ${loadedAds.size})")
+                    }
+                    .withAdListener(object : AdListener() {
+                        override fun onAdFailedToLoad(adError: LoadAdError) {
+                            println("ネイティブ広告の読み込みに失敗: ${adError.message}")
+                        }
+                    })
+                    .withNativeAdOptions(
+                        NativeAdOptions.Builder()
+                            .setAdChoicesPlacement(NativeAdOptions.ADCHOICES_TOP_RIGHT)
+                            .build()
+                    )
+                    .build()
 
-                // 少し待ってから再度チェック
-                kotlinx.coroutines.delay(1500)
-                val newAd = cache.getAd(adPosition)
-                if (newAd != null) {
-                    nativeAd = newAd
-                    println("📱 AndroidAdFactory: ✅ 事前読み込み完了 (position: $adPosition)")
-                } else {
-                    println("📱 AndroidAdFactory: ⚠️ 事前読み込み失敗、ダミー表示 (position: $adPosition)")
-                    // フォールバック: ダミーデータで表示
-                    // 実際の広告がない場合でも何かしら表示するためのダミー広告
-                }
+                adLoader.loadAd(AdRequest.Builder().build())
             }
-
-            // 次の広告も事前読み込み
-            cache.preloadAds(listOf(adPosition + 5, adPosition + 10))
         }
 
         AndroidView(
             modifier = modifier,
             factory = { context ->
-                createNativeAdView(context, null)
+                createNativeAdView(context)
             },
             update = { view ->
                 (view as? NativeAdView)?.let { adView ->
@@ -126,7 +170,7 @@ class AndroidAdFactory : AdFactory {
         )
     }
 
-    private fun createNativeAdView(context: Context, nativeAd: NativeAd?): NativeAdView {
+    private fun createNativeAdView(context: Context): NativeAdView {
         val adView = NativeAdView(context)
 
         // メインコンテナ

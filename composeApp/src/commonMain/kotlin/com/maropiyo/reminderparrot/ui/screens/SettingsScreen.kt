@@ -317,6 +317,44 @@ fun SettingsScreen() {
 
                         Spacer(modifier = Modifier.height(16.dp))
 
+                        // 広告表示設定
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text(
+                                    text = "こうこくひょうじ",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = Secondary,
+                                    fontWeight = FontWeight.Medium
+                                )
+                                Text(
+                                    text = "こうこくをひょうじする",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = Secondary.copy(alpha = 0.7f)
+                                )
+                            }
+
+                            Switch(
+                                checked = settings.isAdsEnabled,
+                                onCheckedChange = { enabled ->
+                                    viewModel.updateAdsEnabled(enabled)
+                                },
+                                colors = SwitchDefaults.colors(
+                                    checkedThumbColor = Color.White,
+                                    checkedTrackColor = Primary,
+                                    uncheckedThumbColor = Color.White,
+                                    uncheckedTrackColor = Secondary.copy(alpha = 0.3f)
+                                )
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
                         // 高速記憶設定
                         Row(
                             modifier = Modifier.fillMaxWidth(),

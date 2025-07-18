@@ -77,6 +77,17 @@ class SettingsViewModel(
     }
 
     /**
+     * 広告表示設定を更新する
+     */
+    fun updateAdsEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            val newSettings = _settings.value.copy(isAdsEnabled = enabled)
+            saveUserSettingsUseCase(newSettings)
+            _settings.value = newSettings
+        }
+    }
+
+    /**
      * 表示名を読み込む
      */
     private fun loadDisplayName() {
