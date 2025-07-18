@@ -35,6 +35,30 @@ class AndroidAdFactory(
     // 読み込み済み広告を保持するマップ
     private val loadedAds = mutableMapOf<Int, NativeAd>()
 
+    // メモリリーク防止: 最大保持数制限
+    private val maxCachedAds = 20
+
+    /**
+     * 古い広告をクリーンアップしてメモリリークを防ぐ
+     */
+    private fun cleanupOldAds(currentPosition: Int) {
+        if (loadedAds.size >= maxCachedAds) {
+            // 現在位置から離れた古い広告を削除
+            val positionsToRemove = loadedAds.keys.filter { position ->
+                kotlin.math.abs(position - currentPosition) > 10
+            }.sortedBy { kotlin.math.abs(it - currentPosition) }
+
+            // 最も離れた位置から削除
+            positionsToRemove.take(loadedAds.size - maxCachedAds + 1).forEach { position ->
+                loadedAds[position]?.let { ad ->
+                    // 広告リソースを適切に解放
+                    println("📱 AndroidAdFactory: 古い広告を削除 (position: $position)")
+                }
+                loadedAds.remove(position)
+            }
+        }
+    }
+
     @Composable
     override fun BannerAd(modifier: Modifier) {
         var userSettings by remember { mutableStateOf<com.maropiyo.reminderparrot.domain.entity.UserSettings?>(null) }
@@ -84,10 +108,14 @@ class AndroidAdFactory(
         // 広告をロード（まだ読み込んでいない場合のみ）
         LaunchedEffect(adPosition) {
             if (loadedAds[adPosition] == null) {
+                // メモリリーク防止のクリーンアップ
+                cleanupOldAds(adPosition)
+
                 val adLoader = AdLoader.Builder(context, "ca-app-pub-3940256099942544/2247696110")
                     .forNativeAd { ad ->
                         loadedAds[adPosition] = ad
                         nativeAd = ad
+                        println("📱 AndroidAdFactory: 広告を保存 (position: $adPosition, total: ${loadedAds.size})")
                     }
                     .withAdListener(object : AdListener() {
                         override fun onAdFailedToLoad(adError: LoadAdError) {

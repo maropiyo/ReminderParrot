@@ -14,6 +14,9 @@ class NativeAdViewFactoryImpl: NativeAdViewFactory {
     // 読み込み済み広告を保持するマップ
     private static var loadedAds: [Int: NativeAd] = [:]
     
+    // メモリリーク防止: 最大保持数制限
+    private static let maxCachedAds = 20
+    
     func createNativeAdView() -> UIView {
         print("📱 NativeAd: ネイティブ広告ビューを作成開始")
         let wrapper = NativeAdViewWrapper()
@@ -31,7 +34,30 @@ class NativeAdViewFactoryImpl: NativeAdViewFactory {
     }
     
     static func setLoadedAd(_ ad: NativeAd, for position: Int) {
+        // メモリリーク防止のクリーンアップ
+        cleanupOldAds(currentPosition: position)
+        
         loadedAds[position] = ad
+        print("📱 NativeAdFactory: 広告を保存 (position: \(position), total: \(loadedAds.count))")
+    }
+    
+    /**
+     * 古い広告をクリーンアップしてメモリリークを防ぐ
+     */
+    private static func cleanupOldAds(currentPosition: Int) {
+        if loadedAds.count >= maxCachedAds {
+            // 現在位置から離れた古い広告を削除
+            let positionsToRemove = loadedAds.keys.filter { position in
+                abs(position - currentPosition) > 10
+            }.sorted { abs($0 - currentPosition) > abs($1 - currentPosition) }
+            
+            // 最も離れた位置から削除
+            let removeCount = loadedAds.count - maxCachedAds + 1
+            for position in positionsToRemove.prefix(removeCount) {
+                loadedAds.removeValue(forKey: position)
+                print("📱 NativeAdFactory: 古い広告を削除 (position: \(position))")
+            }
+        }
     }
 }
 
