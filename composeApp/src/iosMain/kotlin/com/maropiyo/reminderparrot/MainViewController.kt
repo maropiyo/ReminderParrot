@@ -26,7 +26,7 @@ fun MainViewController(
             platformModule,
             // AdMob
             module {
-                single<AdFactory> { IOSAdFactory(bannerAdViewFactory, nativeAdViewFactory) }
+                single<AdFactory> { IOSAdFactory(bannerAdViewFactory, nativeAdViewFactory, get()) }
             }
         )
     )

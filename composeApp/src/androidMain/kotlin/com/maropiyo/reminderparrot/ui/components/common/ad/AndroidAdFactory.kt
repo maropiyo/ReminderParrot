@@ -24,12 +24,26 @@ import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.nativead.NativeAd
 import com.google.android.gms.ads.nativead.NativeAdView
+import com.maropiyo.reminderparrot.domain.usecase.GetUserSettingsUseCase
 
-class AndroidAdFactory : AdFactory {
+class AndroidAdFactory(
+    private val getUserSettingsUseCase: GetUserSettingsUseCase
+) : AdFactory {
     private var nativeAdCache: NativeAdCache? = null
 
     @Composable
     override fun BannerAd(modifier: Modifier) {
+        var userSettings by remember { mutableStateOf<com.maropiyo.reminderparrot.domain.entity.UserSettings?>(null) }
+
+        LaunchedEffect(Unit) {
+            userSettings = getUserSettingsUseCase()
+        }
+
+        // 広告が無効な場合は何も表示しない
+        if (userSettings?.isAdsEnabled == false) {
+            return
+        }
+
         AndroidView(
             modifier = modifier,
             factory = { context ->
@@ -49,6 +63,17 @@ class AndroidAdFactory : AdFactory {
 
     @Composable
     override fun NativeAd(modifier: Modifier, adPosition: Int) {
+        var userSettings by remember { mutableStateOf<com.maropiyo.reminderparrot.domain.entity.UserSettings?>(null) }
+
+        LaunchedEffect(Unit) {
+            userSettings = getUserSettingsUseCase()
+        }
+
+        // 広告が無効な場合は何も表示しない
+        if (userSettings?.isAdsEnabled == false) {
+            return
+        }
+
         val context = LocalContext.current
         val scope = rememberCoroutineScope()
         var nativeAd by remember(adPosition) { mutableStateOf<NativeAd?>(null) }
