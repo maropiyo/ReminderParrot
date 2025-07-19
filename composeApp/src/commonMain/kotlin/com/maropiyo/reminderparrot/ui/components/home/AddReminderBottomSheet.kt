@@ -20,7 +20,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -191,14 +190,6 @@ private fun ReminderTextField(
                 text = reminderText,
                 selection = TextRange(reminderText.length)
             )
-        )
-    }
-
-    // reminderTextが変更された場合に同期（ボトムシート表示時のリセット対応）
-    LaunchedEffect(reminderText) {
-        textFieldValue = TextFieldValue(
-            text = reminderText,
-            selection = TextRange(reminderText.length)
         )
     }
 
