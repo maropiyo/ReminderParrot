@@ -213,12 +213,15 @@ private fun EditReminderTextField(
         )
     }
 
-    // リマインダーテキストが外部から変更された場合に同期（ボトムシート表示時のリセット対応）
+    // リマインダーテキストが外部から変更された場合に同期
     LaunchedEffect(reminderText) {
-        textFieldValue = TextFieldValue(
-            text = reminderText,
-            selection = TextRange(reminderText.length)
-        )
+        if (textFieldValue.text != reminderText) {
+            textFieldValue =
+                TextFieldValue(
+                    text = reminderText,
+                    selection = TextRange(reminderText.length)
+                )
+        }
     }
 
     TextField(
